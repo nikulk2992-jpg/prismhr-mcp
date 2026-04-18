@@ -1,3 +1,5 @@
+<!-- mcp-name: io.github.nikulk2992-jpg/prismhr-mcp -->
+
 # prismhr-mcp
 
 **The open-source Model Context Protocol server for PrismHR.**

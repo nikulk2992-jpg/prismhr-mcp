@@ -1,0 +1,64 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.nikulk2992-jpg/prismhr-mcp",
+  "title": "PrismHR MCP",
+  "description": "Open-source Model Context Protocol server for PrismHR. Exposes PEO workflow tools (client/employee/payroll/benefits/compliance/billing), pluggable branded reporting, and Microsoft 365 connectors for Claude and other MCP-aware agents.",
+  "websiteUrl": "https://github.com/nikulk2992-jpg/prismhr-mcp",
+  "repository": {
+    "url": "https://github.com/nikulk2992-jpg/prismhr-mcp",
+    "source": "github"
+  },
+  "version": "0.1.0.dev2",
+  "packages": [
+    {
+      "registryType": "pypi",
+      "registryBaseUrl": "https://pypi.org",
+      "identifier": "prismhr-mcp",
+      "version": "0.1.0.dev2",
+      "transport": {
+        "type": "stdio"
+      },
+      "environmentVariables": [
+        {
+          "name": "PRISMHR_MCP_ENVIRONMENT",
+          "description": "Target environment. 'uat' (default) or 'prod' (requires PRISMHR_MCP_ALLOW_PROD=true).",
+          "isRequired": false,
+          "default": "uat"
+        },
+        {
+          "name": "PRISMHR_MCP_PEO_ID",
+          "description": "PrismHR PEO identifier (e.g. 'TEST-PEO' for Simploy UAT).",
+          "isRequired": true
+        },
+        {
+          "name": "PRISMHR_MCP_USERNAME",
+          "description": "PrismHR API username. Alternatively use 1Password via PRISMHR_MCP_ONEPASSWORD_VAULT + PRISMHR_MCP_ONEPASSWORD_ITEM_PRISMHR.",
+          "isRequired": false,
+          "isSecret": false
+        },
+        {
+          "name": "PRISMHR_MCP_PASSWORD",
+          "description": "PrismHR API password. Alternatively use 1Password.",
+          "isRequired": false,
+          "isSecret": true
+        },
+        {
+          "name": "PRISMHR_MCP_ONEPASSWORD_VAULT",
+          "description": "1Password vault name (requires op CLI signed in). Overridden by direct USERNAME/PASSWORD.",
+          "isRequired": false
+        },
+        {
+          "name": "PRISMHR_MCP_ONEPASSWORD_ITEM_PRISMHR",
+          "description": "1Password item name containing PrismHR credentials.",
+          "isRequired": false
+        },
+        {
+          "name": "PRISMHR_MCP_ALLOW_PROD",
+          "description": "Must be 'true' to allow PRISMHR_MCP_ENVIRONMENT=prod. Safety default keeps first-run posture on UAT.",
+          "isRequired": false,
+          "default": "false"
+        }
+      ]
+    }
+  ]
+}
