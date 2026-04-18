@@ -1,0 +1,80 @@
+name: publish
+
+# Publishes prismhr-mcp to PyPI using trusted publishing (OIDC).
+# No API token is ever stored in GitHub Secrets — PyPI verifies the
+# workflow's OIDC identity directly.
+#
+# Trigger: push a git tag that starts with `v`, e.g. `v0.1.0.dev0`, `v0.1.0`.
+#
+# One-time setup (on PyPI, outside this repo):
+#   https://pypi.org/manage/account/publishing/
+#     Project name: prismhr-mcp
+#     Owner:        nikulk2992-jpg
+#     Repo name:    prismhr-mcp
+#     Workflow:     publish.yml
+#     Environment:  release   (recommended; matches `environment:` below)
+
+on:
+  push:
+    tags:
+      - "v*"
+
+concurrency:
+  group: publish-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.meta.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+
+      - name: Verify tag matches pyproject version
+        id: meta
+        run: |
+          set -euo pipefail
+          tag_version="${GITHUB_REF_NAME#v}"
+          pkg_version="$(uv run python -c 'import tomllib,pathlib; print(tomllib.loads(pathlib.Path("pyproject.toml").read_text())["project"]["version"])')"
+          if [ "$tag_version" != "$pkg_version" ]; then
+            echo "::error::Tag ${GITHUB_REF_NAME} declares version '${tag_version}' but pyproject.toml says '${pkg_version}'."
+            exit 1
+          fi
+          echo "version=${pkg_version}" >> "$GITHUB_OUTPUT"
+
+      - name: Install dev dependencies
+        run: uv sync --extra dev
+
+      - name: Run tests before publishing
+        run: uv run pytest -q
+
+      - name: Build sdist + wheel
+        run: uv build
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+          if-no-files-found: error
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: release
+      url: https://pypi.org/p/prismhr-mcp
+    permissions:
+      id-token: write  # OIDC token for PyPI trusted publishing
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+      - name: Publish to PyPI (trusted publisher)
+        uses: pypa/gh-action-pypi-publish@release/v1
+        # No `password:` — OIDC only.
