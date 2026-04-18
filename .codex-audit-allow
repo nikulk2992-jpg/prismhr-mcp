@@ -1,0 +1,5 @@
+# Global codex audit gate exceptions for prismhr-mcp.
+# Format: <finding_id>:<path>:<line>
+# Every entry MUST be justified in docs/AUDIT_REGISTER.md.
+
+F1:tests/:0
