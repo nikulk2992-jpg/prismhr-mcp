@@ -1,0 +1,49 @@
+# Python
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info/
+
+# Virtual envs
+.venv/
+.venv.*/
+venv/
+
+# Test / tooling caches
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+.coverage.*
+htmlcov/
+
+# Secrets / local config
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+credentials.json
+.msal-cache.json
+
+# Runtime cache dirs
+.prismhr-mcp/
+.simploy-mcp/
+cached-credentials.enc
+
+# IDE / OS
+.idea/
+.vscode/
+*.swp
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# cc-pilot internal state (not for public repo)
+.cc-pilot/
+
+# Project-internal scratchpads
+scratch/
+tmp/

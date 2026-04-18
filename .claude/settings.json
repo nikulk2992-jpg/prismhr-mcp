@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__prismhr-mcp__meta_ping",
+      "mcp__prismhr-mcp__meta_about",
+      "mcp__prismhr-mcp__meta_request_permissions",
+      "mcp__prismhr-mcp__meta_grant_permissions",
+      "mcp__prismhr-mcp__meta_list_permissions",
+      "mcp__prismhr-mcp__client_list",
+      "mcp__prismhr-mcp__client_employees",
+      "mcp__prismhr-mcp__client_employee",
+      "mcp__prismhr-mcp__client_employee_search",
+      "Bash(uv run pytest:*)",
+      "Bash(uv sync:*)",
+      "Bash(uv run python:*)"
+    ]
+  }
+}
