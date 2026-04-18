@@ -1,6 +1,6 @@
 [project]
 name = "prismhr-mcp"
-version = "0.1.0.dev0"
+version = "0.1.0.dev1"
 description = "Open-source Model Context Protocol server for PrismHR — PEO workflow tools + Microsoft 365 connectors for Claude and other MCP-aware agents."
 authors = [{ name = "Nihar Kulkarni", email = "nihar@simploy.com" }]
 readme = "README.md"
@@ -45,7 +45,7 @@ dev = [
 Homepage = "https://github.com/nikulk2992-jpg/prismhr-mcp"
 Repository = "https://github.com/nikulk2992-jpg/prismhr-mcp"
 Issues = "https://github.com/nikulk2992-jpg/prismhr-mcp/issues"
-"Commercial Support" = "mailto:nihar@simploy.com"
+"Commercial Support" = "https://github.com/nikulk2992-jpg/prismhr-mcp#commercial-support"
 
 [project.scripts]
 prismhr-mcp = "prismhr_mcp.__main__:main"
