@@ -47,3 +47,8 @@ desktop.ini
 # Project-internal scratchpads
 scratch/
 tmp/
+
+# mcp-publisher CLI binary (downloaded locally; not a build artifact)
+mcp-publisher
+mcp-publisher.exe
+mcp-publisher.tar.gz
