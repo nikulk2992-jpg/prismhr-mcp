@@ -1,234 +1,153 @@
-<!-- mcp-name: io.github.nikulk2992-jpg/prismhr-mcp -->
+# MCP Registry
 
-# prismhr-mcp
+The MCP registry provides MCP clients with a list of MCP servers, like an app store for MCP servers.
 
-**The open-source Model Context Protocol server for PrismHR.**
-Turn Claude (and any MCP-aware agent) into a PEO operations native — payroll,
-benefits, compliance, billing, and Microsoft 365 actions, all exposed as
-composable, scope-gated tools.
+[**📤 Publish my MCP server**](docs/modelcontextprotocol-io/quickstart.mdx) | [**⚡️ Live API docs**](https://registry.modelcontextprotocol.io/docs) | [**👀 Ecosystem vision**](docs/design/ecosystem-vision.md) | 📖 **[Full documentation](./docs)**
 
-Maintained by [Simploy](https://simploy.com) as the fundamental layer for
-PrismHR × agentic AI. MIT-licensed, PyPI-distributed, plugin-friendly.
+## Development Status
 
----
+**2025-10-24 update**: The Registry API has entered an **API freeze (v0.1)** 🎉. For the next month or more, the API will remain stable with no breaking changes, allowing integrators to confidently implement support. This freeze applies to v0.1 while development continues on v0. We'll use this period to validate the API in real-world integrations and gather feedback to shape v1 for general availability. Thank you to everyone for your contributions and patience—your involvement has been key to getting us here!
 
-## Why this exists
+**2025-09-08 update**: The registry has launched in preview 🎉 ([announcement blog post](https://blog.modelcontextprotocol.io/posts/2025-09-08-mcp-registry-preview/)). While the system is now more stable, this is still a preview release and breaking changes or data resets may occur. A general availability (GA) release will follow later. We'd love your feedback in [GitHub discussions](https://github.com/modelcontextprotocol/registry/discussions/new?category=ideas) or in the [#registry-dev Discord](https://discord.com/channels/1358869848138059966/1369487942862504016) ([joining details here](https://modelcontextprotocol.io/community/communication)).
 
-Every PEO running PrismHR ends up with the same Frankenstein stack: Python
-scripts, Postman collections, Playwright automations, one-off Node apps.
-Each one re-implements login, session refresh, retry, pagination, and
-PrismHR's quirks (camelCase schemas, `500 "No data found"` gotchas, batch-of-20
-caps, silent 401s).
+Current key maintainers:
+- **Adam Jones** (Anthropic) [@domdomegg](https://github.com/domdomegg)  
+- **Tadas Antanavicius** (PulseMCP) [@tadasant](https://github.com/tadasant)
+- **Toby Padilla** (GitHub) [@toby](https://github.com/toby)
+- **Radoslav (Rado) Dimitrov** (Stacklok) [@rdimitrov](https://github.com/rdimitrov)
 
-`prismhr-mcp` centralizes that once, as an MCP server. Claude orchestrates;
-the server owns auth, caching, retries, normalization, and PEO domain logic.
-Other PEOs drop it in and immediately get a productive Claude experience
-against their own PrismHR instance — no custom code.
+## Contributing
 
----
+We use multiple channels for collaboration - see [modelcontextprotocol.io/community/communication](https://modelcontextprotocol.io/community/communication).
 
-## Status
+Often (but not always) ideas flow through this pipeline:
 
-Early but working. Current milestone: **Phase 1.5 complete.**
+- **[Discord](https://modelcontextprotocol.io/community/communication)** - Real-time community discussions
+- **[Discussions](https://github.com/modelcontextprotocol/registry/discussions)** - Propose and discuss product/technical requirements
+- **[Issues](https://github.com/modelcontextprotocol/registry/issues)** - Track well-scoped technical work  
+- **[Pull Requests](https://github.com/modelcontextprotocol/registry/pulls)** - Contribute work towards issues
 
-- **Auth + session + HTTP client:** done. 1Password CLI, scrypt-encrypted
-  disk cache, PrismHR session with 55-min TTL, proactive + forced + 401
-  refresh, keepalive, concurrency cap, retry with jittered backoff,
-  500→empty quirk handling, pagination, batching.
-- **Connect-time consent system:** done. Scope manifest across 14 scopes,
-  per-(peo, env) JSON consent store with prerequisite expansion and cascade
-  revoke. Default posture = **deny all**. Tools enforce scope at call time.
-- **Production safety gate:** `PRISMHR_MCP_ALLOW_PROD=true` required to
-  point at prod PrismHR. Prevents accidental first-run blast radius.
-- **Tool inventory:** 9 live (`meta_*` ×5, `client_*` ×4). 39 more across
-  payroll, benefits, compliance, billing, branded reporting, and M365
-  connectors planned.
-- **Test suite:** 60 passing (pytest + respx).
+### Quick start:
 
-See `.planning/architecture.md` for the full 48-tool plan.
+#### Pre-requisites
 
----
+- **Docker**
+- **Go 1.24.x**
+- **ko** - Container image builder for Go ([installation instructions](https://ko.build/install/))
+- **golangci-lint v2.4.0**
 
-## Quick start — UAT smoke test
+#### Running the server
 
-> Only UAT is supported without an explicit opt-in right now. Prod is
-> guarded behind `PRISMHR_MCP_ALLOW_PROD=true`.
-
-### 1. Install
-
-```powershell
-cd C:\path\to\prismhr-mcp    # or wherever you cloned
-uv sync --extra dev
+```bash
+# Start full development environment
+make dev-compose
 ```
 
-### 2. Configure credentials
+This starts the registry at [`localhost:8080`](http://localhost:8080) with PostgreSQL. The database uses ephemeral storage and is reset each time you restart the containers, ensuring a clean state for development and testing.
 
-Copy `.env.example` → `.env` (or set env vars). Pick ONE path:
+**Note:** The registry uses [ko](https://ko.build) to build container images. The `make dev-compose` command automatically builds the registry image with ko and loads it into your local Docker daemon before starting the services.
 
-**Path A — 1Password CLI (recommended):**
-```powershell
-$env:PRISMHR_MCP_ONEPASSWORD_VAULT = "YourVault"
-$env:PRISMHR_MCP_ONEPASSWORD_ITEM_PRISMHR = "PrismHR UAT"
-```
-Requires `op` CLI signed in (`op signin`). The item must expose fields
-labeled `username` and `password` (optionally `peoId`).
+By default, the registry seeds from the production API with a filtered subset of servers (to keep startup fast). This ensures your local environment mirrors production behavior and all seed data passes validation. For offline development you can seed from a file without validation with `MCP_REGISTRY_SEED_FROM=data/seed.json MCP_REGISTRY_ENABLE_REGISTRY_VALIDATION=false make dev-compose`.
 
-**Path B — direct env vars (fast, CI-friendly):**
-```powershell
-$env:PRISMHR_MCP_USERNAME = "claudedemo"
-$env:PRISMHR_MCP_PASSWORD = "<paste>"
-$env:PRISMHR_MCP_PEO_ID   = "624*D"
-```
+The setup can be configured with environment variables in [docker-compose.yml](./docker-compose.yml) - see [.env.example](./.env.example) for a reference.
 
-### 3. Sanity check
+<details>
+<summary>Alternative: Running a pre-built Docker image</summary>
 
-```powershell
-uv run python -c "from prismhr_mcp.server import build; b = build(); import asyncio; print([t.name for t in asyncio.run(b.server.list_tools())])"
-```
-Expect 9 tools.
+Pre-built Docker images are automatically published to GitHub Container Registry:
 
-### 4. Register with Claude Code
+```bash
+# Run latest stable release
+docker run -p 8080:8080 ghcr.io/modelcontextprotocol/registry:latest
 
-Add to your Claude Code `.mcp.json`:
+# Run latest from main branch (continuous deployment)
+docker run -p 8080:8080 ghcr.io/modelcontextprotocol/registry:main
 
-```json
-{
-  "mcpServers": {
-    "prismhr-mcp": {
-      "command": "uv",
-      "args": ["run", "--directory", "C:\\path\\to\\prismhr-mcp", "prismhr-mcp"],
-      "env": {
-        "PRISMHR_MCP_ENVIRONMENT": "uat",
-        "PRISMHR_MCP_USERNAME": "claudedemo",
-        "PRISMHR_MCP_PASSWORD": "<paste or reference>",
-        "PRISMHR_MCP_PEO_ID": "624*D"
-      }
-    }
-  }
-}
+# Run specific release version
+docker run -p 8080:8080 ghcr.io/modelcontextprotocol/registry:v1.0.0
+
+# Run development build from main branch
+docker run -p 8080:8080 ghcr.io/modelcontextprotocol/registry:main-20250906-abc123d
 ```
 
-Restart Claude Code. `/mcp` should show `prismhr-mcp` connected with 9 tools.
+**Available tags:** 
+- **Releases**: `latest`, `v1.0.0`, `v1.1.0`, etc.
+- **Continuous**: `main` (latest main branch build)
+- **Development**: `main-<date>-<sha>` (specific commit builds)
 
-### 5. First conversation
+</details>
 
-```
-You: Tell me about the prismhr-mcp server.
-Claude: [calls meta_about] → explains what's available + commercial options.
+#### Publishing a server
 
-You: What permissions does it want?
-Claude: [calls meta_request_permissions] → shows 14 scopes grouped by category.
+To publish a server, we've built a simple CLI. You can use it with:
 
-You: Grant everything recommended (reads only, no writes).
-Claude: [calls meta_grant_permissions(accept_recommended_defaults=true)]
+```bash
+# Build the latest CLI
+make publisher
 
-You: List all clients in UAT.
-Claude: [calls client_list] → 245 clients.
-```
-
-### 6. Run tests
-
-```powershell
-uv run pytest -q      # expect 60 passing
+# Use it!
+./bin/mcp-publisher --help
 ```
 
----
+See [the publisher guide](./docs/modelcontextprotocol-io/quickstart.mdx) for more details.
 
-## Architecture in one breath
+#### Other commands
 
-```
-┌──────────────────────────────────────────────────────────────┐
-│ Claude / Cowork / any MCP client                             │
-└──────────────────┬───────────────────────────────────────────┘
-                   │ stdio (MCP JSON-RPC)
-┌──────────────────▼───────────────────────────────────────────┐
-│ prismhr-mcp server (FastMCP)                                 │
-│   ├── Permissions (deny-default, scope-gated tools)          │
-│   ├── Tool groups: meta • client • payroll • benefits        │
-│   │                 compliance • billing • report • m365     │
-│   ├── Runtime: PrismHR client, Graph client, SQLite cache    │
-│   └── Auth: 1Password → scrypt-AES cache → session / MSAL    │
-└────┬─────────────────────────────────────────────────┬───────┘
-     │                                                 │
-     ▼                                                 ▼
-┌──────────────┐                           ┌──────────────────┐
-│ PrismHR REST │                           │ Microsoft Graph   │
-│ (UAT / Prod) │                           │ (Outlook / Teams /│
-└──────────────┘                           │  SharePoint)      │
-                                           └──────────────────┘
+```bash
+# Run lint, unit tests and integration tests
+make check
 ```
 
-Key design commitments:
-- **Factory + strict registry.** Tools register via `server.build()` only;
-  duplicate names or unknown group prefixes fail at boot (not silently at
-  import).
-- **Deny-default scopes.** Users must run `meta_grant_permissions` to
-  enable tool access. Prerequisites auto-expand, revokes cascade.
-- **Async-first.** `httpx.AsyncClient` + `asyncio.Semaphore(5)` + async tools.
-- **PrismHR quirks handled.** 401 auto-refresh, 404→`[]` on list endpoints,
-  `500 "No data found"` → empty, 10-consecutive-500s → force refresh.
-- **snake_case outputs.** Pydantic `validation_alias=AliasChoices(...)` so
-  PrismHR's camelCase payloads map to snake_case outputs without leaking
-  camelCase into the MCP tool contract.
-- **Per-(peo, env) consent.** Switching UAT → prod does not inherit grants.
+There are also a few more helpful commands for development. Run `make help` to learn more, or look in [Makefile](./Makefile).
 
----
+<!--
+For Claude and other AI tools: Always prefer make targets over custom commands where possible.
+-->
 
-## Commercial support
+## Architecture
 
-The OSS core stays free forever. Two paid offerings from Simploy layer on top:
+### Project Structure
 
-### Solution Architect — White-Label deployment
+```
+├── cmd/                     # Application entry points
+│   └── publisher/           # Server publishing tool
+├── data/                    # Seed data
+├── deploy/                  # Deployment configuration (Pulumi)
+├── docs/                    # Documentation
+├── internal/                # Private application code
+│   ├── api/                 # HTTP handlers and routing
+│   ├── auth/                # Authentication (GitHub OAuth, JWT, namespace blocking)
+│   ├── config/              # Configuration management
+│   ├── database/            # Data persistence (PostgreSQL)
+│   ├── service/             # Business logic
+│   ├── telemetry/           # Metrics and monitoring
+│   └── validators/          # Input validation
+├── pkg/                     # Public packages
+│   ├── api/                 # API types and structures
+│   │   └── v0/              # Version 0 API types
+│   └── model/               # Data models for server.json
+├── scripts/                 # Development and testing scripts
+├── tests/                   # Integration tests
+└── tools/                   # CLI tools and utilities
+    └── validate-*.sh        # Schema validation tools
+```
 
-Turnkey deployment of `prismhr-mcp` for your PEO brand:
-- Brand config authoring (logo, palette, typography, PDF footer, legal disclaimer)
-- Per-client SharePoint site mapping + Azure AD / Graph tenant setup
-- Custom PrismHR tools for PEO-specific workflows
-- Migration from spreadsheets / legacy scripts to MCP tools
-- PEO ops team onboarding + Claude/Cowork workflow coaching
-- Quarterly updates aligned with upstream releases
-- Priority issue response + named Slack/email contact
+### Authentication
 
-Best for PEOs with 50–5,000 clients who want Claude-first operations
-without the in-house build. Contact: **nihar@simploy.com**
+Publishing supports multiple authentication methods:
+- **GitHub OAuth** - For publishing by logging into GitHub
+- **GitHub OIDC** - For publishing from GitHub Actions
+- **DNS verification** - For proving ownership of a domain and its subdomains
+- **HTTP verification** - For proving ownership of a domain
 
-### Enterprise Support
+The registry validates namespace ownership when publishing. E.g. to publish...:
+- `io.github.domdomegg/my-cool-mcp` you must login to GitHub as `domdomegg`, or be in a GitHub Action on domdomegg's repos
+- `me.adamjones/my-cool-mcp` you must prove ownership of `adamjones.me` via DNS or HTTP challenge
 
-SLA-backed support for teams already running the OSS server:
-- 4-hour response on Sev-1 (prod outage)
-- Annual security review + SOC-2-friendly deployment guidance
-- Signed release artifacts + SBOM
-- Private vulnerability disclosure channel
+## Community Projects
 
-Best for regulated industries or mid/large PEOs with procurement
-requirements. Contact: **nihar@simploy.com**
+Check out [community projects](docs/community-projects.md) to explore notable registry-related work created by the community.
 
-Claude can surface both via `meta_about` — ask "what commercial options
-exist for prismhr-mcp?" and it will describe them.
+## More documentation
 
----
-
-## Troubleshooting
-
-**`No PrismHR credentials configured`** — set either the 1Password item
-env vars or the direct `PRISMHR_MCP_USERNAME`/`_PASSWORD` pair.
-
-**`PrismHR login rejected (status=401)`** — wrong username/password/peo_id.
-UAT's `peo_id` is `624*D` (asterisk literal). Prod differs per PEO.
-
-**`environment=prod requires PRISMHR_MCP_ALLOW_PROD=true`** — safety gate.
-Set `PRISMHR_MCP_ALLOW_PROD=true` explicitly once you're ready.
-
-**`PERMISSION_NOT_GRANTED`** — tool was called without its scope. Ask
-Claude to run `meta_request_permissions` → then `meta_grant_permissions`
-with the scope you want.
-
-**Server exits immediately when Claude Code starts it** — nearly always a
-missing env var. Use the step-3 sanity check to isolate.
-
----
-
-## License
-
-MIT — see [LICENSE](LICENSE). Contributions welcome; see the planning docs
-under `.planning/` for the roadmap.
+See the [documentation](./docs) for more details if your question has not been answered here!
