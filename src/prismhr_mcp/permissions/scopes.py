@@ -114,8 +114,17 @@ MANIFEST: tuple[ScopeSpec, ...] = (
             "/payroll/v1/getBatchListByDate",
             "/payroll/v1/getBillingCodeTotalsForBatch",
             "/payroll/v1/getBillingVouchersByBatch",
+            "/employee/v1/getScheduledDeductions",
         ),
-        tools=(),  # Phase 2 populates
+        tools=(
+            "payroll_batch_status",
+            "payroll_pay_history",
+            "payroll_pay_group_check",
+            "payroll_deduction_conflicts",
+            "payroll_overtime_anomalies",
+            "payroll_superbatch_status",
+            "payroll_register_reconcile",
+        ),
     ),
     ScopeSpec(
         scope=Scope.BENEFITS_READ,
@@ -221,7 +230,7 @@ MANIFEST: tuple[ScopeSpec, ...] = (
         description="Kick off void/correction workflows in PrismHR. Always gated behind preview → confirm.",
         risk="high",
         recommended_default=False,
-        tools=(),
+        tools=("payroll_void_workflow", "payroll_correction_workflow"),
         requires=(Scope.PAYROLL_READ,),
     ),
 )
