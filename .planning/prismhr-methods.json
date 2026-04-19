@@ -1,0 +1,3578 @@
+[
+  {
+    "path": "/applicant/v1/createJobApplicant",
+    "method": "POST",
+    "service": "applicant",
+    "version": "v1",
+    "operation": "createJobApplicant",
+    "summary": "Create a new applicant or candidate for new hires"
+  },
+  {
+    "path": "/applicant/v1/getJobApplicantList",
+    "method": "GET",
+    "service": "applicant",
+    "version": "v1",
+    "operation": "getJobApplicantList",
+    "summary": "Get a list of job applicants"
+  },
+  {
+    "path": "/applicant/v1/getJobApplicants",
+    "method": "GET",
+    "service": "applicant",
+    "version": "v1",
+    "operation": "getJobApplicants",
+    "summary": "Get a list of job applicants"
+  },
+  {
+    "path": "/benefits/v1/addEmployeeAbsence",
+    "method": "POST",
+    "service": "benefits",
+    "version": "v1",
+    "operation": "addEmployeeAbsence",
+    "summary": "Add Absence Journal Entries"
+  },
+  {
+    "path": "/benefits/v1/addFSAReimbursement",
+    "method": "POST",
+    "service": "benefits",
+    "version": "v1",
+    "operation": "addFSAReimbursement",
+    "summary": "Add FSA reimbursement record for an employee"
+  },
+  {
+    "path": "/benefits/v1/adjustBenefitAdjustmentCycles",
+    "method": "POST",
+    "service": "benefits",
+    "version": "v1",
+    "operation": "adjustBenefitAdjustmentCycles",
+    "summary": "Adjust benefit adjustment cyles for an employee"
+  },
+  {
+    "path": "/benefits/v1/adjustPTO",
+    "method": "POST",
+    "service": "benefits",
+    "version": "v1",
+    "operation": "adjustPTO",
+    "summary": "PTO Adjustment"
+  },
+  {
+    "path": "/benefits/v1/benefitEnrollmentStatus",
+    "method": "GET",
+    "service": "benefits",
+    "version": "v1",
+    "operation": "benefitEnrollmentStatus",
+    "summary": "Benefit Enrollment Status"
+  },
+  {
+    "path": "/benefits/v1/deleteBenefitAdjustment",
+    "method": "POST",
+    "service": "benefits",
+    "version": "v1",
+    "operation": "deleteBenefitAdjustment",
+    "summary": "deletion of a specific reference number/client/employeeId/checksum benefit adjustment."
+  },
+  {
+    "path": "/benefits/v1/enrollBenefit",
+    "method": "POST",
+    "service": "benefits",
+    "version": "v1",
+    "operation": "enrollBenefit",
+    "summary": "Enroll a benefit plan"
+  },
+  {
+    "path": "/benefits/v1/enrollPTORegister",
+    "method": "POST",
+    "service": "benefits",
+    "version": "v1",
+    "operation": "enrollPTORegister",
+    "summary": "The BenefitService.enrollPTORegister enrolls an Employee in a PTO Register."
+  },
+  {
+    "path": "/benefits/v1/get401KMatchRules",
+    "method": "GET",
+    "service": "benefits",
+    "version": "v1",
+    "operation": "get401KMatchRules",
+    "summary": "Get client's 401(k) match rules"
+  },
+  {
+    "path": "/benefits/v1/getACAOfferedEmployees",
+    "method": "GET",
+    "service": "benefits",
+    "version": "v1",
+    "operation": "getACAOfferedEmployees",
+    "summary": "Get ACAOffered Employees"
+  },
+  {
+    "path": "/benefits/v1/getAbsenceJournal",
+    "method": "GET",
+    "service": "benefits",
+    "version": "v1",
+    "operation": "getAbsenceJournal",
+    "summary": "Get absence journals"
+  },
+  {
+    "path": "/benefits/v1/getAbsenceJournalByDate",
+    "method": "GET",
+    "service": "benefits",
+    "version": "v1",
+    "operation": "getAbsenceJournalByDate",
+    "summary": "Get absence journals by Date"
+  },
+  {
+    "path": "/benefits/v1/getActiveBenefitPlans",
+    "method": "GET",
+    "service": "benefits",
+    "version": "v1",
+    "operation": "getActiveBenefitPlans",
+    "summary": "Get active plan(s) for an employee"
+  },
+  {
+    "path": "/benefits/v1/getAvailableBenefitPlans",
+    "method": "GET",
+    "service": "benefits",
+    "version": "v1",
+    "operation": "getAvailableBenefitPlans",
+    "summary": "Get available benefit plans for the specified employee"
+  },
+  {
+    "path": "/benefits/v1/getBenefitAdjustments",
+    "method": "GET",
+    "service": "benefits",
+    "version": "v1",
+    "operation": "getBenefitAdjustments",
+    "summary": "Get benefit adjustment information for a specified employee"
+  },
+  {
+    "path": "/benefits/v1/getBenefitConfirmationData",
+    "method": "GET",
+    "service": "benefits",
+    "version": "v1",
+    "operation": "getBenefitConfirmationData",
+    "summary": "Downloads benefits confirmation statement"
+  },
+  {
+    "path": "/benefits/v1/getBenefitConfirmationList",
+    "method": "GET",
+    "service": "benefits",
+    "version": "v1",
+    "operation": "getBenefitConfirmationList",
+    "summary": "Get a list of benefit confirmation"
+  },
+  {
+    "path": "/benefits/v1/getBenefitPlanList",
+    "method": "GET",
+    "service": "benefits",
+    "version": "v1",
+    "operation": "getBenefitPlanList",
+    "summary": "Get a list of group benefit plans"
+  },
+  {
+    "path": "/benefits/v1/getBenefitPlans",
+    "method": "GET",
+    "service": "benefits",
+    "version": "v1",
+    "operation": "getBenefitPlans",
+    "summary": "Get benefit plans for the specified employee"
+  },
+  {
+    "path": "/benefits/v1/getBenefitRule",
+    "method": "GET",
+    "service": "benefits",
+    "version": "v1",
+    "operation": "getBenefitRule",
+    "summary": "Get benefit rule"
+  },
+  {
+    "path": "/benefits/v1/getBenefitWorkflowGrid",
+    "method": "GET",
+    "service": "benefits",
+    "version": "v1",
+    "operation": "getBenefitWorkflowGrid",
+    "summary": "Get client benefit work flow grid"
+  },
+  {
+    "path": "/benefits/v1/getBenefitsEnrollmentTrace",
+    "method": "GET",
+    "service": "benefits",
+    "version": "v1",
+    "operation": "getBenefitsEnrollmentTrace",
+    "summary": "Get employee's benefit enrollment workflow"
+  },
+  {
+    "path": "/benefits/v1/getClientBenefitPlanSetupDetails",
+    "method": "GET",
+    "service": "benefits",
+    "version": "v1",
+    "operation": "getClientBenefitPlanSetupDetails",
+    "summary": "Get client benefit plan setup details"
+  },
+  {
+    "path": "/benefits/v1/getClientBenefitPlans",
+    "method": "GET",
+    "service": "benefits",
+    "version": "v1",
+    "operation": "getClientBenefitPlans",
+    "summary": "Get client benefit plans"
+  },
+  {
+    "path": "/benefits/v1/getCobraCodes",
+    "method": "GET",
+    "service": "benefits",
+    "version": "v1",
+    "operation": "getCobraCodes",
+    "summary": "Get Cobra Codes"
+  },
+  {
+    "path": "/benefits/v1/getCobraEmployee",
+    "method": "GET",
+    "service": "benefits",
+    "version": "v1",
+    "operation": "getCobraEmployee",
+    "summary": "Get Cobra Employee"
+  },
+  {
+    "path": "/benefits/v1/getDependents",
+    "method": "GET",
+    "service": "benefits",
+    "version": "v1",
+    "operation": "getDependents",
+    "summary": "Get dependent information for an employee"
+  },
+  {
+    "path": "/benefits/v1/getDisabilityPlanEnrollmentDetails",
+    "method": "GET",
+    "service": "benefits",
+    "version": "v1",
+    "operation": "getDisabilityPlanEnrollmentDetails",
+    "summary": "Benefit Enrollment Plan Details"
+  },
+  {
+    "path": "/benefits/v1/getEligibleFlexSpendingPlans",
+    "method": "GET",
+    "service": "benefits",
+    "version": "v1",
+    "operation": "getEligibleFlexSpendingPlans",
+    "summary": "Get Eligible Flex Spending Plans for an Employee"
+  },
+  {
+    "path": "/benefits/v1/getEligibleZipCodes",
+    "method": "GET",
+    "service": "benefits",
+    "version": "v1",
+    "operation": "getEligibleZipCodes",
+    "summary": "Get eligible zip codes"
+  },
+  {
+    "path": "/benefits/v1/getEmployeePremium",
+    "method": "GET",
+    "service": "benefits",
+    "version": "v1",
+    "operation": "getEmployeePremium",
+    "summary": "Calculate an employee's premium rates"
+  },
+  {
+    "path": "/benefits/v1/getEmployeeRetirementSummary",
+    "method": "GET",
+    "service": "benefits",
+    "version": "v1",
+    "operation": "getEmployeeRetirementSummary",
+    "summary": "Get employee retirement summary"
+  },
+  {
+    "path": "/benefits/v1/getEnrollInputList",
+    "method": "GET",
+    "service": "benefits",
+    "version": "v1",
+    "operation": "getEnrollInputList",
+    "summary": "Get required input elements to enroll specified employee in benefit plan"
+  },
+  {
+    "path": "/benefits/v1/getEnrollmentPlanDetails",
+    "method": "GET",
+    "service": "benefits",
+    "version": "v1",
+    "operation": "getEnrollmentPlanDetails",
+    "summary": "Benefit Enrollment Plan Details"
+  },
+  {
+    "path": "/benefits/v1/getFSAReimbursements",
+    "method": "GET",
+    "service": "benefits",
+    "version": "v1",
+    "operation": "getFSAReimbursements",
+    "summary": "Get flexible spending account (FSA) reimbursement for an employee"
+  },
+  {
+    "path": "/benefits/v1/getFlexPlans",
+    "method": "GET",
+    "service": "benefits",
+    "version": "v1",
+    "operation": "getFlexPlans",
+    "summary": "Get flexible spending plan enrollment for the specified employee"
+  },
+  {
+    "path": "/benefits/v1/getGroupBenefitPlan",
+    "method": "GET",
+    "service": "benefits",
+    "version": "v1",
+    "operation": "getGroupBenefitPlan",
+    "summary": "Get group benefit plan details"
+  },
+  {
+    "path": "/benefits/v1/getGroupBenefitRates",
+    "method": "GET",
+    "service": "benefits",
+    "version": "v1",
+    "operation": "getGroupBenefitRates",
+    "summary": "Get premium and billing rates for a benefit plan"
+  },
+  {
+    "path": "/benefits/v1/getGroupBenefitTypes",
+    "method": "GET",
+    "service": "benefits",
+    "version": "v1",
+    "operation": "getGroupBenefitTypes",
+    "summary": "Get group benefit type(s)"
+  },
+  {
+    "path": "/benefits/v1/getLifeEventCodeDetails",
+    "method": "GET",
+    "service": "benefits",
+    "version": "v1",
+    "operation": "getLifeEventCodeDetails",
+    "summary": "Get life event code(s) information for a clent"
+  },
+  {
+    "path": "/benefits/v1/getMonthlyACAInfo",
+    "method": "GET",
+    "service": "benefits",
+    "version": "v1",
+    "operation": "getMonthlyACAInfo",
+    "summary": "Get monthly employee ACA data"
+  },
+  {
+    "path": "/benefits/v1/getPTORequestsList",
+    "method": "GET",
+    "service": "benefits",
+    "version": "v1",
+    "operation": "getPTORequestsList",
+    "summary": "Get PTO Request List"
+  },
+  {
+    "path": "/benefits/v1/getPaidTimeOff",
+    "method": "GET",
+    "service": "benefits",
+    "version": "v1",
+    "operation": "getPaidTimeOff",
+    "summary": "Get paid time off information"
+  },
+  {
+    "path": "/benefits/v1/getPaidTimeOffPlans",
+    "method": "GET",
+    "service": "benefits",
+    "version": "v1",
+    "operation": "getPaidTimeOffPlans",
+    "summary": "Get paid time off plans for the specified client"
+  },
+  {
+    "path": "/benefits/v1/getPlanYearInfo",
+    "method": "GET",
+    "service": "benefits",
+    "version": "v1",
+    "operation": "getPlanYearInfo",
+    "summary": "Benefit plan year data"
+  },
+  {
+    "path": "/benefits/v1/getPtoAbsenceCodes",
+    "method": "GET",
+    "service": "benefits",
+    "version": "v1",
+    "operation": "getPtoAbsenceCodes",
+    "summary": "Get PTO absence codes for a client"
+  },
+  {
+    "path": "/benefits/v1/getPtoAutoEnrollRules",
+    "method": "GET",
+    "service": "benefits",
+    "version": "v1",
+    "operation": "getPtoAutoEnrollRules",
+    "summary": "Get PTO auto enroll rules for a client"
+  },
+  {
+    "path": "/benefits/v1/getPtoClasses",
+    "method": "GET",
+    "service": "benefits",
+    "version": "v1",
+    "operation": "getPtoClasses",
+    "summary": "Get paid time off classes for the specified client"
+  },
+  {
+    "path": "/benefits/v1/getPtoPlanDetails",
+    "method": "GET",
+    "service": "benefits",
+    "version": "v1",
+    "operation": "getPtoPlanDetails",
+    "summary": "Get pto plan details"
+  },
+  {
+    "path": "/benefits/v1/getPtoRegisterTypes",
+    "method": "GET",
+    "service": "benefits",
+    "version": "v1",
+    "operation": "getPtoRegisterTypes",
+    "summary": "Get PTO register types for a client"
+  },
+  {
+    "path": "/benefits/v1/getRetirementLoans",
+    "method": "GET",
+    "service": "benefits",
+    "version": "v1",
+    "operation": "getRetirementLoans",
+    "summary": "Get retirement loans for the specified employee or a client"
+  },
+  {
+    "path": "/benefits/v1/getRetirementPlan",
+    "method": "GET",
+    "service": "benefits",
+    "version": "v1",
+    "operation": "getRetirementPlan",
+    "summary": "Get active retirement plans for an employee"
+  },
+  {
+    "path": "/benefits/v1/getSection125Plans",
+    "method": "GET",
+    "service": "benefits",
+    "version": "v1",
+    "operation": "getSection125Plans",
+    "summary": "Get HSA/Section 125 plan deatils"
+  },
+  {
+    "path": "/benefits/v1/import401KData",
+    "method": "POST",
+    "service": "benefits",
+    "version": "v1",
+    "operation": "import401KData",
+    "summary": "Upload 401K import data"
+  },
+  {
+    "path": "/benefits/v1/retirementCensusExport",
+    "method": "GET",
+    "service": "benefits",
+    "version": "v1",
+    "operation": "retirementCensusExport",
+    "summary": "download retirement census report"
+  },
+  {
+    "path": "/benefits/v1/set401KMatchRules",
+    "method": "POST",
+    "service": "benefits",
+    "version": "v1",
+    "operation": "set401KMatchRules",
+    "summary": "The BenefitService.set401KMatchRules creates and updates 401(k) match rules."
+  },
+  {
+    "path": "/benefits/v1/setACAOfferedEmployees",
+    "method": "POST",
+    "service": "benefits",
+    "version": "v1",
+    "operation": "setACAOfferedEmployees",
+    "summary": "Save ACA Offered Employees Information"
+  },
+  {
+    "path": "/benefits/v1/setBenefitAdjustments",
+    "method": "POST",
+    "service": "benefits",
+    "version": "v1",
+    "operation": "setBenefitAdjustments",
+    "summary": "Create or update benefit adjustments for an employee"
+  },
+  {
+    "path": "/benefits/v1/setBenefitRule",
+    "method": "POST",
+    "service": "benefits",
+    "version": "v1",
+    "operation": "setBenefitRule",
+    "summary": "Set benefit rule"
+  },
+  {
+    "path": "/benefits/v1/setClientBenefitPlanSetupDetails",
+    "method": "POST",
+    "service": "benefits",
+    "version": "v1",
+    "operation": "setClientBenefitPlanSetupDetails",
+    "summary": "set client benefit plan setup parameters"
+  },
+  {
+    "path": "/benefits/v1/setDependent",
+    "method": "POST",
+    "service": "benefits",
+    "version": "v1",
+    "operation": "setDependent",
+    "summary": "This service creates or updates a single dependent."
+  },
+  {
+    "path": "/benefits/v1/setDisabilityPlanEnrollmentDetails",
+    "method": "POST",
+    "service": "benefits",
+    "version": "v1",
+    "operation": "setDisabilityPlanEnrollmentDetails",
+    "summary": "save disability plan enrollment information"
+  },
+  {
+    "path": "/benefits/v1/setEmployeePTOAccrual",
+    "method": "POST",
+    "service": "benefits",
+    "version": "v1",
+    "operation": "setEmployeePTOAccrual",
+    "summary": "Start or stop PTO accruals"
+  },
+  {
+    "path": "/benefits/v1/setEnrollmentPlanDetails",
+    "method": "POST",
+    "service": "benefits",
+    "version": "v1",
+    "operation": "setEnrollmentPlanDetails",
+    "summary": "Set Benefit Enrollment Plan Details"
+  },
+  {
+    "path": "/benefits/v1/setFlexPlan",
+    "method": "POST",
+    "service": "benefits",
+    "version": "v1",
+    "operation": "setFlexPlan",
+    "summary": "The BenefitService.setFlexPlan method enrolls a single employee in a flexible spending"
+  },
+  {
+    "path": "/benefits/v1/setGroupBenefitBillingRates",
+    "method": "POST",
+    "service": "benefits",
+    "version": "v1",
+    "operation": "setGroupBenefitBillingRates",
+    "summary": "Configure group benefit billing rate details"
+  },
+  {
+    "path": "/benefits/v1/setGroupBenefitPlanDetails",
+    "method": "POST",
+    "service": "benefits",
+    "version": "v1",
+    "operation": "setGroupBenefitPlanDetails",
+    "summary": "Configure group benefit plan details"
+  },
+  {
+    "path": "/benefits/v1/setGroupBenefitPremiumRates",
+    "method": "POST",
+    "service": "benefits",
+    "version": "v1",
+    "operation": "setGroupBenefitPremiumRates",
+    "summary": "Configure group benefit premium rate details"
+  },
+  {
+    "path": "/benefits/v1/setPtoAbsenceCode",
+    "method": "POST",
+    "service": "benefits",
+    "version": "v1",
+    "operation": "setPtoAbsenceCode",
+    "summary": "Set single PTO absence code."
+  },
+  {
+    "path": "/benefits/v1/setPtoAutoEnrollRules",
+    "method": "POST",
+    "service": "benefits",
+    "version": "v1",
+    "operation": "setPtoAutoEnrollRules",
+    "summary": "Set PTO auto enroll rules for a client"
+  },
+  {
+    "path": "/benefits/v1/setPtoClass",
+    "method": "POST",
+    "service": "benefits",
+    "version": "v1",
+    "operation": "setPtoClass",
+    "summary": "Set paid time off class for the specified client"
+  },
+  {
+    "path": "/benefits/v1/setPtoPlanDetails",
+    "method": "POST",
+    "service": "benefits",
+    "version": "v1",
+    "operation": "setPtoPlanDetails",
+    "summary": "Set pto plan details"
+  },
+  {
+    "path": "/benefits/v1/setPtoRegisterType",
+    "method": "POST",
+    "service": "benefits",
+    "version": "v1",
+    "operation": "setPtoRegisterType",
+    "summary": "Set PTO register type for a client"
+  },
+  {
+    "path": "/benefits/v1/setRetirementLoan",
+    "method": "POST",
+    "service": "benefits",
+    "version": "v1",
+    "operation": "setRetirementLoan",
+    "summary": "Set retirement loan"
+  },
+  {
+    "path": "/benefits/v1/submitLifeEvent",
+    "method": "POST",
+    "service": "benefits",
+    "version": "v1",
+    "operation": "submitLifeEvent",
+    "summary": "Submit a life event for an employee"
+  },
+  {
+    "path": "/benefits/v1/updateRetirementPlanElection",
+    "method": "POST",
+    "service": "benefits",
+    "version": "v1",
+    "operation": "updateRetirementPlanElection",
+    "summary": "Configure retirement plan elections setup"
+  },
+  {
+    "path": "/benefits/v1/updateRetirementPlanEnroll",
+    "method": "POST",
+    "service": "benefits",
+    "version": "v1",
+    "operation": "updateRetirementPlanEnroll",
+    "summary": "Configure retirement plan enrollment"
+  },
+  {
+    "path": "/clientMaster/v1/addBillPending",
+    "method": "POST",
+    "service": "clientMaster",
+    "version": "v1",
+    "operation": "addBillPending",
+    "summary": "add a bill pending record"
+  },
+  {
+    "path": "/clientMaster/v1/cloneClient",
+    "method": "POST",
+    "service": "clientMaster",
+    "version": "v1",
+    "operation": "cloneClient",
+    "summary": "Clone a client"
+  },
+  {
+    "path": "/clientMaster/v1/createClientMaster",
+    "method": "POST",
+    "service": "clientMaster",
+    "version": "v1",
+    "operation": "createClientMaster",
+    "summary": "Create a new client master record"
+  },
+  {
+    "path": "/clientMaster/v1/createNewMessage",
+    "method": "POST",
+    "service": "clientMaster",
+    "version": "v1",
+    "operation": "createNewMessage",
+    "summary": "Create new message"
+  },
+  {
+    "path": "/clientMaster/v1/createPositionCode",
+    "method": "POST",
+    "service": "clientMaster",
+    "version": "v1",
+    "operation": "createPositionCode",
+    "summary": "Create position code"
+  },
+  {
+    "path": "/clientMaster/v1/createPrismClientContact",
+    "method": "POST",
+    "service": "clientMaster",
+    "version": "v1",
+    "operation": "createPrismClientContact",
+    "summary": "Create a new Prism client contact"
+  },
+  {
+    "path": "/clientMaster/v1/createSutaRates",
+    "method": "POST",
+    "service": "clientMaster",
+    "version": "v1",
+    "operation": "createSutaRates",
+    "summary": "Create SUTA Rates"
+  },
+  {
+    "path": "/clientMaster/v1/deleteBillPending",
+    "method": "POST",
+    "service": "clientMaster",
+    "version": "v1",
+    "operation": "deleteBillPending",
+    "summary": "delete a bill pending record"
+  },
+  {
+    "path": "/clientMaster/v1/deletePrismMessage",
+    "method": "POST",
+    "service": "clientMaster",
+    "version": "v1",
+    "operation": "deletePrismMessage",
+    "summary": "delete Prism message"
+  },
+  {
+    "path": "/clientMaster/v1/flagClientsForEverify",
+    "method": "POST",
+    "service": "clientMaster",
+    "version": "v1",
+    "operation": "flagClientsForEverify",
+    "summary": "Flag all clients for everify that are listed in the input"
+  },
+  {
+    "path": "/clientMaster/v1/flagLocationEverifyOverride",
+    "method": "POST",
+    "service": "clientMaster",
+    "version": "v1",
+    "operation": "flagLocationEverifyOverride",
+    "summary": "Flag client's location(s) for everify"
+  },
+  {
+    "path": "/clientMaster/v1/getACALargeEmployer",
+    "method": "GET",
+    "service": "clientMaster",
+    "version": "v1",
+    "operation": "getACALargeEmployer",
+    "summary": "Get ACA large Employer"
+  },
+  {
+    "path": "/clientMaster/v1/getAllPrismClientContacts",
+    "method": "GET",
+    "service": "clientMaster",
+    "version": "v1",
+    "operation": "getAllPrismClientContacts",
+    "summary": "Get all Prism client contacts"
+  },
+  {
+    "path": "/clientMaster/v1/getBackupAssignments",
+    "method": "GET",
+    "service": "clientMaster",
+    "version": "v1",
+    "operation": "getBackupAssignments",
+    "summary": "Get Backup Assignments"
+  },
+  {
+    "path": "/clientMaster/v1/getBenefitGroup",
+    "method": "GET",
+    "service": "clientMaster",
+    "version": "v1",
+    "operation": "getBenefitGroup",
+    "summary": "Get a benefit group"
+  },
+  {
+    "path": "/clientMaster/v1/getBillPending",
+    "method": "GET",
+    "service": "clientMaster",
+    "version": "v1",
+    "operation": "getBillPending",
+    "summary": "Get bill pending record"
+  },
+  {
+    "path": "/clientMaster/v1/getBundledBillingRule",
+    "method": "GET",
+    "service": "clientMaster",
+    "version": "v1",
+    "operation": "getBundledBillingRule",
+    "summary": "Get bundled billing rule(s)"
+  },
+  {
+    "path": "/clientMaster/v1/getClientBillingBankAccount",
+    "method": "GET",
+    "service": "clientMaster",
+    "version": "v1",
+    "operation": "getClientBillingBankAccount",
+    "summary": "Get client billing bank account"
+  },
+  {
+    "path": "/clientMaster/v1/getClientCodes",
+    "method": "GET",
+    "service": "clientMaster",
+    "version": "v1",
+    "operation": "getClientCodes",
+    "summary": "Get code tables for the specified client"
+  },
+  {
+    "path": "/clientMaster/v1/getClientEvents",
+    "method": "GET",
+    "service": "clientMaster",
+    "version": "v1",
+    "operation": "getClientEvents",
+    "summary": "Get client specific events"
+  },
+  {
+    "path": "/clientMaster/v1/getClientList",
+    "method": "GET",
+    "service": "clientMaster",
+    "version": "v1",
+    "operation": "getClientList",
+    "summary": "Get clients list"
+  },
+  {
+    "path": "/clientMaster/v1/getClientLocationDetails",
+    "method": "GET",
+    "service": "clientMaster",
+    "version": "v1",
+    "operation": "getClientLocationDetails",
+    "summary": "Get client location detail"
+  },
+  {
+    "path": "/clientMaster/v1/getClientMaster",
+    "method": "GET",
+    "service": "clientMaster",
+    "version": "v1",
+    "operation": "getClientMaster",
+    "summary": "Get client master data"
+  },
+  {
+    "path": "/clientMaster/v1/getClientOwnership",
+    "method": "GET",
+    "service": "clientMaster",
+    "version": "v1",
+    "operation": "getClientOwnership",
+    "summary": "Get client ownership details"
+  },
+  {
+    "path": "/clientMaster/v1/getDocExpirations",
+    "method": "GET",
+    "service": "clientMaster",
+    "version": "v1",
+    "operation": "getDocExpirations",
+    "summary": "Return docs that will expire within 'daysOut' days from current date"
+  },
+  {
+    "path": "/clientMaster/v1/getEmployeeListByEntity",
+    "method": "GET",
+    "service": "clientMaster",
+    "version": "v1",
+    "operation": "getEmployeeListByEntity",
+    "summary": "Get employee list by entity"
+  },
+  {
+    "path": "/clientMaster/v1/getEmployeesInPayGroup",
+    "method": "GET",
+    "service": "clientMaster",
+    "version": "v1",
+    "operation": "getEmployeesInPayGroup",
+    "summary": "Get employees by pay group"
+  },
+  {
+    "path": "/clientMaster/v1/getGLCutbackCheckPost",
+    "method": "GET",
+    "service": "clientMaster",
+    "version": "v1",
+    "operation": "getGLCutbackCheckPost",
+    "summary": "Get GLCutbackCheckPost"
+  },
+  {
+    "path": "/clientMaster/v1/getGLData",
+    "method": "GET",
+    "service": "clientMaster",
+    "version": "v1",
+    "operation": "getGLData",
+    "summary": "Get GL data"
+  },
+  {
+    "path": "/clientMaster/v1/getGLInvoicePost",
+    "method": "GET",
+    "service": "clientMaster",
+    "version": "v1",
+    "operation": "getGLInvoicePost",
+    "summary": "Get GL invoice post"
+  },
+  {
+    "path": "/clientMaster/v1/getGLJournalPost",
+    "method": "GET",
+    "service": "clientMaster",
+    "version": "v1",
+    "operation": "getGLJournalPost",
+    "summary": "Get GL journal post"
+  },
+  {
+    "path": "/clientMaster/v1/getGeoLocations",
+    "method": "GET",
+    "service": "clientMaster",
+    "version": "v1",
+    "operation": "getGeoLocations",
+    "summary": "Get GeoLocations matching for the ZIP code"
+  },
+  {
+    "path": "/clientMaster/v1/getLaborAllocations",
+    "method": "GET",
+    "service": "clientMaster",
+    "version": "v1",
+    "operation": "getLaborAllocations",
+    "summary": "Get list of labor allocation templates"
+  },
+  {
+    "path": "/clientMaster/v1/getLaborUnionDetails",
+    "method": "GET",
+    "service": "clientMaster",
+    "version": "v1",
+    "operation": "getLaborUnionDetails",
+    "summary": "Get Labor Union Details"
+  },
+  {
+    "path": "/clientMaster/v1/getMessageList",
+    "method": "GET",
+    "service": "clientMaster",
+    "version": "v1",
+    "operation": "getMessageList",
+    "summary": "Get message list"
+  },
+  {
+    "path": "/clientMaster/v1/getMessages",
+    "method": "GET",
+    "service": "clientMaster",
+    "version": "v1",
+    "operation": "getMessages",
+    "summary": "Get messages"
+  },
+  {
+    "path": "/clientMaster/v1/getOSHA300Astats",
+    "method": "GET",
+    "service": "clientMaster",
+    "version": "v1",
+    "operation": "getOSHA300Astats",
+    "summary": "Get OSHA 300A stats"
+  },
+  {
+    "path": "/clientMaster/v1/getPayDayRules",
+    "method": "GET",
+    "service": "clientMaster",
+    "version": "v1",
+    "operation": "getPayDayRules",
+    "summary": "Return pay day rules for the client"
+  },
+  {
+    "path": "/clientMaster/v1/setPayGroup",
+    "method": "POST",
+    "service": "clientMaster",
+    "version": "v1",
+    "operation": "setPayGroup",
+    "summary": "set pay group details by pay group code"
+  },
+  {
+    "path": "/clientMaster/v1/getPayGroupDetails",
+    "method": "GET",
+    "service": "clientMaster",
+    "version": "v1",
+    "operation": "getPayGroupDetails",
+    "summary": "Get pay group details by pay group ID"
+  },
+  {
+    "path": "/clientMaster/v1/getPayrollSchedule",
+    "method": "GET",
+    "service": "clientMaster",
+    "version": "v1",
+    "operation": "getPayrollSchedule",
+    "summary": "Get pay group and pay schedule for the specified client"
+  },
+  {
+    "path": "/clientMaster/v1/getPrismClientContact",
+    "method": "GET",
+    "service": "clientMaster",
+    "version": "v1",
+    "operation": "getPrismClientContact",
+    "summary": "Get a Prism client contact"
+  },
+  {
+    "path": "/clientMaster/v1/getRetirementPlanList",
+    "method": "GET",
+    "service": "clientMaster",
+    "version": "v1",
+    "operation": "getRetirementPlanList",
+    "summary": "Get Retirement Plan List"
+  },
+  {
+    "path": "/clientMaster/v1/getSutaBillingRates",
+    "method": "GET",
+    "service": "clientMaster",
+    "version": "v1",
+    "operation": "getSutaBillingRates",
+    "summary": "Get SUTA billing rates"
+  },
+  {
+    "path": "/clientMaster/v1/getSutaRates",
+    "method": "GET",
+    "service": "clientMaster",
+    "version": "v1",
+    "operation": "getSutaRates",
+    "summary": "Get SUTA rates"
+  },
+  {
+    "path": "/clientMaster/v1/getUnbundledBillingRules",
+    "method": "GET",
+    "service": "clientMaster",
+    "version": "v1",
+    "operation": "getUnbundledBillingRules",
+    "summary": "Get unbundled billing rules"
+  },
+  {
+    "path": "/clientMaster/v1/getWCAccrualModifiers",
+    "method": "GET",
+    "service": "clientMaster",
+    "version": "v1",
+    "operation": "getWCAccrualModifiers",
+    "summary": "Get client W/C accrual modifiers"
+  },
+  {
+    "path": "/clientMaster/v1/getWCBillingModifiers",
+    "method": "GET",
+    "service": "clientMaster",
+    "version": "v1",
+    "operation": "getWCBillingModifiers",
+    "summary": "Get client W/C billing modifiers"
+  },
+  {
+    "path": "/clientMaster/v1/removePrismClientContact",
+    "method": "POST",
+    "service": "clientMaster",
+    "version": "v1",
+    "operation": "removePrismClientContact",
+    "summary": "Remove a Prism client contact"
+  },
+  {
+    "path": "/clientMaster/v1/setACALargeEmployer",
+    "method": "POST",
+    "service": "clientMaster",
+    "version": "v1",
+    "operation": "setACALargeEmployer",
+    "summary": "Set ACA large Employer"
+  },
+  {
+    "path": "/clientMaster/v1/setAccountAssignments",
+    "method": "POST",
+    "service": "clientMaster",
+    "version": "v1",
+    "operation": "setAccountAssignments",
+    "summary": "Update the account roles associated with a client"
+  },
+  {
+    "path": "/clientMaster/v1/setAlternateEmployers",
+    "method": "POST",
+    "service": "clientMaster",
+    "version": "v1",
+    "operation": "setAlternateEmployers",
+    "summary": "set alteranate Employers"
+  },
+  {
+    "path": "/clientMaster/v1/setBackupAssignments",
+    "method": "POST",
+    "service": "clientMaster",
+    "version": "v1",
+    "operation": "setBackupAssignments",
+    "summary": "Set Backup Assignments"
+  },
+  {
+    "path": "/clientMaster/v1/setBenefitGroup",
+    "method": "POST",
+    "service": "clientMaster",
+    "version": "v1",
+    "operation": "setBenefitGroup",
+    "summary": "Set a benefit group"
+  },
+  {
+    "path": "/clientMaster/v1/setBillingDetails",
+    "method": "POST",
+    "service": "clientMaster",
+    "version": "v1",
+    "operation": "setBillingDetails",
+    "summary": "Set billing details"
+  },
+  {
+    "path": "/clientMaster/v1/setBundledBillingRule",
+    "method": "POST",
+    "service": "clientMaster",
+    "version": "v1",
+    "operation": "setBundledBillingRule",
+    "summary": "create or update bundled billing rule"
+  },
+  {
+    "path": "/clientMaster/v1/setClientBillingBankAccount",
+    "method": "POST",
+    "service": "clientMaster",
+    "version": "v1",
+    "operation": "setClientBillingBankAccount",
+    "summary": "Set client billing bank account"
+  },
+  {
+    "path": "/clientMaster/v1/setClientControl",
+    "method": "POST",
+    "service": "clientMaster",
+    "version": "v1",
+    "operation": "setClientControl",
+    "summary": "Set client control options"
+  },
+  {
+    "path": "/clientMaster/v1/setClientEvents",
+    "method": "POST",
+    "service": "clientMaster",
+    "version": "v1",
+    "operation": "setClientEvents",
+    "summary": "Create or update a client specific event"
+  },
+  {
+    "path": "/clientMaster/v1/setClientLocationDetails",
+    "method": "POST",
+    "service": "clientMaster",
+    "version": "v1",
+    "operation": "setClientLocationDetails",
+    "summary": "Create new worksite location"
+  },
+  {
+    "path": "/clientMaster/v1/setClientOwnership",
+    "method": "POST",
+    "service": "clientMaster",
+    "version": "v1",
+    "operation": "setClientOwnership",
+    "summary": "Set client ownership details"
+  },
+  {
+    "path": "/clientMaster/v1/setClientPayroll",
+    "method": "POST",
+    "service": "clientMaster",
+    "version": "v1",
+    "operation": "setClientPayroll",
+    "summary": "Set client payroll options"
+  },
+  {
+    "path": "/clientMaster/v1/setClientTimeSheetPayCode",
+    "method": "POST",
+    "service": "clientMaster",
+    "version": "v1",
+    "operation": "setClientTimeSheetPayCode",
+    "summary": "Set client time sheet pay codes and default hours"
+  },
+  {
+    "path": "/clientMaster/v1/setCodeDescriptionOverride",
+    "method": "POST",
+    "service": "clientMaster",
+    "version": "v1",
+    "operation": "setCodeDescriptionOverride",
+    "summary": "Create or update a code description override"
+  },
+  {
+    "path": "/clientMaster/v1/setControlCodes",
+    "method": "POST",
+    "service": "clientMaster",
+    "version": "v1",
+    "operation": "setControlCodes",
+    "summary": "Set Control Codes"
+  },
+  {
+    "path": "/clientMaster/v1/setLaborAllocations",
+    "method": "POST",
+    "service": "clientMaster",
+    "version": "v1",
+    "operation": "setLaborAllocations",
+    "summary": "Create or update labor allocation template"
+  },
+  {
+    "path": "/clientMaster/v1/setLaborUnionDetails",
+    "method": "POST",
+    "service": "clientMaster",
+    "version": "v1",
+    "operation": "setLaborUnionDetails",
+    "summary": "set labor union details"
+  },
+  {
+    "path": "/clientMaster/v1/setMessageToRead",
+    "method": "POST",
+    "service": "clientMaster",
+    "version": "v1",
+    "operation": "setMessageToRead",
+    "summary": "Set a message as alreadyRead status"
+  },
+  {
+    "path": "/clientMaster/v1/setPayDayRules",
+    "method": "POST",
+    "service": "clientMaster",
+    "version": "v1",
+    "operation": "setPayDayRules",
+    "summary": "sets payday rules for a client"
+  },
+  {
+    "path": "/clientMaster/v1/setRetirementPlan",
+    "method": "POST",
+    "service": "clientMaster",
+    "version": "v1",
+    "operation": "setRetirementPlan",
+    "summary": "Update the retirement plans associated with a client"
+  },
+  {
+    "path": "/clientMaster/v1/setWCAccrualModifiers",
+    "method": "POST",
+    "service": "clientMaster",
+    "version": "v1",
+    "operation": "setWCAccrualModifiers",
+    "summary": "Set client W/C accrual modifiers"
+  },
+  {
+    "path": "/clientMaster/v1/setWCBillingModifiers",
+    "method": "POST",
+    "service": "clientMaster",
+    "version": "v1",
+    "operation": "setWCBillingModifiers",
+    "summary": "Set client W/C billing modifiers"
+  },
+  {
+    "path": "/clientMaster/v1/setWorkersCompPolicy",
+    "method": "POST",
+    "service": "clientMaster",
+    "version": "v1",
+    "operation": "setWorkersCompPolicy",
+    "summary": "update or create Workers' Compensation insurance policy"
+  },
+  {
+    "path": "/clientMaster/v1/updateClientAddress",
+    "method": "POST",
+    "service": "clientMaster",
+    "version": "v1",
+    "operation": "updateClientAddress",
+    "summary": "Update client address information"
+  },
+  {
+    "path": "/clientMaster/v1/updateClientMasterFields",
+    "method": "POST",
+    "service": "clientMaster",
+    "version": "v1",
+    "operation": "updateClientMasterFields",
+    "summary": "Update client master fields"
+  },
+  {
+    "path": "/clientMaster/v1/updateClientStatus",
+    "method": "POST",
+    "service": "clientMaster",
+    "version": "v1",
+    "operation": "updateClientStatus",
+    "summary": "update client status"
+  },
+  {
+    "path": "/clientMaster/v1/updateClientTaxInfo",
+    "method": "POST",
+    "service": "clientMaster",
+    "version": "v1",
+    "operation": "updateClientTaxInfo",
+    "summary": "update Client Tax Info"
+  },
+  {
+    "path": "/clientMaster/v1/updatePrismClientContact",
+    "method": "POST",
+    "service": "clientMaster",
+    "version": "v1",
+    "operation": "updatePrismClientContact",
+    "summary": "Update a Prism client contact"
+  },
+  {
+    "path": "/clientMaster/v1/updateWorksiteLocationAch",
+    "method": "POST",
+    "service": "clientMaster",
+    "version": "v1",
+    "operation": "updateWorksiteLocationAch",
+    "summary": "Update worksite location's ACH"
+  },
+  {
+    "path": "/clientMaster/v2/getClientLocationDetails",
+    "method": "GET",
+    "service": "clientMaster",
+    "version": "v2",
+    "operation": "getClientLocationDetails",
+    "summary": "Get client location detail V2 version"
+  },
+  {
+    "path": "/clientMaster/v2/getSutaBillingRates",
+    "method": "GET",
+    "service": "clientMaster",
+    "version": "v2",
+    "operation": "getSutaBillingRates",
+    "summary": "Get SUTA billing rates (v2)"
+  },
+  {
+    "path": "/codeFiles/v1/getBillingCode",
+    "method": "GET",
+    "service": "codeFiles",
+    "version": "v1",
+    "operation": "getBillingCode",
+    "summary": "Get Billing codes"
+  },
+  {
+    "path": "/codeFiles/v1/getClientCategoryList",
+    "method": "GET",
+    "service": "codeFiles",
+    "version": "v1",
+    "operation": "getClientCategoryList",
+    "summary": "Get client category list"
+  },
+  {
+    "path": "/codeFiles/v1/getContactTypeList",
+    "method": "GET",
+    "service": "codeFiles",
+    "version": "v1",
+    "operation": "getContactTypeList",
+    "summary": "Get Contact Type List"
+  },
+  {
+    "path": "/codeFiles/v1/getCourseCodesList",
+    "method": "GET",
+    "service": "codeFiles",
+    "version": "v1",
+    "operation": "getCourseCodesList",
+    "summary": "Get all courses associated with a particular client."
+  },
+  {
+    "path": "/codeFiles/v1/getDeductionCodeDetails",
+    "method": "GET",
+    "service": "codeFiles",
+    "version": "v1",
+    "operation": "getDeductionCodeDetails",
+    "summary": "Get Deduction code details"
+  },
+  {
+    "path": "/codeFiles/v1/getDepartmentCode",
+    "method": "GET",
+    "service": "codeFiles",
+    "version": "v1",
+    "operation": "getDepartmentCode",
+    "summary": "Get specified department code file for a particular client"
+  },
+  {
+    "path": "/codeFiles/v1/getDivisionCode",
+    "method": "GET",
+    "service": "codeFiles",
+    "version": "v1",
+    "operation": "getDivisionCode",
+    "summary": "Get specified division code file for a particular client"
+  },
+  {
+    "path": "/codeFiles/v1/getEeoCodes",
+    "method": "GET",
+    "service": "codeFiles",
+    "version": "v1",
+    "operation": "getEeoCodes",
+    "summary": "Get EEO setup codes"
+  },
+  {
+    "path": "/codeFiles/v1/getEventCodes",
+    "method": "GET",
+    "service": "codeFiles",
+    "version": "v1",
+    "operation": "getEventCodes",
+    "summary": "Returns event codes file for the specified client"
+  },
+  {
+    "path": "/codeFiles/v1/getHolidayCodeList",
+    "method": "GET",
+    "service": "codeFiles",
+    "version": "v1",
+    "operation": "getHolidayCodeList",
+    "summary": "Get global holiday code list for this PEO"
+  },
+  {
+    "path": "/codeFiles/v1/getNAICSCodeList",
+    "method": "GET",
+    "service": "codeFiles",
+    "version": "v1",
+    "operation": "getNAICSCodeList",
+    "summary": "Get NAICS Code List"
+  },
+  {
+    "path": "/codeFiles/v1/getPayGrades",
+    "method": "GET",
+    "service": "codeFiles",
+    "version": "v1",
+    "operation": "getPayGrades",
+    "summary": "Get Client Pay Grades"
+  },
+  {
+    "path": "/codeFiles/v1/getPaycodeDetails",
+    "method": "GET",
+    "service": "codeFiles",
+    "version": "v1",
+    "operation": "getPaycodeDetails",
+    "summary": "Get Pay Code details"
+  },
+  {
+    "path": "/codeFiles/v1/getPositionClassifications",
+    "method": "GET",
+    "service": "codeFiles",
+    "version": "v1",
+    "operation": "getPositionClassifications",
+    "summary": "Returns position classifications."
+  },
+  {
+    "path": "/codeFiles/v1/getPositionCode",
+    "method": "GET",
+    "service": "codeFiles",
+    "version": "v1",
+    "operation": "getPositionCode",
+    "summary": "Returns position code for the specified client."
+  },
+  {
+    "path": "/codeFiles/v1/getProjectCode",
+    "method": "GET",
+    "service": "codeFiles",
+    "version": "v1",
+    "operation": "getProjectCode",
+    "summary": "Returns project code for the specified client"
+  },
+  {
+    "path": "/codeFiles/v1/getProjectPhase",
+    "method": "GET",
+    "service": "codeFiles",
+    "version": "v1",
+    "operation": "getProjectPhase",
+    "summary": "Returns project phases for the specified client."
+  },
+  {
+    "path": "/codeFiles/v1/getRatingCode",
+    "method": "GET",
+    "service": "codeFiles",
+    "version": "v1",
+    "operation": "getRatingCode",
+    "summary": "Get rating codes for specific client"
+  },
+  {
+    "path": "/codeFiles/v1/getShiftCode",
+    "method": "GET",
+    "service": "codeFiles",
+    "version": "v1",
+    "operation": "getShiftCode",
+    "summary": "Get specified shift code file for a particular client"
+  },
+  {
+    "path": "/codeFiles/v1/getSkillCode",
+    "method": "GET",
+    "service": "codeFiles",
+    "version": "v1",
+    "operation": "getSkillCode",
+    "summary": "Returns skill code for the specified client"
+  },
+  {
+    "path": "/codeFiles/v1/getUserDefinedFields",
+    "method": "GET",
+    "service": "codeFiles",
+    "version": "v1",
+    "operation": "getUserDefinedFields",
+    "summary": "Get user-defined fields for the specified field type"
+  },
+  {
+    "path": "/codeFiles/v1/setContactType",
+    "method": "POST",
+    "service": "codeFiles",
+    "version": "v1",
+    "operation": "setContactType",
+    "summary": "Set Contact Type"
+  },
+  {
+    "path": "/codeFiles/v1/setCourseCode",
+    "method": "POST",
+    "service": "codeFiles",
+    "version": "v1",
+    "operation": "setCourseCode",
+    "summary": "Set a course code file for the specified client"
+  },
+  {
+    "path": "/codeFiles/v1/setDeductionCodeDetails",
+    "method": "POST",
+    "service": "codeFiles",
+    "version": "v1",
+    "operation": "setDeductionCodeDetails",
+    "summary": "Set Deduction Code Details"
+  },
+  {
+    "path": "/codeFiles/v1/setDepartmentCode",
+    "method": "POST",
+    "service": "codeFiles",
+    "version": "v1",
+    "operation": "setDepartmentCode",
+    "summary": "Set a department code file for the specified client"
+  },
+  {
+    "path": "/codeFiles/v1/setDivisionCode",
+    "method": "POST",
+    "service": "codeFiles",
+    "version": "v1",
+    "operation": "setDivisionCode",
+    "summary": "Set a division code file for the specified client"
+  },
+  {
+    "path": "/codeFiles/v1/setDivisionCodeWithAch",
+    "method": "POST",
+    "service": "codeFiles",
+    "version": "v1",
+    "operation": "setDivisionCodeWithAch",
+    "summary": "Set a division code with ACH file for the specified client"
+  },
+  {
+    "path": "/codeFiles/v1/setEthnicCode",
+    "method": "POST",
+    "service": "codeFiles",
+    "version": "v1",
+    "operation": "setEthnicCode",
+    "summary": "create or update ethnic code"
+  },
+  {
+    "path": "/codeFiles/v1/setEventCode",
+    "method": "POST",
+    "service": "codeFiles",
+    "version": "v1",
+    "operation": "setEventCode",
+    "summary": "Set an event code for a specified client"
+  },
+  {
+    "path": "/codeFiles/v1/setPaycodeDetails",
+    "method": "POST",
+    "service": "codeFiles",
+    "version": "v1",
+    "operation": "setPaycodeDetails",
+    "summary": "Set Pay code details"
+  },
+  {
+    "path": "/codeFiles/v1/setPositionClassification",
+    "method": "POST",
+    "service": "codeFiles",
+    "version": "v1",
+    "operation": "setPositionClassification",
+    "summary": "Set Position Classification"
+  },
+  {
+    "path": "/codeFiles/v1/setPositionCode",
+    "method": "POST",
+    "service": "codeFiles",
+    "version": "v1",
+    "operation": "setPositionCode",
+    "summary": "The CodeFileService.setPositionCode method creates or edits an existing position."
+  },
+  {
+    "path": "/codeFiles/v1/setProjectClass",
+    "method": "POST",
+    "service": "codeFiles",
+    "version": "v1",
+    "operation": "setProjectClass",
+    "summary": "The CodeFileService.setProjectClass method creates or edits an existing project class."
+  },
+  {
+    "path": "/codeFiles/v1/setProjectCode",
+    "method": "POST",
+    "service": "codeFiles",
+    "version": "v1",
+    "operation": "setProjectCode",
+    "summary": "Set a project code for a specified client"
+  },
+  {
+    "path": "/codeFiles/v1/setProjectPhase",
+    "method": "POST",
+    "service": "codeFiles",
+    "version": "v1",
+    "operation": "setProjectPhase",
+    "summary": "Set a project phase for the specified client"
+  },
+  {
+    "path": "/codeFiles/v1/setRatingCode",
+    "method": "POST",
+    "service": "codeFiles",
+    "version": "v1",
+    "operation": "setRatingCode",
+    "summary": "Create or update a rating code."
+  },
+  {
+    "path": "/codeFiles/v1/setShiftCode",
+    "method": "POST",
+    "service": "codeFiles",
+    "version": "v1",
+    "operation": "setShiftCode",
+    "summary": "Set a shift code file for the specified client"
+  },
+  {
+    "path": "/codeFiles/v1/setSkillCode",
+    "method": "POST",
+    "service": "codeFiles",
+    "version": "v1",
+    "operation": "setSkillCode",
+    "summary": "Set a skill code for a specified client"
+  },
+  {
+    "path": "/codeFiles/v1/setUserDefinedFields",
+    "method": "POST",
+    "service": "codeFiles",
+    "version": "v1",
+    "operation": "setUserDefinedFields",
+    "summary": "Set user-defined fields for the specified field type"
+  },
+  {
+    "path": "/codeFiles/v1/setWorkGroupCode",
+    "method": "POST",
+    "service": "codeFiles",
+    "version": "v1",
+    "operation": "setWorkGroupCode",
+    "summary": "The CodeFileService.setWorkGroupCode method creates or edits an existing work"
+  },
+  {
+    "path": "/deductions/v1/getDeductionArrears",
+    "method": "GET",
+    "service": "deductions",
+    "version": "v1",
+    "operation": "getDeductionArrears",
+    "summary": "Get payroll deductions arrear information"
+  },
+  {
+    "path": "/deductions/v1/getDeductions",
+    "method": "GET",
+    "service": "deductions",
+    "version": "v1",
+    "operation": "getDeductions",
+    "summary": "Get payroll deductions information"
+  },
+  {
+    "path": "/deductions/v1/getEmployeeLoans",
+    "method": "GET",
+    "service": "deductions",
+    "version": "v1",
+    "operation": "getEmployeeLoans",
+    "summary": "Get employee loans information"
+  },
+  {
+    "path": "/deductions/v1/getGarnishmentDetails",
+    "method": "GET",
+    "service": "deductions",
+    "version": "v1",
+    "operation": "getGarnishmentDetails",
+    "summary": "Garnishment Details for the employee"
+  },
+  {
+    "path": "/deductions/v1/getGarnishmentPaymentHistory",
+    "method": "GET",
+    "service": "deductions",
+    "version": "v1",
+    "operation": "getGarnishmentPaymentHistory",
+    "summary": "Get gernishment payment history"
+  },
+  {
+    "path": "/deductions/v1/getVoluntaryRecurringDeductions",
+    "method": "GET",
+    "service": "deductions",
+    "version": "v1",
+    "operation": "getVoluntaryRecurringDeductions",
+    "summary": "Get voluntary recurring deductions list"
+  },
+  {
+    "path": "/deductions/v1/setEmployeeLoan",
+    "method": "POST",
+    "service": "deductions",
+    "version": "v1",
+    "operation": "setEmployeeLoan",
+    "summary": "Update or create new loan for an employee"
+  },
+  {
+    "path": "/deductions/v1/setVoluntaryRecurringDeductions",
+    "method": "POST",
+    "service": "deductions",
+    "version": "v1",
+    "operation": "setVoluntaryRecurringDeductions",
+    "summary": "update, add or remove a voluntary deduction for an employee"
+  },
+  {
+    "path": "/documentService/v1/getDocumentTypes",
+    "method": "GET",
+    "service": "documentService",
+    "version": "v1",
+    "operation": "getDocumentTypes",
+    "summary": "Get document types"
+  },
+  {
+    "path": "/documentService/v1/getRuleset",
+    "method": "GET",
+    "service": "documentService",
+    "version": "v1",
+    "operation": "getRuleset",
+    "summary": "Get document management ruleset"
+  },
+  {
+    "path": "/documentService/v1/uploadDocument",
+    "method": "POST",
+    "service": "documentService",
+    "version": "v1",
+    "operation": "uploadDocument",
+    "summary": "Upload Document"
+  },
+  {
+    "path": "/documentService/v1/validateSsoToken",
+    "method": "POST",
+    "service": "documentService",
+    "version": "v1",
+    "operation": "validateSsoToken",
+    "summary": "Validate ssoToken with context from DocumentService.getRuleset"
+  },
+  {
+    "path": "/employee/v1/addEmployeeEvents",
+    "method": "POST",
+    "service": "employee",
+    "version": "v1",
+    "operation": "addEmployeeEvents",
+    "summary": "add new employee events"
+  },
+  {
+    "path": "/employee/v1/adjustStatusHistory",
+    "method": "POST",
+    "service": "employee",
+    "version": "v1",
+    "operation": "adjustStatusHistory",
+    "summary": "adjusts an employee's status/type change history date."
+  },
+  {
+    "path": "/employee/v1/approveOrDenyPTORequest",
+    "method": "POST",
+    "service": "employee",
+    "version": "v1",
+    "operation": "approveOrDenyPTORequest",
+    "summary": "Approve or Deny employee PTO request"
+  },
+  {
+    "path": "/employee/v1/benefitPlanSetEligible",
+    "method": "POST",
+    "service": "employee",
+    "version": "v1",
+    "operation": "benefitPlanSetEligible",
+    "summary": "Set an employee benefit plan status to eligible"
+  },
+  {
+    "path": "/employee/v1/benefitPlanSetInEligible",
+    "method": "POST",
+    "service": "employee",
+    "version": "v1",
+    "operation": "benefitPlanSetInEligible",
+    "summary": "Set an employee benefit plan status to ineligible"
+  },
+  {
+    "path": "/employee/v1/benefitPlanSetTerminate",
+    "method": "POST",
+    "service": "employee",
+    "version": "v1",
+    "operation": "benefitPlanSetTerminate",
+    "summary": "Set an employee benefit plan status to terminate"
+  },
+  {
+    "path": "/employee/v1/benefitPlanSetWaive",
+    "method": "POST",
+    "service": "employee",
+    "version": "v1",
+    "operation": "benefitPlanSetWaive",
+    "summary": "Set an employee benefit plan status to waived"
+  },
+  {
+    "path": "/employee/v1/cancelPTORequest",
+    "method": "POST",
+    "service": "employee",
+    "version": "v1",
+    "operation": "cancelPTORequest",
+    "summary": "Cancel PTO Request"
+  },
+  {
+    "path": "/employee/v1/checkForGarnishments",
+    "method": "GET",
+    "service": "employee",
+    "version": "v1",
+    "operation": "checkForGarnishments",
+    "summary": "Check for garnishments for employee"
+  },
+  {
+    "path": "/employee/v1/download1095C",
+    "method": "GET",
+    "service": "employee",
+    "version": "v1",
+    "operation": "download1095C",
+    "summary": "Download an employee's 1095C"
+  },
+  {
+    "path": "/employee/v1/downloadW2",
+    "method": "GET",
+    "service": "employee",
+    "version": "v1",
+    "operation": "downloadW2",
+    "summary": "Download an employee's W2"
+  },
+  {
+    "path": "/employee/v1/get1095CYears",
+    "method": "GET",
+    "service": "employee",
+    "version": "v1",
+    "operation": "get1095CYears",
+    "summary": "Get a list of available Form 1095-C years"
+  },
+  {
+    "path": "/employee/v1/get1099Years",
+    "method": "GET",
+    "service": "employee",
+    "version": "v1",
+    "operation": "get1099Years",
+    "summary": "Get a list of available 1099 years"
+  },
+  {
+    "path": "/employee/v1/getACHDeductions",
+    "method": "GET",
+    "service": "employee",
+    "version": "v1",
+    "operation": "getACHDeductions",
+    "summary": "Get Employee ACH Deductions"
+  },
+  {
+    "path": "/employee/v1/getAddressInfo",
+    "method": "GET",
+    "service": "employee",
+    "version": "v1",
+    "operation": "getAddressInfo",
+    "summary": "Get employee address information"
+  },
+  {
+    "path": "/employee/v1/getEmployee",
+    "method": "GET",
+    "service": "employee",
+    "version": "v1",
+    "operation": "getEmployee",
+    "summary": "Get employee(s) information by employee ID"
+  },
+  {
+    "path": "/employee/v1/getEmployeeBySSN",
+    "method": "POST",
+    "service": "employee",
+    "version": "v1",
+    "operation": "getEmployeeBySSN",
+    "summary": "Get employee(s) information by Social Security number"
+  },
+  {
+    "path": "/employee/v1/getEmployeeEvents",
+    "method": "GET",
+    "service": "employee",
+    "version": "v1",
+    "operation": "getEmployeeEvents",
+    "summary": "Get events for an employee"
+  },
+  {
+    "path": "/employee/v1/getEmployeeList",
+    "method": "GET",
+    "service": "employee",
+    "version": "v1",
+    "operation": "getEmployeeList",
+    "summary": "Get list of employees for a specified client"
+  },
+  {
+    "path": "/employee/v1/getEmployeeSSNList",
+    "method": "GET",
+    "service": "employee",
+    "version": "v1",
+    "operation": "getEmployeeSSNList",
+    "summary": "Get list of employees with their SSN"
+  },
+  {
+    "path": "/employee/v1/getEmployeesReadyForEverify",
+    "method": "GET",
+    "service": "employee",
+    "version": "v1",
+    "operation": "getEmployeesReadyForEverify",
+    "summary": "Get employees who have E-Verify Requested status"
+  },
+  {
+    "path": "/employee/v1/getEmployersInfo",
+    "method": "GET",
+    "service": "employee",
+    "version": "v1",
+    "operation": "getEmployersInfo",
+    "summary": "Get current employer and list of possible employers"
+  },
+  {
+    "path": "/employee/v1/getEverifyStatus",
+    "method": "GET",
+    "service": "employee",
+    "version": "v1",
+    "operation": "getEverifyStatus",
+    "summary": "Get employee's E-Verify data"
+  },
+  {
+    "path": "/employee/v1/getFutureEeChange",
+    "method": "GET",
+    "service": "employee",
+    "version": "v1",
+    "operation": "getFutureEeChange",
+    "summary": "Get employee future event change"
+  },
+  {
+    "path": "/employee/v1/getGarnishmentEmployee",
+    "method": "GET",
+    "service": "employee",
+    "version": "v1",
+    "operation": "getGarnishmentEmployee",
+    "summary": "Get employee Id for garnishment"
+  },
+  {
+    "path": "/employee/v1/getHistory",
+    "method": "GET",
+    "service": "employee",
+    "version": "v1",
+    "operation": "getHistory",
+    "summary": "Get historical events"
+  },
+  {
+    "path": "/employee/v1/getI9Data",
+    "method": "GET",
+    "service": "employee",
+    "version": "v1",
+    "operation": "getI9Data",
+    "summary": "Get employee I9 data"
+  },
+  {
+    "path": "/employee/v1/getLeaveRequests",
+    "method": "GET",
+    "service": "employee",
+    "version": "v1",
+    "operation": "getLeaveRequests",
+    "summary": "Get leave requests by clientId and leaveId"
+  },
+  {
+    "path": "/employee/v1/getLifeEvent",
+    "method": "GET",
+    "service": "employee",
+    "version": "v1",
+    "operation": "getLifeEvent",
+    "summary": "Retrieve an employee life event"
+  },
+  {
+    "path": "/employee/v1/getOSHA",
+    "method": "GET",
+    "service": "employee",
+    "version": "v1",
+    "operation": "getOSHA",
+    "summary": "Get OSHA case"
+  },
+  {
+    "path": "/employee/v1/getPayCardEmployees",
+    "method": "GET",
+    "service": "employee",
+    "version": "v1",
+    "operation": "getPayCardEmployees",
+    "summary": "Get list of employees associated with a specified direct deposit transit/routing number."
+  },
+  {
+    "path": "/employee/v1/getPayRateHistory",
+    "method": "GET",
+    "service": "employee",
+    "version": "v1",
+    "operation": "getPayRateHistory",
+    "summary": "Get historical pay rate attributes"
+  },
+  {
+    "path": "/employee/v1/getPendingApproval",
+    "method": "GET",
+    "service": "employee",
+    "version": "v1",
+    "operation": "getPendingApproval",
+    "summary": "Get list of pending approvals by employeeID"
+  },
+  {
+    "path": "/employee/v1/getPositionRate",
+    "method": "GET",
+    "service": "employee",
+    "version": "v1",
+    "operation": "getPositionRate",
+    "summary": "Get list of position rates"
+  },
+  {
+    "path": "/employee/v1/getScheduledDeductions",
+    "method": "GET",
+    "service": "employee",
+    "version": "v1",
+    "operation": "getScheduledDeductions",
+    "summary": "Get an employee's scheduled deductions"
+  },
+  {
+    "path": "/employee/v1/getStatusHistoryForAdjustment",
+    "method": "GET",
+    "service": "employee",
+    "version": "v1",
+    "operation": "getStatusHistoryForAdjustment",
+    "summary": "Retrieve status history for employee"
+  },
+  {
+    "path": "/employee/v1/getTerminationDateRange",
+    "method": "GET",
+    "service": "employee",
+    "version": "v1",
+    "operation": "getTerminationDateRange",
+    "summary": "Get termination date range for employees"
+  },
+  {
+    "path": "/employee/v1/getW2Years",
+    "method": "GET",
+    "service": "employee",
+    "version": "v1",
+    "operation": "getW2Years",
+    "summary": "Get a list of available W2 years"
+  },
+  {
+    "path": "/employee/v1/lookupBySsn",
+    "method": "POST",
+    "service": "employee",
+    "version": "v1",
+    "operation": "lookupBySsn",
+    "summary": "Get employee information by Social Security number"
+  },
+  {
+    "path": "/employee/v1/reactivate",
+    "method": "POST",
+    "service": "employee",
+    "version": "v1",
+    "operation": "reactivate",
+    "summary": "reactivate an employee on leave"
+  },
+  {
+    "path": "/employee/v1/rehireEmployee",
+    "method": "POST",
+    "service": "employee",
+    "version": "v1",
+    "operation": "rehireEmployee",
+    "summary": "Rehire an employee"
+  },
+  {
+    "path": "/employee/v1/removeEmployee",
+    "method": "POST",
+    "service": "employee",
+    "version": "v1",
+    "operation": "removeEmployee",
+    "summary": "Remove employee"
+  },
+  {
+    "path": "/employee/v1/reprint1099",
+    "method": "GET",
+    "service": "employee",
+    "version": "v1",
+    "operation": "reprint1099",
+    "summary": "Download an employee's 1099"
+  },
+  {
+    "path": "/employee/v1/reprintW2C",
+    "method": "GET",
+    "service": "employee",
+    "version": "v1",
+    "operation": "reprintW2C",
+    "summary": "Download an employee's W2C"
+  },
+  {
+    "path": "/employee/v1/requestPTO",
+    "method": "POST",
+    "service": "employee",
+    "version": "v1",
+    "operation": "requestPTO",
+    "summary": "PTO Request for an employee"
+  },
+  {
+    "path": "/employee/v1/setEmployeePayAllocations",
+    "method": "POST",
+    "service": "employee",
+    "version": "v1",
+    "operation": "setEmployeePayAllocations",
+    "summary": "update employee pay allocations"
+  },
+  {
+    "path": "/employee/v1/setEmployer",
+    "method": "POST",
+    "service": "employee",
+    "version": "v1",
+    "operation": "setEmployer",
+    "summary": "Set employer for an employee"
+  },
+  {
+    "path": "/employee/v1/setEverifyStatus",
+    "method": "POST",
+    "service": "employee",
+    "version": "v1",
+    "operation": "setEverifyStatus",
+    "summary": "Set employee's E-Verify data"
+  },
+  {
+    "path": "/employee/v1/setHSA",
+    "method": "POST",
+    "service": "employee",
+    "version": "v1",
+    "operation": "setHSA",
+    "summary": "update HSA fields."
+  },
+  {
+    "path": "/employee/v1/setI9Data",
+    "method": "POST",
+    "service": "employee",
+    "version": "v1",
+    "operation": "setI9Data",
+    "summary": "Update employee I9 data"
+  },
+  {
+    "path": "/employee/v1/setPositionRate",
+    "method": "POST",
+    "service": "employee",
+    "version": "v1",
+    "operation": "setPositionRate",
+    "summary": "Update job/position rates"
+  },
+  {
+    "path": "/employee/v1/takeLeaveOfAbsence",
+    "method": "POST",
+    "service": "employee",
+    "version": "v1",
+    "operation": "takeLeaveOfAbsence",
+    "summary": "take Leave of Absence for employee"
+  },
+  {
+    "path": "/employee/v1/terminateEmployee",
+    "method": "POST",
+    "service": "employee",
+    "version": "v1",
+    "operation": "terminateEmployee",
+    "summary": "Terminate an employee"
+  },
+  {
+    "path": "/employee/v1/updateACHDeductions",
+    "method": "POST",
+    "service": "employee",
+    "version": "v1",
+    "operation": "updateACHDeductions",
+    "summary": "Update Employee ACH Deductions"
+  },
+  {
+    "path": "/employee/v1/updateAddressInfo",
+    "method": "POST",
+    "service": "employee",
+    "version": "v1",
+    "operation": "updateAddressInfo",
+    "summary": "Update address information"
+  },
+  {
+    "path": "/employee/v1/updateDirectDeposit",
+    "method": "POST",
+    "service": "employee",
+    "version": "v1",
+    "operation": "updateDirectDeposit",
+    "summary": "Update direct deposit account information"
+  },
+  {
+    "path": "/employee/v1/updateDirectDepositForAdmins",
+    "method": "POST",
+    "service": "employee",
+    "version": "v1",
+    "operation": "updateDirectDepositForAdmins",
+    "summary": "Update direct deposit account information"
+  },
+  {
+    "path": "/employee/v1/updateEmergencyContact",
+    "method": "POST",
+    "service": "employee",
+    "version": "v1",
+    "operation": "updateEmergencyContact",
+    "summary": "Update employee emergency contact information"
+  },
+  {
+    "path": "/employee/v1/updateEmployeeEvents",
+    "method": "POST",
+    "service": "employee",
+    "version": "v1",
+    "operation": "updateEmployeeEvents",
+    "summary": "update events for employee"
+  },
+  {
+    "path": "/employee/v1/updateEmployeeFields",
+    "method": "POST",
+    "service": "employee",
+    "version": "v1",
+    "operation": "updateEmployeeFields",
+    "summary": "update employee fields."
+  },
+  {
+    "path": "/employee/v1/updateEmployeeSkills",
+    "method": "POST",
+    "service": "employee",
+    "version": "v1",
+    "operation": "updateEmployeeSkills",
+    "summary": "Update employee skills and education"
+  },
+  {
+    "path": "/employee/v1/updateEmployeeStatusType",
+    "method": "POST",
+    "service": "employee",
+    "version": "v1",
+    "operation": "updateEmployeeStatusType",
+    "summary": "Change employee status/type"
+  },
+  {
+    "path": "/employee/v1/updateFutureAssignment",
+    "method": "POST",
+    "service": "employee",
+    "version": "v1",
+    "operation": "updateFutureAssignment",
+    "summary": "future date changes."
+  },
+  {
+    "path": "/employee/v1/updateJobCode",
+    "method": "POST",
+    "service": "employee",
+    "version": "v1",
+    "operation": "updateJobCode",
+    "summary": "Update job/position information"
+  },
+  {
+    "path": "/employee/v1/updatePayGroup",
+    "method": "POST",
+    "service": "employee",
+    "version": "v1",
+    "operation": "updatePayGroup",
+    "summary": "Update pay group information"
+  },
+  {
+    "path": "/employee/v1/updatePayMethod",
+    "method": "POST",
+    "service": "employee",
+    "version": "v1",
+    "operation": "updatePayMethod",
+    "summary": "Update pay method information"
+  },
+  {
+    "path": "/employee/v1/updatePayRate",
+    "method": "POST",
+    "service": "employee",
+    "version": "v1",
+    "operation": "updatePayRate",
+    "summary": "Update pay rate information"
+  },
+  {
+    "path": "/employee/v1/updateScheduledDeduction",
+    "method": "POST",
+    "service": "employee",
+    "version": "v1",
+    "operation": "updateScheduledDeduction",
+    "summary": "Update employee's scheduled deductions"
+  },
+  {
+    "path": "/employee/v1/updateW4",
+    "method": "POST",
+    "service": "employee",
+    "version": "v1",
+    "operation": "updateW4",
+    "summary": "Update W-4 tax information"
+  },
+  {
+    "path": "/employee/v1/validateEmployeeStatusType",
+    "method": "POST",
+    "service": "employee",
+    "version": "v1",
+    "operation": "validateEmployeeStatusType",
+    "summary": "Validate employee status/type change"
+  },
+  {
+    "path": "/employee/v1/validateEmployeeTerminate",
+    "method": "POST",
+    "service": "employee",
+    "version": "v1",
+    "operation": "validateEmployeeTerminate",
+    "summary": "Validate employee termination"
+  },
+  {
+    "path": "/employee/v1/validateReactivate",
+    "method": "POST",
+    "service": "employee",
+    "version": "v1",
+    "operation": "validateReactivate",
+    "summary": "validation to reactivate an employee on leave"
+  },
+  {
+    "path": "/employee/v1/validateTakeLeaveOfAbsence",
+    "method": "POST",
+    "service": "employee",
+    "version": "v1",
+    "operation": "validateTakeLeaveOfAbsence",
+    "summary": "Validate to take leave of absence"
+  },
+  {
+    "path": "/employee/v2/updateAddressInfo",
+    "method": "POST",
+    "service": "employee",
+    "version": "v2",
+    "operation": "updateAddressInfo",
+    "summary": "Update address information"
+  },
+  {
+    "path": "/generalLedger/v1/deleteCashReceipts",
+    "method": "POST",
+    "service": "generalLedger",
+    "version": "v1",
+    "operation": "deleteCashReceipts",
+    "summary": "deleteCashReceipts"
+  },
+  {
+    "path": "/generalLedger/v1/getBulkOutstandingInvoices",
+    "method": "GET",
+    "service": "generalLedger",
+    "version": "v1",
+    "operation": "getBulkOutstandingInvoices",
+    "summary": "Retrieve list of client invoices"
+  },
+  {
+    "path": "/generalLedger/v1/getClientAccountingTemplate",
+    "method": "GET",
+    "service": "generalLedger",
+    "version": "v1",
+    "operation": "getClientAccountingTemplate",
+    "summary": "Retrieve client and global PEO accounting templates."
+  },
+  {
+    "path": "/generalLedger/v1/getClientGLData",
+    "method": "GET",
+    "service": "generalLedger",
+    "version": "v1",
+    "operation": "getClientGLData",
+    "summary": "get PEO client accounting data"
+  },
+  {
+    "path": "/generalLedger/v1/getGLCodes",
+    "method": "GET",
+    "service": "generalLedger",
+    "version": "v1",
+    "operation": "getGLCodes",
+    "summary": "get a list of General Ledger account codes and their descriptions"
+  },
+  {
+    "path": "/generalLedger/v1/getGLDetailDownload",
+    "method": "GET",
+    "service": "generalLedger",
+    "version": "v1",
+    "operation": "getGLDetailDownload",
+    "summary": "download accounting g/l detail report"
+  },
+  {
+    "path": "/generalLedger/v1/getGLInvoiceDetail",
+    "method": "GET",
+    "service": "generalLedger",
+    "version": "v1",
+    "operation": "getGLInvoiceDetail",
+    "summary": "Get posted and unposted invoice detail"
+  },
+  {
+    "path": "/generalLedger/v1/getGLSetup",
+    "method": "GET",
+    "service": "generalLedger",
+    "version": "v1",
+    "operation": "getGLSetup",
+    "summary": "get a list of general ledger accounts"
+  },
+  {
+    "path": "/generalLedger/v1/getOutstandingInvoices",
+    "method": "GET",
+    "service": "generalLedger",
+    "version": "v1",
+    "operation": "getOutstandingInvoices",
+    "summary": "Retrieve list of client invoices"
+  },
+  {
+    "path": "/generalLedger/v1/getPendingCashReceipts",
+    "method": "GET",
+    "service": "generalLedger",
+    "version": "v1",
+    "operation": "getPendingCashReceipts",
+    "summary": "get a paginated list of cash receipts and, optionally, any associated G/L deposit and post"
+  },
+  {
+    "path": "/generalLedger/v1/depositCashReceipt",
+    "method": "POST",
+    "service": "generalLedger",
+    "version": "v1",
+    "operation": "depositCashReceipt",
+    "summary": "deposit Cash Receipt."
+  },
+  {
+    "path": "/generalLedger/v1/setGLSetup",
+    "method": "POST",
+    "service": "generalLedger",
+    "version": "v1",
+    "operation": "setGLSetup",
+    "summary": "update the GL accounting template."
+  },
+  {
+    "path": "/generalLedger/v2/getClientGLData",
+    "method": "GET",
+    "service": "generalLedger",
+    "version": "v2",
+    "operation": "getClientGLData",
+    "summary": "get PEO client accounting data"
+  },
+  {
+    "path": "/humanResources/v1/getAssignedPendingApprovals",
+    "method": "GET",
+    "service": "humanResources",
+    "version": "v1",
+    "operation": "getAssignedPendingApprovals",
+    "summary": "get a list of pending approvals"
+  },
+  {
+    "path": "/humanResources/v1/getOnboardTasks",
+    "method": "GET",
+    "service": "humanResources",
+    "version": "v1",
+    "operation": "getOnboardTasks",
+    "summary": "Get onboarding tasks"
+  },
+  {
+    "path": "/humanResources/v1/getStaffingPlacement",
+    "method": "GET",
+    "service": "humanResources",
+    "version": "v1",
+    "operation": "getStaffingPlacement",
+    "summary": "Get staffing placement record"
+  },
+  {
+    "path": "/humanResources/v1/getStaffingPlacementList",
+    "method": "GET",
+    "service": "humanResources",
+    "version": "v1",
+    "operation": "getStaffingPlacementList",
+    "summary": "Get staffing placement ids"
+  },
+  {
+    "path": "/humanResources/v1/performOnboardingAction",
+    "method": "POST",
+    "service": "humanResources",
+    "version": "v1",
+    "operation": "performOnboardingAction",
+    "summary": "perform action on onboarding tasks"
+  },
+  {
+    "path": "/humanResources/v1/reassignPendingApprovals",
+    "method": "POST",
+    "service": "humanResources",
+    "version": "v1",
+    "operation": "reassignPendingApprovals",
+    "summary": "assign pending approvals from one PrismHR user to another"
+  },
+  {
+    "path": "/humanResources/v1/setStaffingPlacement",
+    "method": "POST",
+    "service": "humanResources",
+    "version": "v1",
+    "operation": "setStaffingPlacement",
+    "summary": "create or update staffing placement record"
+  },
+  {
+    "path": "/login/v1/checkPermissionsRequestStatus",
+    "method": "GET",
+    "service": "login",
+    "version": "v1",
+    "operation": "checkPermissionsRequestStatus",
+    "summary": "get status for API permissions request"
+  },
+  {
+    "path": "/login/v1/createPeoSession",
+    "method": "POST",
+    "service": "login",
+    "version": "v1",
+    "operation": "createPeoSession",
+    "summary": "Create a session token"
+  },
+  {
+    "path": "/login/v1/getAPIPermissions",
+    "method": "GET",
+    "service": "login",
+    "version": "v1",
+    "operation": "getAPIPermissions",
+    "summary": "get current API permissions"
+  },
+  {
+    "path": "/login/v1/invalidateSession",
+    "method": "POST",
+    "service": "login",
+    "version": "v1",
+    "operation": "invalidateSession",
+    "summary": "Invalidate a session token"
+  },
+  {
+    "path": "/login/v1/keepAlive",
+    "method": "POST",
+    "service": "login",
+    "version": "v1",
+    "operation": "keepAlive",
+    "summary": "keep a session alive"
+  },
+  {
+    "path": "/login/v1/requestAPIPermissions",
+    "method": "POST",
+    "service": "login",
+    "version": "v1",
+    "operation": "requestAPIPermissions",
+    "summary": "request new API permissions"
+  },
+  {
+    "path": "/newHire/v1/EPHire",
+    "method": "POST",
+    "service": "newHire",
+    "version": "v1",
+    "operation": "EPHire",
+    "summary": "Enroll an employee in the Employee Portal new hire process"
+  },
+  {
+    "path": "/newHire/v1/cancelImport",
+    "method": "POST",
+    "service": "newHire",
+    "version": "v1",
+    "operation": "cancelImport",
+    "summary": "Cancel import operation"
+  },
+  {
+    "path": "/newHire/v1/commitEmployees",
+    "method": "POST",
+    "service": "newHire",
+    "version": "v1",
+    "operation": "commitEmployees",
+    "summary": "Commit employees operation"
+  },
+  {
+    "path": "/newHire/v1/getNewHireQuestions",
+    "method": "GET",
+    "service": "newHire",
+    "version": "v1",
+    "operation": "getNewHireQuestions",
+    "summary": "Get new hire questions associated with state code"
+  },
+  {
+    "path": "/newHire/v1/getNewHireRequiredFields",
+    "method": "GET",
+    "service": "newHire",
+    "version": "v1",
+    "operation": "getNewHireRequiredFields",
+    "summary": "Get list of required fields for new hires"
+  },
+  {
+    "path": "/newHire/v1/getPrehireDetails",
+    "method": "POST",
+    "service": "newHire",
+    "version": "v1",
+    "operation": "getPrehireDetails",
+    "summary": "Get prehire record details"
+  },
+  {
+    "path": "/newHire/v1/importEmployees",
+    "method": "POST",
+    "service": "newHire",
+    "version": "v1",
+    "operation": "importEmployees",
+    "summary": "Import a batch of employee records"
+  },
+  {
+    "path": "/newHire/v1/importEmployeesAllowingCrossHire",
+    "method": "POST",
+    "service": "newHire",
+    "version": "v1",
+    "operation": "importEmployeesAllowingCrossHire",
+    "summary": "Import a batch allowing a cross hire"
+  },
+  {
+    "path": "/payroll/v1/calculateManualCheck",
+    "method": "POST",
+    "service": "payroll",
+    "version": "v1",
+    "operation": "calculateManualCheck",
+    "summary": "Calculate a manual check"
+  },
+  {
+    "path": "/payroll/v1/calculateNetToGross",
+    "method": "POST",
+    "service": "payroll",
+    "version": "v1",
+    "operation": "calculateNetToGross",
+    "summary": "Calculate gross payment amount for a target net check amount"
+  },
+  {
+    "path": "/payroll/v1/checkInitializationStatus",
+    "method": "GET",
+    "service": "payroll",
+    "version": "v1",
+    "operation": "checkInitializationStatus",
+    "summary": "Check payroll batch initialization status"
+  },
+  {
+    "path": "/payroll/v1/createPayrollBatches",
+    "method": "POST",
+    "service": "payroll",
+    "version": "v1",
+    "operation": "createPayrollBatches",
+    "summary": "Create new manual or special payroll batch"
+  },
+  {
+    "path": "/payroll/v1/createPayrollNotes",
+    "method": "POST",
+    "service": "payroll",
+    "version": "v1",
+    "operation": "createPayrollNotes",
+    "summary": "Create payroll notes"
+  },
+  {
+    "path": "/payroll/v1/createPayrollSchedule",
+    "method": "POST",
+    "service": "payroll",
+    "version": "v1",
+    "operation": "createPayrollSchedule",
+    "summary": "Create a new payroll schedule"
+  },
+  {
+    "path": "/payroll/v1/deleteManualCheck",
+    "method": "POST",
+    "service": "payroll",
+    "version": "v1",
+    "operation": "deleteManualCheck",
+    "summary": "Delete a manual check"
+  },
+  {
+    "path": "/payroll/v1/getApprovalSummary",
+    "method": "GET",
+    "service": "payroll",
+    "version": "v1",
+    "operation": "getApprovalSummary",
+    "summary": "Get payroll batch summary for approval"
+  },
+  {
+    "path": "/payroll/v1/getBatchInfo",
+    "method": "GET",
+    "service": "payroll",
+    "version": "v1",
+    "operation": "getBatchInfo",
+    "summary": "Get payroll batch information"
+  },
+  {
+    "path": "/payroll/v1/getBatchListByDate",
+    "method": "GET",
+    "service": "payroll",
+    "version": "v1",
+    "operation": "getBatchListByDate",
+    "summary": "Return Payroll Batches Within a Date Range"
+  },
+  {
+    "path": "/payroll/v1/getBatchListForApproval",
+    "method": "GET",
+    "service": "payroll",
+    "version": "v1",
+    "operation": "getBatchListForApproval",
+    "summary": "Get a list of batchids available for approval for client."
+  },
+  {
+    "path": "/payroll/v1/getBatchListForInitialization",
+    "method": "GET",
+    "service": "payroll",
+    "version": "v1",
+    "operation": "getBatchListForInitialization",
+    "summary": "Get a list of batch IDs available for initialization for specified client."
+  },
+  {
+    "path": "/payroll/v1/getBatchPayments",
+    "method": "GET",
+    "service": "payroll",
+    "version": "v1",
+    "operation": "getBatchPayments",
+    "summary": "Get batch payments information for an employee"
+  },
+  {
+    "path": "/payroll/v1/getBatchStatus",
+    "method": "GET",
+    "service": "payroll",
+    "version": "v1",
+    "operation": "getBatchStatus",
+    "summary": "Get the statuses for a list of batches"
+  },
+  {
+    "path": "/payroll/v1/getBillingCodeTotalsByPayGroup",
+    "method": "GET",
+    "service": "payroll",
+    "version": "v1",
+    "operation": "getBillingCodeTotalsByPayGroup",
+    "summary": "Get total billing amount for a client and batch broken out by pay group"
+  },
+  {
+    "path": "/payroll/v1/getBillingCodeTotalsForBatch",
+    "method": "GET",
+    "service": "payroll",
+    "version": "v1",
+    "operation": "getBillingCodeTotalsForBatch",
+    "summary": "Get total billing amount for a client and and batch"
+  },
+  {
+    "path": "/payroll/v1/getBillingCodeTotalsWithCosts",
+    "method": "GET",
+    "service": "payroll",
+    "version": "v1",
+    "operation": "getBillingCodeTotalsWithCosts",
+    "summary": "Get total billing amount with costs for a client and batch"
+  },
+  {
+    "path": "/payroll/v1/getBillingRuleUnbundled",
+    "method": "GET",
+    "service": "payroll",
+    "version": "v1",
+    "operation": "getBillingRuleUnbundled",
+    "summary": "Get an unbundled billing rule for clientId and billingRuleNum"
+  },
+  {
+    "path": "/payroll/v1/getBillingVouchers",
+    "method": "GET",
+    "service": "payroll",
+    "version": "v1",
+    "operation": "getBillingVouchers",
+    "summary": "Get list of billing vouchers for clientId and date range"
+  },
+  {
+    "path": "/payroll/v1/getBillingVouchersByBatch",
+    "method": "GET",
+    "service": "payroll",
+    "version": "v1",
+    "operation": "getBillingVouchersByBatch",
+    "summary": "Get list of initialized or finalized billing vouchers for clientId and batchId"
+  },
+  {
+    "path": "/payroll/v1/getBulkYearToDateValues",
+    "method": "GET",
+    "service": "payroll",
+    "version": "v1",
+    "operation": "getBulkYearToDateValues",
+    "summary": "Get bulk year to date values"
+  },
+  {
+    "path": "/payroll/v1/getClientsWithVouchers",
+    "method": "GET",
+    "service": "payroll",
+    "version": "v1",
+    "operation": "getClientsWithVouchers",
+    "summary": "Get the list of clients with at least one payroll voucher"
+  },
+  {
+    "path": "/payroll/v1/getEmployee401KContributionsByDate",
+    "method": "GET",
+    "service": "payroll",
+    "version": "v1",
+    "operation": "getEmployee401KContributionsByDate",
+    "summary": "Get list of employee 401K contributions"
+  },
+  {
+    "path": "/payroll/v1/getEmployeeForBatch",
+    "method": "GET",
+    "service": "payroll",
+    "version": "v1",
+    "operation": "getEmployeeForBatch",
+    "summary": "Get list of employee IDs for clientId and batchId"
+  },
+  {
+    "path": "/payroll/v1/getEmployeeOverrideRates",
+    "method": "GET",
+    "service": "payroll",
+    "version": "v1",
+    "operation": "getEmployeeOverrideRates",
+    "summary": "Get list of employee override rates"
+  },
+  {
+    "path": "/payroll/v1/getEmployeePayrollSummary",
+    "method": "GET",
+    "service": "payroll",
+    "version": "v1",
+    "operation": "getEmployeePayrollSummary",
+    "summary": "Get an employee's payroll summary"
+  },
+  {
+    "path": "/payroll/v1/getExternalPtoBalance",
+    "method": "GET",
+    "service": "payroll",
+    "version": "v1",
+    "operation": "getExternalPtoBalance",
+    "summary": "Get external PTO balance data"
+  },
+  {
+    "path": "/payroll/v1/getManualChecks",
+    "method": "GET",
+    "service": "payroll",
+    "version": "v1",
+    "operation": "getManualChecks",
+    "summary": "Retrieve information about manual checks"
+  },
+  {
+    "path": "/payroll/v1/getPayrollAllocationRpt",
+    "method": "POST",
+    "service": "payroll",
+    "version": "v1",
+    "operation": "getPayrollAllocationRpt",
+    "summary": "Get payroll allocation report"
+  },
+  {
+    "path": "/payroll/v1/getPayrollApproval",
+    "method": "GET",
+    "service": "payroll",
+    "version": "v1",
+    "operation": "getPayrollApproval",
+    "summary": "Get payroll approval info for a client."
+  },
+  {
+    "path": "/payroll/v1/getPayrollBatchWithOptions",
+    "method": "GET",
+    "service": "payroll",
+    "version": "v1",
+    "operation": "getPayrollBatchWithOptions",
+    "summary": "Get a list of batches with payroll control options"
+  },
+  {
+    "path": "/payroll/v1/getPayrollNotes",
+    "method": "GET",
+    "service": "payroll",
+    "version": "v1",
+    "operation": "getPayrollNotes",
+    "summary": "Get payroll notes"
+  },
+  {
+    "path": "/payroll/v1/getPayrollSchedule",
+    "method": "GET",
+    "service": "payroll",
+    "version": "v1",
+    "operation": "getPayrollSchedule",
+    "summary": "Get a payroll schedule using scheduleCode"
+  },
+  {
+    "path": "/payroll/v1/getPayrollScheduleCodes",
+    "method": "GET",
+    "service": "payroll",
+    "version": "v1",
+    "operation": "getPayrollScheduleCodes",
+    "summary": "Get a list of available schedule codes with their description"
+  },
+  {
+    "path": "/payroll/v1/getPayrollSummary",
+    "method": "GET",
+    "service": "payroll",
+    "version": "v1",
+    "operation": "getPayrollSummary",
+    "summary": "Get payroll summary"
+  },
+  {
+    "path": "/payroll/v1/getPayrollVoucherById",
+    "method": "GET",
+    "service": "payroll",
+    "version": "v1",
+    "operation": "getPayrollVoucherById",
+    "summary": "Get a payroll voucher for clientId and voucherId"
+  },
+  {
+    "path": "/payroll/v1/getPayrollVoucherForBatch",
+    "method": "GET",
+    "service": "payroll",
+    "version": "v1",
+    "operation": "getPayrollVoucherForBatch",
+    "summary": "Get list of employee payroll vouchers for clientId and batchId"
+  },
+  {
+    "path": "/payroll/v1/getPayrollVouchers",
+    "method": "GET",
+    "service": "payroll",
+    "version": "v1",
+    "operation": "getPayrollVouchers",
+    "summary": "Get list of employee payroll vouchers for clientId and date range"
+  },
+  {
+    "path": "/payroll/v1/getPayrollVouchersForEmployee",
+    "method": "GET",
+    "service": "payroll",
+    "version": "v1",
+    "operation": "getPayrollVouchersForEmployee",
+    "summary": "Get list of employee payroll vouchers for employeeId, clientId, and dates"
+  },
+  {
+    "path": "/payroll/v1/getProcessSchedule",
+    "method": "GET",
+    "service": "payroll",
+    "version": "v1",
+    "operation": "getProcessSchedule",
+    "summary": "Get a process schedule using processScheduleId"
+  },
+  {
+    "path": "/payroll/v1/getProcessScheduleCodes",
+    "method": "GET",
+    "service": "payroll",
+    "version": "v1",
+    "operation": "getProcessScheduleCodes",
+    "summary": "Get a list of available process schedule IDs with their corresponding description"
+  },
+  {
+    "path": "/payroll/v1/getRetirementAdjVoucherListByDate",
+    "method": "GET",
+    "service": "payroll",
+    "version": "v1",
+    "operation": "getRetirementAdjVoucherListByDate",
+    "summary": "Get retirement adj voucher-list by date"
+  },
+  {
+    "path": "/payroll/v1/getScheduledPayments",
+    "method": "GET",
+    "service": "payroll",
+    "version": "v1",
+    "operation": "getScheduledPayments",
+    "summary": "Get scheduled payments information for an employee"
+  },
+  {
+    "path": "/payroll/v1/getStandardHours",
+    "method": "GET",
+    "service": "payroll",
+    "version": "v1",
+    "operation": "getStandardHours",
+    "summary": "Get the list of standardHours objects for clientId"
+  },
+  {
+    "path": "/payroll/v1/getYearToDateValues",
+    "method": "GET",
+    "service": "payroll",
+    "version": "v1",
+    "operation": "getYearToDateValues",
+    "summary": "Get period to date payroll values"
+  },
+  {
+    "path": "/payroll/v1/initializePrismBatch",
+    "method": "POST",
+    "service": "payroll",
+    "version": "v1",
+    "operation": "initializePrismBatch",
+    "summary": "Attempt payroll batch initialization"
+  },
+  {
+    "path": "/payroll/v1/payGroupScheduleReport",
+    "method": "GET",
+    "service": "payroll",
+    "version": "v1",
+    "operation": "payGroupScheduleReport",
+    "summary": "Pay Group Schedule Report"
+  },
+  {
+    "path": "/payroll/v1/payrollFinalization",
+    "method": "POST",
+    "service": "payroll",
+    "version": "v1",
+    "operation": "payrollFinalization",
+    "summary": "Finalize (post) a payroll batch"
+  },
+  {
+    "path": "/payroll/v1/reprintCheckStub",
+    "method": "GET",
+    "service": "payroll",
+    "version": "v1",
+    "operation": "reprintCheckStub",
+    "summary": "Retrieve an employee's check stub"
+  },
+  {
+    "path": "/payroll/v1/setBillingRuleUnbundled",
+    "method": "POST",
+    "service": "payroll",
+    "version": "v1",
+    "operation": "setBillingRuleUnbundled",
+    "summary": "Set an unbundled billing rule"
+  },
+  {
+    "path": "/payroll/v1/setEmployeeOverrideRates",
+    "method": "POST",
+    "service": "payroll",
+    "version": "v1",
+    "operation": "setEmployeeOverrideRates",
+    "summary": "Update employee override rates"
+  },
+  {
+    "path": "/payroll/v1/setExternalPtoBalance",
+    "method": "POST",
+    "service": "payroll",
+    "version": "v1",
+    "operation": "setExternalPtoBalance",
+    "summary": "Post external PTO balance data"
+  },
+  {
+    "path": "/payroll/v1/setPayrollApproval",
+    "method": "POST",
+    "service": "payroll",
+    "version": "v1",
+    "operation": "setPayrollApproval",
+    "summary": "Approve / Deny a payroll"
+  },
+  {
+    "path": "/payroll/v1/setScheduledPayments",
+    "method": "POST",
+    "service": "payroll",
+    "version": "v1",
+    "operation": "setScheduledPayments",
+    "summary": "Update employee scheduled payments"
+  },
+  {
+    "path": "/payroll/v1/updatePayrollBatchWithOptions",
+    "method": "POST",
+    "service": "payroll",
+    "version": "v1",
+    "operation": "updatePayrollBatchWithOptions",
+    "summary": "Update payroll batch data and options"
+  },
+  {
+    "path": "/payroll/v1/updatePayrollSchedule",
+    "method": "POST",
+    "service": "payroll",
+    "version": "v1",
+    "operation": "updatePayrollSchedule",
+    "summary": "Update payroll schedule"
+  },
+  {
+    "path": "/prismSecurity/v1/changeEmployeeUserType",
+    "method": "POST",
+    "service": "prismSecurity",
+    "version": "v1",
+    "operation": "changeEmployeeUserType",
+    "summary": "Change a Prism user's type"
+  },
+  {
+    "path": "/prismSecurity/v1/getAllowedEmployeeList",
+    "method": "GET",
+    "service": "prismSecurity",
+    "version": "v1",
+    "operation": "getAllowedEmployeeList",
+    "summary": "Get list of allowed employees"
+  },
+  {
+    "path": "/prismSecurity/v1/getClientList",
+    "method": "GET",
+    "service": "prismSecurity",
+    "version": "v1",
+    "operation": "getClientList",
+    "summary": "Get list of allowed clients"
+  },
+  {
+    "path": "/prismSecurity/v1/getEmployeeClientList",
+    "method": "GET",
+    "service": "prismSecurity",
+    "version": "v1",
+    "operation": "getEmployeeClientList",
+    "summary": "Get list of applicable clients for a provided employee user."
+  },
+  {
+    "path": "/prismSecurity/v1/getEmployeeList",
+    "method": "GET",
+    "service": "prismSecurity",
+    "version": "v1",
+    "operation": "getEmployeeList",
+    "summary": "Get list of allowed employees"
+  },
+  {
+    "path": "/prismSecurity/v1/getEntityAccess",
+    "method": "GET",
+    "service": "prismSecurity",
+    "version": "v1",
+    "operation": "getEntityAccess",
+    "summary": "Get entities access for a user"
+  },
+  {
+    "path": "/prismSecurity/v1/getManagerList",
+    "method": "GET",
+    "service": "prismSecurity",
+    "version": "v1",
+    "operation": "getManagerList",
+    "summary": "Get list of managers that can see a given employee."
+  },
+  {
+    "path": "/prismSecurity/v1/getUserDataSecurity",
+    "method": "GET",
+    "service": "prismSecurity",
+    "version": "v1",
+    "operation": "getUserDataSecurity",
+    "summary": "Get entity access settings"
+  },
+  {
+    "path": "/prismSecurity/v1/getUserDetails",
+    "method": "GET",
+    "service": "prismSecurity",
+    "version": "v1",
+    "operation": "getUserDetails",
+    "summary": "Get PrismHR user details"
+  },
+  {
+    "path": "/prismSecurity/v1/getUserList",
+    "method": "GET",
+    "service": "prismSecurity",
+    "version": "v1",
+    "operation": "getUserList",
+    "summary": "Get list of PrismHR users"
+  },
+  {
+    "path": "/prismSecurity/v1/getUserRoleDetails",
+    "method": "GET",
+    "service": "prismSecurity",
+    "version": "v1",
+    "operation": "getUserRoleDetails",
+    "summary": "Get PrismHR user role details"
+  },
+  {
+    "path": "/prismSecurity/v1/getUserRolesList",
+    "method": "GET",
+    "service": "prismSecurity",
+    "version": "v1",
+    "operation": "getUserRolesList",
+    "summary": "Get PrismHR user roles list"
+  },
+  {
+    "path": "/prismSecurity/v1/isClientAllowed",
+    "method": "GET",
+    "service": "prismSecurity",
+    "version": "v1",
+    "operation": "isClientAllowed",
+    "summary": "Check if client is allowed"
+  },
+  {
+    "path": "/prismSecurity/v1/isEmployeeAllowed",
+    "method": "GET",
+    "service": "prismSecurity",
+    "version": "v1",
+    "operation": "isEmployeeAllowed",
+    "summary": "Check if employee is allowed"
+  },
+  {
+    "path": "/prismSecurity/v1/setUserDataSecurity",
+    "method": "POST",
+    "service": "prismSecurity",
+    "version": "v1",
+    "operation": "setUserDataSecurity",
+    "summary": "Change a Prism user's data security"
+  },
+  {
+    "path": "/prismSecurity/v1/updateManagerUserRole",
+    "method": "POST",
+    "service": "prismSecurity",
+    "version": "v1",
+    "operation": "updateManagerUserRole",
+    "summary": "Change a Prism user's roles"
+  },
+  {
+    "path": "/prismSecurity/v2/getUserList",
+    "method": "GET",
+    "service": "prismSecurity",
+    "version": "v2",
+    "operation": "getUserList",
+    "summary": "Get list of PrismHR users"
+  },
+  {
+    "path": "/signOn/v1/getEmployeeImage",
+    "method": "GET",
+    "service": "signOn",
+    "version": "v1",
+    "operation": "getEmployeeImage",
+    "summary": "Get employee image"
+  },
+  {
+    "path": "/signOn/v1/getFavorites",
+    "method": "GET",
+    "service": "signOn",
+    "version": "v1",
+    "operation": "getFavorites",
+    "summary": "Get favorites"
+  },
+  {
+    "path": "/signOn/v1/getVendorInfo",
+    "method": "GET",
+    "service": "signOn",
+    "version": "v1",
+    "operation": "getVendorInfo",
+    "summary": "Get vendor info"
+  },
+  {
+    "path": "/signOn/v1/redirectUrlByEmployee",
+    "method": "POST",
+    "service": "signOn",
+    "version": "v1",
+    "operation": "redirectUrlByEmployee",
+    "summary": "Redirect URL by employee"
+  },
+  {
+    "path": "/signOn/v1/redirectUrlByUser",
+    "method": "POST",
+    "service": "signOn",
+    "version": "v1",
+    "operation": "redirectUrlByUser",
+    "summary": "Redirect URL by user"
+  },
+  {
+    "path": "/signOn/v1/registerPrismEmployee",
+    "method": "POST",
+    "service": "signOn",
+    "version": "v1",
+    "operation": "registerPrismEmployee",
+    "summary": "Register PrismHR Employee"
+  },
+  {
+    "path": "/signOn/v1/registerPrismManager",
+    "method": "POST",
+    "service": "signOn",
+    "version": "v1",
+    "operation": "registerPrismManager",
+    "summary": "Register PrismHR Manager User"
+  },
+  {
+    "path": "/signOn/v1/registerPrismPrehire",
+    "method": "POST",
+    "service": "signOn",
+    "version": "v1",
+    "operation": "registerPrismPrehire",
+    "summary": "Register PrismHR Prehire"
+  },
+  {
+    "path": "/signOn/v1/setEmployeeImage",
+    "method": "POST",
+    "service": "signOn",
+    "version": "v1",
+    "operation": "setEmployeeImage",
+    "summary": "Set employee image"
+  },
+  {
+    "path": "/signOn/v1/setVendorInfo",
+    "method": "POST",
+    "service": "signOn",
+    "version": "v1",
+    "operation": "setVendorInfo",
+    "summary": "create or update custom vendor fields"
+  },
+  {
+    "path": "/signOn/v1/validateTssoToken",
+    "method": "POST",
+    "service": "signOn",
+    "version": "v1",
+    "operation": "validateTssoToken",
+    "summary": "Validate TssoToken"
+  },
+  {
+    "path": "/subscription/v1/appendFilter",
+    "method": "POST",
+    "service": "subscription",
+    "version": "v1",
+    "operation": "appendFilter",
+    "summary": "Add filters to the subscription"
+  },
+  {
+    "path": "/subscription/v1/cancelSubscription",
+    "method": "POST",
+    "service": "subscription",
+    "version": "v1",
+    "operation": "cancelSubscription",
+    "summary": "Remove subscription"
+  },
+  {
+    "path": "/subscription/v1/createSubscription",
+    "method": "POST",
+    "service": "subscription",
+    "version": "v1",
+    "operation": "createSubscription",
+    "summary": "Create new subscription"
+  },
+  {
+    "path": "/subscription/v1/getAllSubscriptions",
+    "method": "GET",
+    "service": "subscription",
+    "version": "v1",
+    "operation": "getAllSubscriptions",
+    "summary": "Get all subscriptions"
+  },
+  {
+    "path": "/subscription/v1/getEvents",
+    "method": "GET",
+    "service": "subscription",
+    "version": "v1",
+    "operation": "getEvents",
+    "summary": "Get events from the event stream"
+  },
+  {
+    "path": "/subscription/v1/getNewEvents",
+    "method": "GET",
+    "service": "subscription",
+    "version": "v1",
+    "operation": "getNewEvents",
+    "summary": "Get new events from the event stream"
+  },
+  {
+    "path": "/subscription/v1/getSubscription",
+    "method": "GET",
+    "service": "subscription",
+    "version": "v1",
+    "operation": "getSubscription",
+    "summary": "Get a subscription by its ID"
+  },
+  {
+    "path": "/system/v1/getACHFileList",
+    "method": "GET",
+    "service": "system",
+    "version": "v1",
+    "operation": "getACHFileList",
+    "summary": "Get ACH files list"
+  },
+  {
+    "path": "/system/v1/getARTransactionReport",
+    "method": "GET",
+    "service": "system",
+    "version": "v1",
+    "operation": "getARTransactionReport",
+    "summary": "Generate an AR transaction report"
+  },
+  {
+    "path": "/system/v1/getData",
+    "method": "GET",
+    "service": "system",
+    "version": "v1",
+    "operation": "getData",
+    "summary": "Retrieve datasets from the system"
+  },
+  {
+    "path": "/system/v1/getEmployeeHireType",
+    "method": "POST",
+    "service": "system",
+    "version": "v1",
+    "operation": "getEmployeeHireType",
+    "summary": "Determine hire type for given ssn"
+  },
+  {
+    "path": "/system/v1/getEmployerDetails",
+    "method": "GET",
+    "service": "system",
+    "version": "v1",
+    "operation": "getEmployerDetails",
+    "summary": "Get Employer Details"
+  },
+  {
+    "path": "/system/v1/getInvoiceData",
+    "method": "GET",
+    "service": "system",
+    "version": "v1",
+    "operation": "getInvoiceData",
+    "summary": "Get Invoice Data"
+  },
+  {
+    "path": "/system/v1/getMultiEntityGroupList",
+    "method": "GET",
+    "service": "system",
+    "version": "v1",
+    "operation": "getMultiEntityGroupList",
+    "summary": "Get Multi Entity Group List"
+  },
+  {
+    "path": "/system/v1/getPayee",
+    "method": "GET",
+    "service": "system",
+    "version": "v1",
+    "operation": "getPayee",
+    "summary": "Retrieve payee information"
+  },
+  {
+    "path": "/system/v1/getPaymentsPending",
+    "method": "GET",
+    "service": "system",
+    "version": "v1",
+    "operation": "getPaymentsPending",
+    "summary": "Payments Pending information"
+  },
+  {
+    "path": "/system/v1/getPositivePayCheckStub",
+    "method": "GET",
+    "service": "system",
+    "version": "v1",
+    "operation": "getPositivePayCheckStub",
+    "summary": "Get positive pay check stub"
+  },
+  {
+    "path": "/system/v1/getPositivePayFileList",
+    "method": "GET",
+    "service": "system",
+    "version": "v1",
+    "operation": "getPositivePayFileList",
+    "summary": "Get positive pay files list"
+  },
+  {
+    "path": "/system/v1/getUnbilledBenefitAdjustments",
+    "method": "GET",
+    "service": "system",
+    "version": "v1",
+    "operation": "getUnbilledBenefitAdjustments",
+    "summary": "Unbilled Benefit Adjustments information"
+  },
+  {
+    "path": "/system/v1/identifyACHProcessLock",
+    "method": "GET",
+    "service": "system",
+    "version": "v1",
+    "operation": "identifyACHProcessLock",
+    "summary": "Identify ACH Process Lock"
+  },
+  {
+    "path": "/system/v1/import1095CData",
+    "method": "POST",
+    "service": "system",
+    "version": "v1",
+    "operation": "import1095CData",
+    "summary": "Import 1095C data"
+  },
+  {
+    "path": "/system/v1/inactivatePrismUser",
+    "method": "POST",
+    "service": "system",
+    "version": "v1",
+    "operation": "inactivatePrismUser",
+    "summary": "inactivate prism user(s))"
+  },
+  {
+    "path": "/system/v1/markReceivedPayments",
+    "method": "POST",
+    "service": "system",
+    "version": "v1",
+    "operation": "markReceivedPayments",
+    "summary": "Mark pending wire transfers received"
+  },
+  {
+    "path": "/system/v1/positivePayDownload",
+    "method": "GET",
+    "service": "system",
+    "version": "v1",
+    "operation": "positivePayDownload",
+    "summary": "Download positive pay report"
+  },
+  {
+    "path": "/system/v1/recreatePositivePay",
+    "method": "GET",
+    "service": "system",
+    "version": "v1",
+    "operation": "recreatePositivePay",
+    "summary": "Recreate positive pay report"
+  },
+  {
+    "path": "/system/v1/stopProcess",
+    "method": "POST",
+    "service": "system",
+    "version": "v1",
+    "operation": "stopProcess",
+    "summary": "Clear any process locks on a download process"
+  },
+  {
+    "path": "/system/v1/streamACHData",
+    "method": "GET",
+    "service": "system",
+    "version": "v1",
+    "operation": "streamACHData",
+    "summary": "Stream ACH Data"
+  },
+  {
+    "path": "/taxRate/v1/getSutaInformation",
+    "method": "GET",
+    "service": "taxRate",
+    "version": "v1",
+    "operation": "getSutaInformation",
+    "summary": "Retrieve Employee SUTA Reporting Information"
+  },
+  {
+    "path": "/taxRate/v1/getTaxAuthorities",
+    "method": "GET",
+    "service": "taxRate",
+    "version": "v1",
+    "operation": "getTaxAuthorities",
+    "summary": "Get tax authorities"
+  },
+  {
+    "path": "/taxRate/v1/getTaxRate",
+    "method": "GET",
+    "service": "taxRate",
+    "version": "v1",
+    "operation": "getTaxRate",
+    "summary": "Get tax rates"
+  },
+  {
+    "path": "/taxRate/v1/getStateW4Params",
+    "method": "GET",
+    "service": "taxRate",
+    "version": "v1",
+    "operation": "getStateW4Params",
+    "summary": "Get W4 parameters for a given state"
+  },
+  {
+    "path": "/taxRate/v1/getWorkersCompClasses",
+    "method": "GET",
+    "service": "taxRate",
+    "version": "v1",
+    "operation": "getWorkersCompClasses",
+    "summary": "Get workers' compensation classes"
+  },
+  {
+    "path": "/taxRate/v1/getWorkersCompPolicyDetails",
+    "method": "GET",
+    "service": "taxRate",
+    "version": "v1",
+    "operation": "getWorkersCompPolicyDetails",
+    "summary": "Get workers' compensation policy with details"
+  },
+  {
+    "path": "/taxRate/v1/getWorkersCompPolicyList",
+    "method": "GET",
+    "service": "taxRate",
+    "version": "v1",
+    "operation": "getWorkersCompPolicyList",
+    "summary": "Get workers' compensation policy list"
+  },
+  {
+    "path": "/taxRate/v1/setWorkersCompPolicyDetails",
+    "method": "POST",
+    "service": "taxRate",
+    "version": "v1",
+    "operation": "setWorkersCompPolicyDetails",
+    "summary": "update or create Workers' Compensation insurance policy details"
+  },
+  {
+    "path": "/timesheet/v1/accept",
+    "method": "POST",
+    "service": "timesheet",
+    "version": "v1",
+    "operation": "accept",
+    "summary": "Commit the data to the batch"
+  },
+  {
+    "path": "/timesheet/v1/finalizePrismBatchEntry",
+    "method": "POST",
+    "service": "timesheet",
+    "version": "v1",
+    "operation": "finalizePrismBatchEntry",
+    "summary": "Finalize all employees' time sheets"
+  },
+  {
+    "path": "/timesheet/v1/getBatchStatus",
+    "method": "GET",
+    "service": "timesheet",
+    "version": "v1",
+    "operation": "getBatchStatus",
+    "summary": "Get the status of a payroll batch"
+  },
+  {
+    "path": "/timesheet/v1/getParamData",
+    "method": "GET",
+    "service": "timesheet",
+    "version": "v1",
+    "operation": "getParamData",
+    "summary": "Get the list of available templates and batches"
+  },
+  {
+    "path": "/timesheet/v1/getTimeSheetData",
+    "method": "GET",
+    "service": "timesheet",
+    "version": "v1",
+    "operation": "getTimeSheetData",
+    "summary": "Get the timesheet data for a payroll batch"
+  },
+  {
+    "path": "/timesheet/v1/reject",
+    "method": "POST",
+    "service": "timesheet",
+    "version": "v1",
+    "operation": "reject",
+    "summary": "Revert the status of the batch"
+  },
+  {
+    "path": "/timesheet/v1/upload",
+    "method": "POST",
+    "service": "timesheet",
+    "version": "v1",
+    "operation": "upload",
+    "summary": "Upload pay import data into a temporary holding area"
+  }
+]
