@@ -80,6 +80,10 @@ class FixtureRegistry:
             "asOfDate": "as_of_date",
             "year": "year",
             "quarter": "quarter",
+            # Confirmed by PrismHR SME:
+            "dateType": "date_type",           # enum: PAY | PERIOD | POST
+            "batchIds": "batch_ids_csv",       # comma-separated list of batch IDs
+            "payGroup": "pay_group_id",        # same as pay_group_id fixture
         }
         # Seed with date-type fixtures that are always available.
         self._values["start_date"] = ["2026-01-01"]
@@ -89,6 +93,11 @@ class FixtureRegistry:
         self._values["as_of_date"] = ["2026-04-19"]
         self._values["year"] = ["2026"]
         self._values["quarter"] = ["1"]
+        # Per PrismHR support: getBatchListByDate.dateType accepts
+        # 'PAY' | 'PERIOD' | 'POST'. Default to PAY (pay-date range).
+        self._values["date_type"] = ["PAY"]
+        # getBatchStatus.batchIds expects a comma-separated list.
+        # Populated dynamically from batch_id fixtures in _update_derived.
 
     def canonical(self, name: str) -> str:
         return self._aliases.get(name, name)
@@ -108,6 +117,13 @@ class FixtureRegistry:
     def has(self, name: str) -> bool:
         key = self.canonical(name)
         return bool(self._values.get(key))
+
+    def update_derived(self) -> None:
+        """Recompute fixtures derived from primitives (e.g. batch_ids_csv)."""
+        batch_ids = self._values.get("batch_id") or []
+        if batch_ids:
+            # Cap at 20 IDs per CSV to avoid huge request URIs.
+            self._values["batch_ids_csv"] = [",".join(batch_ids[:20])]
 
     def snapshot(self) -> dict[str, list[str]]:
         return {k: list(v) for k, v in self._values.items()}
@@ -395,6 +411,7 @@ async def main() -> int:
 
     # ----- Iterative rounds: keep going while new methods become satisfiable -----
     for round_no in range(1, 10):
+        reg.update_derived()  # rebuild batch_ids_csv etc. from current batch_id list
         print(f"\n--- ITER {round_no} (using learned fixtures) ---")
         print(f"  fixtures now: {sum(len(v) for v in reg._values.values())} values across "  # noqa: SLF001
               f"{len(reg._values)} keys")  # noqa: SLF001
