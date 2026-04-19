@@ -433,6 +433,248 @@ class YTDReconciliationReader:
         return out
 
 
+class ACAIntegrityReader:
+    """Live-data implementation of aca_integrity.PrismHRReader.
+
+    PrismHR's ACA endpoints split into two flavors:
+      - client-level: getACALargeEmployer (1094 summary)
+      - per-employee: getACAOfferedEmployees (offer codes),
+        getMonthlyACAInfo (per-month rate + status), get1095CYears
+    """
+
+    _DEFAULT_EMPLOYEE_CAP = 50
+
+    def __init__(
+        self, client: PrismHRClient, *, max_employees: int = _DEFAULT_EMPLOYEE_CAP
+    ) -> None:
+        self._c = client
+        self._cap = max_employees
+
+    async def get_1094_data(self, client_id: str, year: int) -> dict:
+        try:
+            body = await self._c.get(
+                "/clientMaster/v1/getACALargeEmployer",
+                params={"clientId": client_id, "reportYear": str(year)},
+            )
+        except Exception:  # noqa: BLE001 — permission-gated or no record yet
+            return {}
+        if not isinstance(body, dict):
+            return {}
+        rows = _rows(body, "largeEmployerList") or _rows(body, "largeEmployer") or []
+        if not rows:
+            return {}
+        first = rows[0]
+        # Normalize the 12-month MEC indicator block.
+        months_block = (
+            first.get("mecIndicatorByMonth")
+            or first.get("mecIndicators")
+            or first.get("mecIndicator")
+            or {}
+        )
+        if isinstance(months_block, dict):
+            mec_indicators = [
+                {"month": int(k), "indicator": v}
+                for k, v in months_block.items()
+                if str(k).isdigit()
+            ]
+        elif isinstance(months_block, list):
+            mec_indicators = months_block
+        else:
+            mec_indicators = []
+        return {"mecIndicator": mec_indicators}
+
+    async def get_aca_offered_employees(
+        self, client_id: str, year: int
+    ) -> list[dict]:
+        body = await self._c.get(
+            "/benefits/v1/getACAOfferedEmployees",
+            params={"clientId": client_id, "reportYear": str(year)},
+        )
+        rows = _rows(body, "acaEmployeeInformation") or []
+        out: list[dict] = []
+        for r in rows:
+            eid = str(r.get("employeeId") or "")
+            if not eid:
+                continue
+            # Offer code + safe harbor arrives as nested monthly dict or list
+            offer = r.get("line14") or r.get("offerCodes") or {}
+            harbor = r.get("line16") or r.get("safeHarborCodes") or {}
+            share = r.get("line15") or r.get("employeeShare") or {}
+            if isinstance(offer, list):
+                offer = {str(i + 1): v for i, v in enumerate(offer)}
+            if isinstance(harbor, list):
+                harbor = {str(i + 1): v for i, v in enumerate(harbor)}
+            if isinstance(share, list):
+                share = {str(i + 1): v for i, v in enumerate(share)}
+            out.append(
+                {
+                    "employeeId": eid,
+                    "offerCodes": offer,
+                    "safeHarborCodes": harbor,
+                    "employeeShare": share,
+                }
+            )
+        return out
+
+    async def get_monthly_aca_info(
+        self, client_id: str, year: int
+    ) -> list[dict]:
+        # getMonthlyACAInfo requires employeeId; client-level aggregation
+        # is built by iterating the ACA-offered-employees roster and
+        # summing fullTime + MEC counts per month.
+        offered = await self.get_aca_offered_employees(client_id, year)
+        per_month: dict[int, dict[str, int]] = {
+            m: {"ftCount": 0, "mecCount": 0} for m in range(1, 13)
+        }
+        for emp in offered[: self._cap]:
+            offer = emp.get("offerCodes") or {}
+            if not isinstance(offer, dict):
+                continue
+            for month_key, code in offer.items():
+                try:
+                    m = int(month_key)
+                except (TypeError, ValueError):
+                    continue
+                if m not in per_month:
+                    continue
+                # 1A-1E + 1J-1K indicate MEC offered; rough heuristic.
+                code_up = str(code or "").strip().upper()
+                if code_up in {"1A", "1B", "1C", "1D", "1E", "1J", "1K"}:
+                    per_month[m]["mecCount"] += 1
+                if code_up:
+                    per_month[m]["ftCount"] += 1
+        return [
+            {"month": m, "fullTimeCount": v["ftCount"], "mecCount": v["mecCount"]}
+            for m, v in per_month.items()
+        ]
+
+    async def get_1095c_years(self, client_id: str, employee_id: str) -> dict:
+        try:
+            body = await self._c.get(
+                "/employee/v1/get1095CYears",
+                params={"clientId": client_id, "employeeId": employee_id},
+            )
+        except Exception:  # noqa: BLE001
+            return {}
+        return body if isinstance(body, dict) else {}
+
+
+class BillingWashAuditLiveReader:
+    """Live-data implementation of billing_wash_audit.PrismHRReader."""
+
+    _DEFAULT_EMPLOYEE_CAP = 50
+
+    def __init__(
+        self, client: PrismHRClient, *, max_employees: int = _DEFAULT_EMPLOYEE_CAP
+    ) -> None:
+        self._c = client
+        self._cap = max_employees
+        self._gbp_cache: dict[str, dict] = {}
+
+    async def get_billing_vouchers_by_month(
+        self, client_id: str, year: int, month: int
+    ) -> list[dict]:
+        start = date(year, month, 1)
+        # Naive month end without calendar dep
+        if month == 12:
+            end = date(year, 12, 31)
+        else:
+            end = date(year, month + 1, 1) - __import__("datetime").timedelta(days=1)  # type: ignore[attr-defined]
+        try:
+            body = await self._c.get(
+                "/payroll/v1/getBillingVouchers",
+                params={
+                    "clientId": client_id,
+                    "startDate": start.isoformat(),
+                    "endDate": end.isoformat(),
+                },
+            )
+        except Exception:  # noqa: BLE001
+            return []
+        out: list[dict] = []
+        for v in _rows(body, "billingVoucher") or _rows(body, "vouchers") or []:
+            out.append(
+                {
+                    "employeeId": v.get("employeeId") or "",
+                    "planId": v.get("planId") or v.get("benefitPlan") or "",
+                    "premiumBilled": v.get("premiumBilled")
+                    or v.get("billAmount")
+                    or v.get("amount")
+                    or "0",
+                }
+            )
+        return out
+
+    async def get_benefit_confirmations(self, client_id: str) -> list[dict]:
+        # Reuse BenefitsDeductionAuditReader's pattern — iterate roster
+        list_body = await self._c.get(
+            "/employee/v1/getEmployeeList",
+            params={"clientId": client_id, "employmentStatus": "A"},
+        )
+        ids = _extract_ids(list_body)[: self._cap]
+        out: list[dict] = []
+        for eid in ids:
+            try:
+                body = await self._c.get(
+                    "/benefits/v1/getBenefitConfirmationList",
+                    params={"clientId": client_id, "employeeId": eid},
+                )
+            except Exception:  # noqa: BLE001
+                continue
+            rows = _rows(body, "benefitConfirmationList") or []
+            if not rows:
+                continue
+            plans = []
+            for r in rows:
+                plan_code = (
+                    r.get("planId") or r.get("planCode") or r.get("benefitPlan") or ""
+                )
+                if plan_code:
+                    plans.append(
+                        {
+                            "planId": str(plan_code),
+                            "coverageStart": r.get("coverageStart") or r.get("effectiveDate"),
+                            "coverageEnd": r.get("coverageEnd") or r.get("terminationDate"),
+                        }
+                    )
+            out.append({"employeeId": eid, "plans": plans})
+        return out
+
+    async def get_scheduled_deductions(
+        self, client_id: str, employee_id: str
+    ) -> list[dict]:
+        body = await self._c.get(
+            "/employee/v1/getScheduledDeductions",
+            params={"clientId": client_id, "employeeId": employee_id},
+        )
+        rows = _rows(body, "scheduledDeductions") or _rows(body, "deductions") or []
+        return [
+            {
+                "code": r.get("deductionCode") or r.get("code") or "",
+                "amount": r.get("amount") or r.get("deductionAmount") or "0",
+            }
+            for r in rows
+        ]
+
+    async def get_group_benefit_plan(self, plan_id: str) -> dict:
+        if plan_id in self._gbp_cache:
+            return self._gbp_cache[plan_id]
+        try:
+            body = await self._c.get(
+                "/benefits/v1/getGroupBenefitPlan",
+                params={"planId": plan_id},
+            )
+        except Exception:  # noqa: BLE001
+            self._gbp_cache[plan_id] = {}
+            return {}
+        gbp = body.get("groupBenefitPlan") if isinstance(body, dict) else None
+        if isinstance(gbp, list):
+            gbp = gbp[0] if gbp else {}
+        result = gbp if isinstance(gbp, dict) else {}
+        self._gbp_cache[plan_id] = result
+        return result
+
+
 class RetirementMatchReader:
     """Live-data implementation of retirement_match_compliance.PrismHRReader."""
 
