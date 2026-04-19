@@ -144,6 +144,40 @@ def _harvest_ids_from_response(reg: FixtureRegistry, payload: Any) -> int:
         "deductionCode": "deduction_code",
         "billingCode": "billing_code",
         "payCode": "paycode",
+        "departmentCode": "department_code",
+        "divisionCode": "division_code",
+        "jobCode": "job_code",
+        "positionCode": "position_code",
+        "locationId": "location_id",
+        "benefitPlanId": "benefit_plan_id",
+        "benefitPlanCode": "benefit_plan_code",
+        "eventCode": "event_code",
+        "checkNumber": "check_number",
+        "refNumber": "ref_number",
+        "refId": "ref_id",
+        "uploadId": "upload_id",
+        "userId": "user_id",
+        "taskId": "task_id",
+        "templateId": "template_id",
+        "journalId": "journal_id",
+        "planClass": "plan_class",
+        "payrollRunId": "payroll_run_id",
+        "loanId": "loan_id",
+        "garnishmentId": "garnishment_id",
+        "courseCode": "course_code",
+        "skillCode": "skill_code",
+        "shiftCode": "shift_code",
+        "projectCode": "project_code",
+        "ratingCode": "rating_code",
+        "eeoCode": "eeo_code",
+        "holidayCode": "holiday_code",
+        "cobraCode": "cobra_code",
+        "absenceCode": "absence_code",
+        "ptoClassCode": "pto_class_code",
+        "ptoRegisterType": "pto_register_type",
+        "naicsCode": "naics_code",
+        "contactType": "contact_type",
+        "clientCategoryCode": "client_category_code",
     }
 
     def walk(v: Any) -> None:
@@ -360,7 +394,7 @@ async def main() -> int:
         print(f"  [OK ] {rec['path']}  ({elapsed}ms, +{learned} fixtures)")
 
     # ----- Iterative rounds: keep going while new methods become satisfiable -----
-    for round_no in range(1, 5):
+    for round_no in range(1, 10):
         print(f"\n--- ITER {round_no} (using learned fixtures) ---")
         print(f"  fixtures now: {sum(len(v) for v in reg._values.values())} values across "  # noqa: SLF001
               f"{len(reg._values)} keys")  # noqa: SLF001

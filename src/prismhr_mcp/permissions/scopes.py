@@ -18,6 +18,9 @@ from enum import Enum
 
 
 class Scope(str, Enum):
+    # ---- Generic catalog access (tier-2 verified passthrough) ----
+    CATALOG_CALL = "catalog:call"
+
     # ---- PrismHR read ----
     CLIENT_READ = "client:read"
     EMPLOYEE_READ = "employee:read"
@@ -42,6 +45,7 @@ class Scope(str, Enum):
 
 
 class ScopeCategory(str, Enum):
+    CATALOG = "Generic PrismHR Catalog Access"
     PRISMHR_READ = "PrismHR — Read"
     PRISMHR_WRITE = "PrismHR — Write (mutates live data)"
     REPORTING = "Branded Reporting"
@@ -50,6 +54,7 @@ class ScopeCategory(str, Enum):
 
 
 CATEGORY_ORDER: list[ScopeCategory] = [
+    ScopeCategory.CATALOG,
     ScopeCategory.PRISMHR_READ,
     ScopeCategory.REPORTING,
     ScopeCategory.M365_READ,
@@ -73,6 +78,20 @@ class ScopeSpec:
 
 # The canonical manifest. Order matters for UI display.
 MANIFEST: tuple[ScopeSpec, ...] = (
+    ScopeSpec(
+        scope=Scope.CATALOG_CALL,
+        category=ScopeCategory.CATALOG,
+        label="Generic PrismHR method invocation",
+        description=(
+            "Allow schema-validated calls to any non-admin PrismHR method via "
+            "the meta_call tool. Admin services (prismSecurity, subscription, "
+            "login) remain hard-blocked regardless of this grant."
+        ),
+        risk="medium",
+        recommended_default=False,
+        endpoints=("<any non-admin PrismHR endpoint in the bundled catalog>",),
+        tools=("meta_call",),
+    ),
     ScopeSpec(
         scope=Scope.CLIENT_READ,
         category=ScopeCategory.PRISMHR_READ,

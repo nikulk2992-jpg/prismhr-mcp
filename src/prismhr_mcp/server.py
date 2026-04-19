@@ -14,6 +14,7 @@ from mcp.server.fastmcp import FastMCP
 
 from .registry import ToolRegistry, create_server
 from .runtime import Runtime, build_runtime
+from .tools import catalog as catalog_tools
 from .tools import client as client_tools
 from .tools import meta as meta_tools
 from .tools import payroll as payroll_tools
@@ -36,6 +37,7 @@ def build(runtime: Runtime | None = None) -> BuiltServer:
     server, registry = create_server()
 
     meta_tools.register(server, registry, rt.permissions, rt.prismhr)
+    catalog_tools.register(server, registry, rt.prismhr, rt.permissions)
     client_tools.register(server, registry, rt.prismhr, rt.permissions)
     payroll_tools.register(server, registry, rt.prismhr, rt.permissions)
     # Phase 3+ modules plug in below:

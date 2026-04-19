@@ -32,6 +32,7 @@ async def test_meta_about_returns_commercial_tiers(runtime_no_grants) -> None:  
     assert data["license"] == "MIT"
     assert "Simploy" in data["reference_deployment"]
     assert "meta" in data["tool_groups_live"]
+    assert "catalog" in data["tool_groups_live"]
     assert "payroll" in data["tool_groups_live"]
     assert "benefits" in data["tool_groups_planned"]
 
