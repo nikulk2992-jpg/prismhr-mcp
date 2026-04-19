@@ -209,6 +209,11 @@ DESIRED_SERVICES: list[str] = [
     # client level, so we need the per-employee + per-client routes.
     "EmployeeService.download1095C",
     "ClientMasterService.getACALargeEmployer",
+    # W2 access — list + download. Create isn't API-exposed (PrismHR
+    # generates W2s at year-end from posted payroll).
+    "EmployeeService.getW2Years",
+    "EmployeeService.downloadW2",
+    "EmployeeService.reprintW2C",
 ]
 
 

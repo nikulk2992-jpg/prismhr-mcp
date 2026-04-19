@@ -433,6 +433,118 @@ class YTDReconciliationReader:
         return out
 
 
+class PrismHRW2Source:
+    """Live-data implementation of w2_distribution.W2Source.
+
+    downloadW2 returns `{redirectUrl, errorCode}` — the real PDF is
+    served from the redirect URL and requires both the `sessionId`
+    header and `Accept: application/pdf`.
+    """
+
+    _DEFAULT_EMPLOYEE_CAP = 200
+
+    def __init__(
+        self, client: PrismHRClient, *, max_employees: int = _DEFAULT_EMPLOYEE_CAP
+    ) -> None:
+        self._c = client
+        self._cap = max_employees
+
+    async def list_employees_with_w2(
+        self, client_id: str, year: str
+    ) -> list[dict]:
+        list_body = await self._c.get(
+            "/employee/v1/getEmployeeList",
+            params={"clientId": client_id, "employmentStatus": "A"},
+        )
+        ids = _extract_ids(list_body)[: self._cap]
+        out: list[dict] = []
+        for eid in ids:
+            try:
+                body = await self._c.get(
+                    "/employee/v1/getW2Years",
+                    params={"clientId": client_id, "employeeId": eid},
+                )
+            except Exception:  # noqa: BLE001
+                continue
+            if not isinstance(body, dict):
+                continue
+            years = body.get("w2Years") or body.get("formW2Years") or []
+            if not isinstance(years, list):
+                years = []
+            if year in [str(y) for y in years]:
+                # Fetch minimal employee name info for the letter
+                detail = await self._c.get(
+                    "/employee/v1/getEmployee",
+                    params=[
+                        ("clientId", client_id),
+                        ("options", "Person"),
+                        ("employeeId", eid),
+                    ],
+                )
+                row = _first(detail, "employee") or {}
+                out.append(
+                    {
+                        "employeeId": eid,
+                        "firstName": row.get("firstName", ""),
+                        "lastName": row.get("lastName", ""),
+                    }
+                )
+        return out
+
+    async def download_w2_pdf(
+        self, client_id: str, employee_id: str, year: str
+    ) -> bytes:
+        body = await self._c.get(
+            "/employee/v1/downloadW2",
+            params={"clientId": client_id, "employeeId": employee_id, "year": year},
+        )
+        if not isinstance(body, dict):
+            return b""
+        url = body.get("redirectUrl")
+        if not url:
+            return b""
+        token = await self._c._session.token()  # type: ignore[attr-defined]
+        http = httpx.AsyncClient(timeout=120.0, follow_redirects=True)
+        try:
+            resp = await http.get(
+                url, headers={"sessionId": token, "Accept": "application/pdf"}
+            )
+        finally:
+            await http.aclose()
+        if resp.status_code != 200:
+            return b""
+        return resp.content
+
+    async def get_employee_contact(
+        self, client_id: str, employee_id: str
+    ) -> dict:
+        body = await self._c.get(
+            "/employee/v1/getEmployee",
+            params=[
+                ("clientId", client_id),
+                ("options", "ContactInformation,Person"),
+                ("employeeId", employee_id),
+            ],
+        )
+        row = _first(body, "employee") or {}
+        contact = row.get("contactInformation") or {}
+        person = row.get("person") or {}
+        return {
+            "line1": contact.get("addressLine1") or "",
+            "line2": contact.get("addressLine2") or "",
+            "city": contact.get("city") or "",
+            "state": contact.get("state") or "",
+            "zip": contact.get("zipcode") or contact.get("postalCode") or "",
+            "email": contact.get("emailAddress")
+            or contact.get("personalEmail")
+            or person.get("personalEmail")
+            or "",
+            "consentsElectronic": bool(
+                person.get("w2ElecForm") or person.get("electronic1095CFlag")
+            ),
+        }
+
+
 class ACAIntegrityReader:
     """Live-data implementation of aca_integrity.PrismHRReader.
 
