@@ -1167,7 +1167,16 @@
     },
     {
       "path": "/payroll/v1/getPayrollVouchersForEmployee",
-      "status": "error"
+      "response_keys": [
+        "total",
+        "startpage",
+        "count",
+        "errorCode",
+        "errorMessage",
+        "extension",
+        "payrollVoucher"
+      ],
+      "status": "verified"
     },
     {
       "path": "/payroll/v1/getScheduledPayments",
@@ -1418,12 +1427,22 @@
         "payrollVoucher[].otherDeduction[].otherDeductAmount"
       ],
       "status": "verified"
+    },
+    {
+      "path": "/clientMaster/v1/getClientCodes",
+      "response_keys": [
+        "clientCodes",
+        "errorCode",
+        "errorMessage",
+        "extension"
+      ],
+      "status": "verified"
     }
   ],
   "summary": {
     "prismhr_error": 0,
-    "total": 75,
-    "transport_error": 9,
-    "verified": 66
+    "total": 76,
+    "transport_error": 8,
+    "verified": 68
   }
 }
