@@ -2,26 +2,117 @@
   "authorized_services_note": "The upstream authorized-service list is tenant-specific and omitted from the public matrix. Use the `meta_upstream_permissions` tool to see yours.",
   "fixture_key_coverage": {
     "as_of_date": "1",
-    "batch_id": "11-100",
-    "check_number": "1000+",
+    "batch_id": "2-10",
+    "batch_ids_csv": "1",
+    "check_number": "11-100",
     "client_id": "101-1000",
+    "date_type": "1",
     "employee_id": "1000+",
     "end_date": "1",
-    "job_code": "11-100",
+    "job_code": "2-10",
+    "naics_code": "1",
     "pay_date_end": "1",
     "pay_date_start": "1",
     "pay_group_id": "1",
-    "paycode": "11-100",
-    "plan_id": "11-100",
+    "paycode": "2-10",
+    "plan_id": "101-1000",
+    "pto_class_code": "2-10",
     "quarter": "1",
     "schedule_code": "11-100",
     "start_date": "1",
-    "template_id": "1",
-    "voucher_id": "1000+",
+    "voucher_id": "11-100",
     "year": "1"
   },
   "note": "Public verification matrix for prismhr-mcp. Contains endpoint coverage status and response-key schema hints only. No tenant data (client IDs, employee IDs, payroll detail). Run `scripts/calibrated_probe.py` against your own PrismHR instance to build a private matrix with real response bodies in .planning/verified-responses/ (gitignored).",
   "probes": [
+    {
+      "path": "/benefits/v1/getBenefitPlanList",
+      "response_keys": [
+        "benefitPlanList",
+        "benefitPlanList[].planId",
+        "benefitPlanList[].payeeId",
+        "benefitPlanList[].planDesc",
+        "benefitPlanList[].insuranceClass",
+        "benefitPlanList[].insuranceClassDesc",
+        "benefitPlanList[].hdhpFlag",
+        "benefitPlanList[].offerTypeCode",
+        "errorCode",
+        "errorMessage",
+        "extension"
+      ],
+      "status": "verified"
+    },
+    {
+      "path": "/benefits/v1/getCobraCodes",
+      "response_keys": [
+        "qualifyingEvent",
+        "qualifyingEvent[].qualifyingEventCode",
+        "qualifyingEvent[].monthsOfCoverage",
+        "qualifyingEvent[].appliesTo",
+        "terminationReason",
+        "errorCode",
+        "errorMessage",
+        "extension"
+      ],
+      "status": "verified"
+    },
+    {
+      "path": "/clientMaster/v1/getClientList",
+      "response_keys": [
+        "clientListResult",
+        "clientListResult.clientList",
+        "clientListResult.clientList[].clientId",
+        "clientListResult.clientList[].clientName",
+        "clientListResult.clientList[].legalName",
+        "clientListResult.clientList[].status",
+        "clientListResult.clientList[].serviceType",
+        "errorCode",
+        "errorMessage",
+        "extension"
+      ],
+      "status": "verified"
+    },
+    {
+      "path": "/codeFiles/v1/getBillingCode",
+      "status": "error"
+    },
+    {
+      "path": "/codeFiles/v1/getHolidayCodeList",
+      "status": "error"
+    },
+    {
+      "path": "/codeFiles/v1/getNAICSCodeList",
+      "status": "error"
+    },
+    {
+      "path": "/documentService/v1/getDocumentTypes",
+      "response_keys": [
+        "documentType",
+        "documentType[].id",
+        "documentType[].label",
+        "documentType[].description",
+        "documentType[].scope",
+        "documentType[].defaultPath",
+        "documentType[].status",
+        "documentType[].reserved",
+        "documentType[].userRole",
+        "errorCode",
+        "errorMessage",
+        "extension"
+      ],
+      "status": "verified"
+    },
+    {
+      "path": "/generalLedger/v1/getBulkOutstandingInvoices",
+      "response_keys": [
+        "outstandingInvoices",
+        "outstandingInvoices[].clientId",
+        "outstandingInvoices[].invoiceNumber",
+        "outstandingInvoices[].invoiceDate",
+        "outstandingInvoices[].invoiceBalance"
+      ],
+      "status": "verified"
+    },
     {
       "path": "/payroll/v1/getBulkYearToDateValues",
       "response_keys": [
@@ -121,6 +212,397 @@
       "status": "verified"
     },
     {
+      "path": "/applicant/v1/getJobApplicantList",
+      "response_keys": [
+        "total",
+        "startpage",
+        "count",
+        "applicant",
+        "errorCode",
+        "errorMessage",
+        "extension"
+      ],
+      "status": "verified"
+    },
+    {
+      "path": "/applicant/v1/getJobApplicants",
+      "response_keys": [
+        "applicantId",
+        "applicant",
+        "errorCode",
+        "errorMessage",
+        "extension"
+      ],
+      "status": "verified"
+    },
+    {
+      "path": "/benefits/v1/getActiveBenefitPlans",
+      "status": "error"
+    },
+    {
+      "path": "/benefits/v1/getBenefitConfirmationList",
+      "status": "verified"
+    },
+    {
+      "path": "/benefits/v1/getBenefitPlans",
+      "status": "error"
+    },
+    {
+      "path": "/benefits/v1/getClientBenefitPlans",
+      "response_keys": [
+        "benefitPlanOverview",
+        "benefitPlanOverview[].planId",
+        "benefitPlanOverview[].planDescription",
+        "benefitPlanOverview[].rateGroup",
+        "benefitPlanOverview[].startDate",
+        "benefitPlanOverview[].endDate",
+        "benefitPlanOverview[].template",
+        "benefitPlanOverview[].groupRules",
+        "benefitPlanOverview[].insClass",
+        "benefitPlanOverview[].status",
+        "benefitPlanOverview[].premiumRateGroup",
+        "benefitPlanOverview[].coverageEndsOn",
+        "benefitPlanOverview[].riskFactor",
+        "benefitPlanOverview[].checksum",
+        "errorCode",
+        "errorMessage",
+        "extension"
+      ],
+      "status": "verified"
+    },
+    {
+      "path": "/benefits/v1/getCobraEmployee",
+      "status": "verified"
+    },
+    {
+      "path": "/benefits/v1/getDependents",
+      "status": "error"
+    },
+    {
+      "path": "/benefits/v1/getMonthlyACAInfo",
+      "status": "verified"
+    },
+    {
+      "path": "/benefits/v1/getPaidTimeOff",
+      "status": "error"
+    },
+    {
+      "path": "/benefits/v1/getPaidTimeOffPlans",
+      "response_keys": [
+        "paidTimeOffPlan",
+        "paidTimeOffPlan[].id",
+        "paidTimeOffPlan[].description",
+        "paidTimeOffPlan[].calculationBasis",
+        "paidTimeOffPlan[].ytdCarryoverHours",
+        "paidTimeOffPlan[].ltdCarryoverHours",
+        "paidTimeOffPlan[].negativeCarryover",
+        "paidTimeOffPlan[].carryoverExpireUnits",
+        "paidTimeOffPlan[].suppressPrintMonths",
+        "paidTimeOffPlan[].accrueOnArrears",
+        "paidTimeOffPlan[].carryoverExpireBasis",
+        "paidTimeOffPlan[].planExpiration",
+        "paidTimeOffPlan[].addFirstAccrualHours",
+        "errorCode",
+        "errorMessage",
+        "extension"
+      ],
+      "status": "verified"
+    },
+    {
+      "path": "/benefits/v1/getPtoClasses",
+      "response_keys": [
+        "ptoClasses",
+        "ptoClasses[].ptoClassCode",
+        "ptoClasses[].ptoClassDesc",
+        "errorCode",
+        "errorMessage",
+        "extension"
+      ],
+      "status": "verified"
+    },
+    {
+      "path": "/benefits/v1/getRetirementLoans",
+      "status": "error"
+    },
+    {
+      "path": "/benefits/v1/getRetirementPlan",
+      "status": "error"
+    },
+    {
+      "path": "/clientMaster/v1/getClientEvents",
+      "response_keys": [
+        "message",
+        "companyEvents",
+        "errorCode",
+        "errorMessage",
+        "extension"
+      ],
+      "status": "verified"
+    },
+    {
+      "path": "/clientMaster/v1/getClientMaster",
+      "response_keys": [
+        "clientMaster",
+        "clientMaster.id",
+        "clientMaster.clientName",
+        "clientMaster.costCenter",
+        "clientMaster.subCostCenter",
+        "clientMaster.serviceType",
+        "clientMaster.categoryCode",
+        "clientMaster.stateCode",
+        "clientMaster.zipCode",
+        "clientMaster.legalName",
+        "clientMaster.arClientNumber",
+        "clientMaster.divisionRequired",
+        "clientMaster.departmentRequired",
+        "clientMaster.shiftRequired",
+        "clientMaster.empNumbersUsed",
+        "clientMaster.autoEmpNumber",
+        "clientMaster.worksitePayrollApproval",
+        "clientMaster.projectRequired",
+        "clientMaster.workGroupRequired",
+        "clientMaster.payrollDate",
+        "clientMaster.statusDate",
+        "clientMaster.status",
+        "clientMaster.deliverChecks",
+        "clientMaster.employerId",
+        "clientMaster.minCheckAmt",
+        "clientMaster.maxCheckAmt",
+        "clientMaster.deliveryMethod",
+        "clientMaster.mainPhoneExt",
+        "clientMaster.addressLine1",
+        "clientMaster.addressLine2",
+        "clientMaster.city",
+        "clientMaster.zipSuffix",
+        "clientMaster.mainPhone",
+        "clientMaster.fax",
+        "clientMaster.websiteUrl",
+        "clientMaster.emailAddress",
+        "clientMaster.businessDescription",
+        "clientMaster.sicCode",
+        "clientMaster.federalIdNumber",
+        "clientMaster.billFormat",
+        "clientMaster.groupCode",
+        "clientMaster.tpaDownloadOptions",
+        "clientMaster.hoursType1",
+        "clientMaster.hoursType2",
+        "clientMaster.hoursType3",
+        "clientMaster.hoursType4",
+        "clientMaster.hoursType5",
+        "clientMaster.hoursType6",
+        "clientMaster.hoursType9",
+        "clientMaster.flatType1",
+        "clientMaster.flatType2",
+        "clientMaster.extraHeading1",
+        "clientMaster.extraHeading2",
+        "clientMaster.corporationType",
+        "clientMaster.controlGroupCompany",
+        "clientMaster.cafeteriaPlan",
+        "clientMaster.hsaPlanId",
+        "clientMaster.glClientNo",
+        "clientMaster.billTemplate",
+        "clientMaster.wcPolicy",
+        "clientMaster.wcPolicyEffDate",
+        "clientMaster.wcLocationBased",
+        "clientMaster.flsaRuleset",
+        "clientMaster.flsaWeekEnds",
+        "clientMaster.satPayOnDay",
+        "clientMaster.sunPayOnDay",
+        "clientMaster.satPayBefAft",
+        "clientMaster.sunPayBefAft",
+        "clientMaster.contractDate",
+        "clientMaster.benefitParentClient",
+        "clientMaster.payCode",
+        "clientMaster.payCode[].payCodeId",
+        "clientMaster.payCode[].printOnPayStub",
+        "clientMaster.deductionCode",
+        "clientMaster.deductionCode[].deductionCodeId",
+        "clientMaster.deductionCode[].printOnPayStub",
+        "clientMaster.deductionCode[].worksiteUserSelectable",
+        "clientMaster.arrear",
+        "clientMaster.employeeType",
+        "clientMaster.employeeStatus"
+      ],
+      "status": "verified"
+    },
+    {
+      "path": "/clientMaster/v1/getClientOwnership",
+      "response_keys": [
+        "clientMasterChecksum",
+        "clientOwnership",
+        "clientOwnership[].contactId",
+        "clientOwnership[].ownerName",
+        "clientOwnership[].owner",
+        "clientOwnership[].percent",
+        "clientOwnership[].ownerGroup",
+        "clientOwnership[].ownerRelation",
+        "errorCode",
+        "errorMessage",
+        "extension"
+      ],
+      "status": "verified"
+    },
+    {
+      "path": "/clientMaster/v1/getPayrollSchedule",
+      "response_keys": [
+        "clientPayrollSchedule",
+        "clientPayrollSchedule[].groupId",
+        "clientPayrollSchedule[].groupDesc",
+        "clientPayrollSchedule[].scheduleId",
+        "clientPayrollSchedule[].scheduleDesc",
+        "clientPayrollSchedule[].weekEndOnDay",
+        "clientPayrollSchedule[].printFaxBack",
+        "clientPayrollSchedule[].payPeriod",
+        "clientPayrollSchedule[].payPeriodDesc",
+        "clientPayrollSchedule[].payDay",
+        "clientPayrollSchedule[].skipWeekends",
+        "clientPayrollSchedule[].callInDays",
+        "clientPayrollSchedule[].deliverDays",
+        "clientPayrollSchedule[].thirdPartyCode",
+        "clientPayrollSchedule[].payPeriodEnd",
+        "clientPayrollSchedule[].periodEndType",
+        "clientPayrollSchedule[].periodEndTypeDesc",
+        "clientPayrollSchedule[].periodEndType2",
+        "clientPayrollSchedule[].periodEndType2Desc",
+        "errorCode",
+        "errorMessage",
+        "extension"
+      ],
+      "status": "verified"
+    },
+    {
+      "path": "/codeFiles/v1/getEventCodes",
+      "status": "error"
+    },
+    {
+      "path": "/codeFiles/v1/getPayGrades",
+      "status": "error"
+    },
+    {
+      "path": "/deductions/v1/getDeductions",
+      "status": "error"
+    },
+    {
+      "path": "/deductions/v1/getGarnishmentDetails",
+      "status": "error"
+    },
+    {
+      "path": "/deductions/v1/getGarnishmentPaymentHistory",
+      "status": "error"
+    },
+    {
+      "path": "/deductions/v1/getVoluntaryRecurringDeductions",
+      "status": "error"
+    },
+    {
+      "path": "/employee/v1/checkForGarnishments",
+      "response_keys": [
+        "enrolled",
+        "active",
+        "errorCode",
+        "errorMessage",
+        "extension"
+      ],
+      "status": "verified"
+    },
+    {
+      "path": "/employee/v1/get1095CYears",
+      "status": "error"
+    },
+    {
+      "path": "/employee/v1/get1099Years",
+      "status": "error"
+    },
+    {
+      "path": "/employee/v1/getACHDeductions",
+      "status": "error"
+    },
+    {
+      "path": "/employee/v1/getAddressInfo",
+      "status": "error"
+    },
+    {
+      "path": "/employee/v1/getEmployee",
+      "status": "error"
+    },
+    {
+      "path": "/employee/v1/getEmployeeEvents",
+      "status": "verified"
+    },
+    {
+      "path": "/employee/v1/getEmployeeList",
+      "response_keys": [
+        "employeeList",
+        "employeeList.employeeId",
+        "errorCode",
+        "errorMessage",
+        "extension"
+      ],
+      "status": "verified"
+    },
+    {
+      "path": "/employee/v1/getEmployersInfo",
+      "status": "error"
+    },
+    {
+      "path": "/employee/v1/getEverifyStatus",
+      "status": "error"
+    },
+    {
+      "path": "/employee/v1/getScheduledDeductions",
+      "status": "error"
+    },
+    {
+      "path": "/generalLedger/v1/getClientAccountingTemplate",
+      "status": "verified"
+    },
+    {
+      "path": "/generalLedger/v1/getClientGLData",
+      "response_keys": [
+        "downloadId",
+        "buildStatus",
+        "dataObject",
+        "errorCode",
+        "errorMessage",
+        "extension"
+      ],
+      "status": "verified"
+    },
+    {
+      "path": "/generalLedger/v2/getClientGLData",
+      "response_keys": [
+        "clientId",
+        "startDate",
+        "endDate",
+        "data",
+        "infoMessage",
+        "errorCode",
+        "errorMessage",
+        "extension"
+      ],
+      "status": "verified"
+    },
+    {
+      "path": "/payroll/v1/getBatchListByDate",
+      "response_keys": [
+        "batchList",
+        "batchList[].batchId",
+        "batchList[].payDate",
+        "batchList[].batchType",
+        "batchList[].batchStatus",
+        "batchList[].payGroup",
+        "batchList[].payGroup[].payGroupId",
+        "batchList[].payGroup[].payPeriodStartDate",
+        "batchList[].payGroup[].payPeriodEndDate",
+        "batchList[].payGroup[].weeksWorked",
+        "batchList[].payGroup[].deductPeriod",
+        "errorCode",
+        "errorMessage",
+        "extension"
+      ],
+      "status": "verified"
+    },
+    {
       "path": "/payroll/v1/getBatchListForApproval",
       "status": "verified"
     },
@@ -135,7 +617,149 @@
       "status": "verified"
     },
     {
+      "path": "/payroll/v1/getBillingCodeTotalsForBatch",
+      "response_keys": [
+        "batchControl",
+        "batchControl.batchStatus",
+        "batchControl.batchId",
+        "batchControl.payDate",
+        "batchControl.batchDescription",
+        "batchControl.batchType",
+        "batchControl.processor",
+        "batchControl.deliveryDate",
+        "batchControl.deliveryMethod",
+        "batchControl.actualShipMethod",
+        "batchControl.actualShipDate",
+        "batchControl.voucher",
+        "batchControl.voucher[].payGroupId",
+        "batchControl.voucher[].periodStart",
+        "batchControl.voucher[].periodEnd",
+        "batchControl.voucher[].weeksWorked",
+        "batchControl.voucher[].deductPeriod",
+        "batchControl.voucher[].payPeriod",
+        "billCodeTotals",
+        "billCodeTotals.batchId",
+        "billCodeTotals.batchTotals",
+        "billCodeTotals.batchTotals[].billCode",
+        "billCodeTotals.batchTotals[].totBillAmt",
+        "billCodeTotals.batchTotalWithCost",
+        "employeeIdList",
+        "employeeIdList.employeeId",
+        "employeeIdList.employeeCount",
+        "errorCode",
+        "errorMessage",
+        "extension"
+      ],
+      "status": "verified"
+    },
+    {
+      "path": "/payroll/v1/getBillingCodeTotalsWithCosts",
+      "response_keys": [
+        "batchControl",
+        "batchControl.batchStatus",
+        "batchControl.batchId",
+        "batchControl.payDate",
+        "batchControl.batchDescription",
+        "batchControl.batchType",
+        "batchControl.processor",
+        "batchControl.deliveryDate",
+        "batchControl.deliveryMethod",
+        "batchControl.actualShipMethod",
+        "batchControl.actualShipDate",
+        "batchControl.voucher",
+        "batchControl.voucher[].payGroupId",
+        "batchControl.voucher[].periodStart",
+        "batchControl.voucher[].periodEnd",
+        "batchControl.voucher[].weeksWorked",
+        "batchControl.voucher[].deductPeriod",
+        "batchControl.voucher[].payPeriod",
+        "billCodeTotals",
+        "billCodeTotals.batchId",
+        "billCodeTotals.batchTotals",
+        "billCodeTotals.batchTotalWithCost",
+        "billCodeTotals.batchTotalWithCost[].billCost",
+        "billCodeTotals.batchTotalWithCost[].billCode",
+        "billCodeTotals.batchTotalWithCost[].totBillAmt",
+        "employeeIdList",
+        "employeeIdList.employeeId",
+        "employeeIdList.employeeCount",
+        "errorCode",
+        "errorMessage",
+        "extension"
+      ],
+      "status": "verified"
+    },
+    {
       "path": "/payroll/v1/getManualChecks",
+      "status": "verified"
+    },
+    {
+      "path": "/payroll/v1/getPayrollApproval",
+      "status": "verified"
+    },
+    {
+      "path": "/payroll/v1/getPayrollBatchWithOptions",
+      "response_keys": [
+        "batchControl",
+        "batchControl.checksum",
+        "batchControl.batchStatus",
+        "batchControl.batchId",
+        "batchControl.payDate",
+        "batchControl.batchDescription",
+        "batchControl.batchType",
+        "batchControl.processor",
+        "batchControl.quarterEnd",
+        "batchControl.yearEnd",
+        "batchControl.glPeriod",
+        "batchControl.remoteCutoffDate",
+        "batchControl.remoteCutoffTime",
+        "batchControl.deliveryDate",
+        "batchControl.actualShipMethod",
+        "batchControl.actualShipDate",
+        "batchControl.actualShipDocId",
+        "batchControl.overridePayPeriod",
+        "batchControl.manualBatch",
+        "batchControl.scheduledBatch",
+        "batchControl.scheduledBatch[].payGroupId",
+        "batchControl.scheduledBatch[].periodStart",
+        "batchControl.scheduledBatch[].periodEnd",
+        "batchControl.scheduledBatch[].weeksWorked",
+        "batchControl.scheduledBatch[].deductPeriod",
+        "batchControl.scheduledBatch[].payPeriod",
+        "batchControl.scheduledBatch[].altPayPeriod",
+        "batchControl.scheduledBatch[].payrollOptionTemplate",
+        "batchControl.specialBatch",
+        "batchControl.memoList",
+        "batchControl.options",
+        "batchControl.options.suppressACH",
+        "batchControl.options.achEarnTypeLimiter",
+        "batchControl.options.suppressEarnings",
+        "batchControl.options.suppressDeductions",
+        "batchControl.options.suppressArrears",
+        "batchControl.options.suppressGarnishments",
+        "batchControl.options.suppressBenefitsCalc",
+        "batchControl.options.suppressBenefitsUpdate",
+        "batchControl.options.suppressBenefitAdjust",
+        "batchControl.options.suppressClientApproval",
+        "batchControl.options.suppressClientBillPending",
+        "batchControl.options.suppressLoanPayments",
+        "batchControl.options.suppressManualChecks",
+        "batchControl.options.deliveryMethod",
+        "batchControl.options.fedTaxRateSupplementalPay",
+        "batchControl.options.stateTaxRateSupplementalPay",
+        "batchControl.options.fsaOverrideCalcDate",
+        "batchControl.options.fsaReimbursement",
+        "batchControl.options.benefitCalcDate",
+        "batchControl.options.forceRetirementToZero",
+        "batchControl.options.showFutureDatedChecksOnEss",
+        "batchControl.options.recalculateOvertime",
+        "batchControl.options.replacesScheduledBatch",
+        "batchControl.options.applyDefaultTSHours",
+        "batchControl.options.stateSupplementalRate",
+        "errorCode",
+        "errorMessage",
+        "extension"
+      ],
       "status": "verified"
     },
     {
@@ -283,6 +907,9 @@
         "payrollVoucher[].earning[].projWork",
         "payrollVoucher[].earning[].projPhase",
         "payrollVoucher[].otherEarningsDetail",
+        "payrollVoucher[].otherEarningsDetail[].otherEarnCode",
+        "payrollVoucher[].otherEarningsDetail[].otherEarnsDesc",
+        "payrollVoucher[].otherEarningsDetail[].otherEarnAmount",
         "payrollVoucher[].fsaMatch",
         "payrollVoucher[].companyTax",
         "payrollVoucher[].companyTax[].comTaxEntity",
@@ -301,10 +928,7 @@
         "payrollVoucher[].deduction[].deductCode",
         "payrollVoucher[].deduction[].deductDescription",
         "payrollVoucher[].deduction[].deductAmount",
-        "payrollVoucher[].deduction[].deductType",
-        "payrollVoucher[].deduction[].deductUnionId",
-        "payrollVoucher[].deduction[].planId",
-        "payrollVoucher[].otherDeduction"
+        "payrollVoucher[].deduction[].deductType"
       ],
       "status": "verified"
     },
@@ -369,6 +993,9 @@
         "payrollVoucher[].earning[].projWork",
         "payrollVoucher[].earning[].projPhase",
         "payrollVoucher[].otherEarningsDetail",
+        "payrollVoucher[].otherEarningsDetail[].otherEarnCode",
+        "payrollVoucher[].otherEarningsDetail[].otherEarnsDesc",
+        "payrollVoucher[].otherEarningsDetail[].otherEarnAmount",
         "payrollVoucher[].fsaMatch",
         "payrollVoucher[].companyTax",
         "payrollVoucher[].companyTax[].comTaxEntity",
@@ -387,29 +1014,17 @@
         "payrollVoucher[].deduction[].deductCode",
         "payrollVoucher[].deduction[].deductDescription",
         "payrollVoucher[].deduction[].deductAmount",
-        "payrollVoucher[].deduction[].deductType",
-        "payrollVoucher[].deduction[].deductUnionId",
-        "payrollVoucher[].deduction[].planId",
-        "payrollVoucher[].otherDeduction"
+        "payrollVoucher[].deduction[].deductType"
       ],
       "status": "verified"
     },
     {
       "path": "/payroll/v1/getPayrollVouchersForEmployee",
-      "response_keys": [
-        "total",
-        "startpage",
-        "count",
-        "errorCode",
-        "errorMessage",
-        "extension",
-        "payrollVoucher"
-      ],
-      "status": "verified"
+      "status": "error"
     },
     {
       "path": "/payroll/v1/getScheduledPayments",
-      "status": "verified"
+      "status": "error"
     },
     {
       "path": "/payroll/v1/getStandardHours",
@@ -426,89 +1041,11 @@
     },
     {
       "path": "/payroll/v1/getYearToDateValues",
-      "response_keys": [
-        "YTD",
-        "YTD.totalEarned",
-        "YTD.totalDeducted",
-        "YTD.expenseReimbursement",
-        "YTD.fringeBenefits",
-        "YTD.achDeposit",
-        "YTD.eicAdvanced",
-        "YTD.tipsReported",
-        "YTD.tipsAllocated",
-        "YTD.tipsCharged",
-        "YTD.match401k",
-        "YTD.hoursWorked",
-        "YTD.hoursPaid",
-        "YTD.weeksWorked",
-        "YTD.daysWorked",
-        "YTD.voucherNetPay",
-        "YTD.taxWithholding",
-        "YTD.taxWithholding.federalIncomeTax",
-        "YTD.taxWithholding.stateIncomeTax",
-        "YTD.taxWithholding.socialSecurity",
-        "YTD.taxWithholding.medicare",
-        "YTD.taxWithholding.sdi",
-        "YTD.taxWithholding.otherTax",
-        "YTD.payCodes",
-        "YTD.deductionCodes",
-        "YTD.taxCodes",
-        "YTD.benefitCodes",
-        "YTD.payHours",
-        "YTD.payHours.paid",
-        "YTD.payHours.worked",
-        "YTD.voucherNumbers",
-        "QTD",
-        "QTD.totalEarned",
-        "QTD.totalDeducted",
-        "QTD.expenseReimbursement",
-        "QTD.fringeBenefits",
-        "QTD.achDeposit",
-        "QTD.eicAdvanced",
-        "QTD.tipsReported",
-        "QTD.tipsAllocated",
-        "QTD.tipsCharged",
-        "QTD.match401k",
-        "QTD.hoursWorked",
-        "QTD.hoursPaid",
-        "QTD.weeksWorked",
-        "QTD.daysWorked",
-        "QTD.voucherNetPay",
-        "QTD.taxWithholding",
-        "QTD.taxWithholding.federalIncomeTax",
-        "QTD.taxWithholding.stateIncomeTax",
-        "QTD.taxWithholding.socialSecurity",
-        "QTD.taxWithholding.medicare",
-        "QTD.taxWithholding.sdi",
-        "QTD.taxWithholding.otherTax",
-        "QTD.payCodes",
-        "QTD.deductionCodes",
-        "QTD.taxCodes",
-        "QTD.benefitCodes",
-        "QTD.payHours",
-        "QTD.payHours.paid",
-        "QTD.payHours.worked",
-        "QTD.voucherNumbers",
-        "MTD",
-        "MTD.totalEarned",
-        "MTD.totalDeducted",
-        "MTD.expenseReimbursement",
-        "MTD.fringeBenefits",
-        "MTD.achDeposit",
-        "MTD.eicAdvanced",
-        "MTD.tipsReported",
-        "MTD.tipsAllocated",
-        "MTD.tipsCharged",
-        "MTD.match401k",
-        "MTD.hoursWorked",
-        "MTD.hoursPaid",
-        "MTD.weeksWorked",
-        "MTD.daysWorked",
-        "MTD.voucherNetPay",
-        "MTD.taxWithholding",
-        "MTD.taxWithholding.federalIncomeTax"
-      ],
       "status": "verified"
+    },
+    {
+      "path": "/payroll/v1/payGroupScheduleReport",
+      "status": "transport_error"
     },
     {
       "path": "/timesheet/v1/getBatchStatus",
@@ -541,8 +1078,6 @@
         "paramData.batch[].payGroup[].payPeriodEnd",
         "paramData.batch[].payDate",
         "paramData.template",
-        "paramData.template[].templateId",
-        "paramData.template[].description",
         "errorCode",
         "errorMessage",
         "extension"
@@ -572,6 +1107,20 @@
         "timeSheetDataList[].deduct1",
         "timeSheetDataList[].deduct2",
         "timeSheetDataList[].deduct3",
+        "errorCode",
+        "errorMessage",
+        "extension"
+      ],
+      "status": "verified"
+    },
+    {
+      "path": "/clientMaster/v1/getEmployeesInPayGroup",
+      "response_keys": [
+        "employeeList",
+        "employeeList[].id",
+        "employeeList[].firstName",
+        "employeeList[].lastName",
+        "employeeList[].middleName",
         "errorCode",
         "errorMessage",
         "extension"
@@ -626,139 +1175,11 @@
       "status": "verified"
     },
     {
-      "path": "/payroll/v1/getBillingCodeTotalsForBatch",
+      "path": "/payroll/v1/getBatchStatus",
       "response_keys": [
-        "batchControl",
-        "batchControl.batchStatus",
-        "batchControl.batchId",
-        "batchControl.payDate",
-        "batchControl.batchDescription",
-        "batchControl.batchType",
-        "batchControl.processor",
-        "batchControl.deliveryDate",
-        "batchControl.deliveryMethod",
-        "batchControl.actualShipMethod",
-        "batchControl.actualShipDate",
-        "batchControl.voucher",
-        "batchControl.voucher[].payGroupId",
-        "batchControl.voucher[].periodStart",
-        "batchControl.voucher[].periodEnd",
-        "batchControl.voucher[].weeksWorked",
-        "batchControl.voucher[].deductPeriod",
-        "batchControl.voucher[].payPeriod",
-        "billCodeTotals",
-        "billCodeTotals.batchId",
-        "billCodeTotals.batchTotals",
-        "billCodeTotals.batchTotals[].billCode",
-        "billCodeTotals.batchTotals[].totBillAmt",
-        "billCodeTotals.batchTotalWithCost",
-        "employeeIdList",
-        "employeeIdList.employeeId",
-        "employeeIdList.employeeCount",
-        "errorCode",
-        "errorMessage",
-        "extension"
-      ],
-      "status": "verified"
-    },
-    {
-      "path": "/payroll/v1/getBillingCodeTotalsWithCosts",
-      "response_keys": [
-        "batchControl",
-        "batchControl.batchStatus",
-        "batchControl.batchId",
-        "batchControl.payDate",
-        "batchControl.batchDescription",
-        "batchControl.batchType",
-        "batchControl.processor",
-        "batchControl.deliveryDate",
-        "batchControl.deliveryMethod",
-        "batchControl.actualShipMethod",
-        "batchControl.actualShipDate",
-        "batchControl.voucher",
-        "batchControl.voucher[].payGroupId",
-        "batchControl.voucher[].periodStart",
-        "batchControl.voucher[].periodEnd",
-        "batchControl.voucher[].weeksWorked",
-        "batchControl.voucher[].deductPeriod",
-        "batchControl.voucher[].payPeriod",
-        "billCodeTotals",
-        "billCodeTotals.batchId",
-        "billCodeTotals.batchTotals",
-        "billCodeTotals.batchTotalWithCost",
-        "billCodeTotals.batchTotalWithCost[].billCost",
-        "billCodeTotals.batchTotalWithCost[].billCode",
-        "billCodeTotals.batchTotalWithCost[].totBillAmt",
-        "employeeIdList",
-        "employeeIdList.employeeId",
-        "employeeIdList.employeeCount",
-        "errorCode",
-        "errorMessage",
-        "extension"
-      ],
-      "status": "verified"
-    },
-    {
-      "path": "/payroll/v1/getPayrollApproval",
-      "status": "verified"
-    },
-    {
-      "path": "/payroll/v1/getPayrollBatchWithOptions",
-      "response_keys": [
-        "batchControl",
-        "batchControl.checksum",
-        "batchControl.batchStatus",
-        "batchControl.batchId",
-        "batchControl.payDate",
-        "batchControl.batchDescription",
-        "batchControl.batchType",
-        "batchControl.processor",
-        "batchControl.quarterEnd",
-        "batchControl.yearEnd",
-        "batchControl.glPeriod",
-        "batchControl.remoteCutoffDate",
-        "batchControl.remoteCutoffTime",
-        "batchControl.deliveryDate",
-        "batchControl.actualShipMethod",
-        "batchControl.actualShipDate",
-        "batchControl.actualShipDocId",
-        "batchControl.overridePayPeriod",
-        "batchControl.manualBatch",
-        "batchControl.manualBatch[].employeeId",
-        "batchControl.manualBatch[].periodStart",
-        "batchControl.manualBatch[].periodEnd",
-        "batchControl.manualBatch[].weeksWorked",
-        "batchControl.manualBatch[].deductPeriod",
-        "batchControl.manualBatch[].payrollOptionTemplate",
-        "batchControl.scheduledBatch",
-        "batchControl.specialBatch",
-        "batchControl.memoList",
-        "batchControl.options",
-        "batchControl.options.suppressACH",
-        "batchControl.options.achEarnTypeLimiter",
-        "batchControl.options.suppressEarnings",
-        "batchControl.options.suppressDeductions",
-        "batchControl.options.suppressArrears",
-        "batchControl.options.suppressGarnishments",
-        "batchControl.options.suppressBenefitsCalc",
-        "batchControl.options.suppressBenefitsUpdate",
-        "batchControl.options.suppressBenefitAdjust",
-        "batchControl.options.suppressClientApproval",
-        "batchControl.options.suppressClientBillPending",
-        "batchControl.options.suppressLoanPayments",
-        "batchControl.options.suppressManualChecks",
-        "batchControl.options.deliveryMethod",
-        "batchControl.options.fedTaxRateSupplementalPay",
-        "batchControl.options.stateTaxRateSupplementalPay",
-        "batchControl.options.fsaOverrideCalcDate",
-        "batchControl.options.fsaReimbursement",
-        "batchControl.options.benefitCalcDate",
-        "batchControl.options.forceRetirementToZero",
-        "batchControl.options.showFutureDatedChecksOnEss",
-        "batchControl.options.recalculateOvertime",
-        "batchControl.options.replacesScheduledBatch",
-        "batchControl.options.applyDefaultTSHours",
-        "batchControl.options.stateSupplementalRate",
+        "batchStatuses",
+        "batchStatuses[].batchId",
+        "batchStatuses[].status",
         "errorCode",
         "errorMessage",
         "extension"
@@ -820,6 +1241,9 @@
         "payrollVoucher[].earning[].projWork",
         "payrollVoucher[].earning[].projPhase",
         "payrollVoucher[].otherEarningsDetail",
+        "payrollVoucher[].otherEarningsDetail[].otherEarnCode",
+        "payrollVoucher[].otherEarningsDetail[].otherEarnsDesc",
+        "payrollVoucher[].otherEarningsDetail[].otherEarnAmount",
         "payrollVoucher[].fsaMatch",
         "payrollVoucher[].companyTax",
         "payrollVoucher[].companyTax[].comTaxEntity",
@@ -842,20 +1266,17 @@
         "payrollVoucher[].deduction[].deductUnionId",
         "payrollVoucher[].deduction[].planId",
         "payrollVoucher[].otherDeduction",
-        "payrollVoucher[].benefit",
-        "payrollVoucher[].bankAccount",
-        "payrollVoucher[].checkNum",
-        "payrollVoucher[].checkAmt",
-        "payrollVoucher[].payStubType",
-        "payrollVoucher[].isManualCheck"
+        "payrollVoucher[].otherDeduction[].otherDeductCode",
+        "payrollVoucher[].otherDeduction[].otherDeductDescription",
+        "payrollVoucher[].otherDeduction[].otherDeductAmount"
       ],
       "status": "verified"
     }
   ],
   "summary": {
     "prismhr_error": 0,
-    "total": 25,
-    "transport_error": 1,
-    "verified": 24
+    "total": 75,
+    "transport_error": 27,
+    "verified": 48
   }
 }
