@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import asyncio
 from datetime import date
+from decimal import Decimal
 from typing import Any, TYPE_CHECKING
 
 import httpx
@@ -430,6 +431,134 @@ class YTDReconciliationReader:
                     break
                 page += 1
         return out
+
+
+class RetirementMatchReader:
+    """Live-data implementation of retirement_match_compliance.PrismHRReader."""
+
+    _DEFAULT_EMPLOYEE_CAP = 50
+
+    def __init__(self, client: PrismHRClient, *, max_employees: int = _DEFAULT_EMPLOYEE_CAP) -> None:
+        self._c = client
+        self._cap = max_employees
+
+    async def get_retirement_plan(self, client_id: str) -> dict:
+        body = await self._c.get(
+            "/clientMaster/v1/getRetirementPlanList",
+            params={"clientId": client_id},
+        )
+        for cr in _rows(body, "clientRetirement"):
+            plans = cr.get("retirementPlanList") or []
+            if plans and isinstance(plans[0], dict):
+                return {
+                    "retirePlan": plans[0].get("retirePlan") or "401K",
+                    "startDate": plans[0].get("startDate"),
+                    "endDate": plans[0].get("endDate"),
+                }
+        return {"retirePlan": "401K"}
+
+    async def get_401k_match_rules(self, client_id: str, plan_id: str) -> list[dict]:
+        try:
+            body = await self._c.get(
+                "/benefits/v1/get401KMatchRules",
+                params={
+                    "clientId": client_id,
+                    "retirementPlanId": plan_id,
+                    "benefitGroupId": "1",
+                },
+            )
+        except Exception:  # noqa: BLE001
+            return []
+        return _rows(body, "match401KRules") or _rows(body, "matchRules") or []
+
+    async def get_employee_401k_contributions(
+        self, client_id: str, year: int
+    ) -> list[dict]:
+        # Iterate active employees and call getEmployee401KContributionsByDate
+        # per-employee up to the cap.
+        list_body = await self._c.get(
+            "/employee/v1/getEmployeeList",
+            params={"clientId": client_id, "employmentStatus": "A"},
+        )
+        ids = _extract_ids(list_body)[: self._cap]
+        out: list[dict] = []
+        for eid in ids:
+            try:
+                body = await self._c.get(
+                    "/payroll/v1/getEmployee401KContributionsByDate",
+                    params={
+                        "clientId": client_id,
+                        "employeeId": eid,
+                        "startDate": f"{year}-01-01",
+                        "endDate": f"{year}-12-31",
+                    },
+                )
+            except Exception:  # noqa: BLE001
+                continue
+            ee = Decimal("0")
+            er = Decimal("0")
+            gross = Decimal("0")
+            for r in _rows(body, "employee401KContributions") + _rows(body, "contribution"):
+                ee += _dec(r.get("employeeContribution") or r.get("employeeDeferral"))
+                er += _dec(r.get("employerMatch") or r.get("employerContribution"))
+                gross += _dec(r.get("grossWages") or r.get("ytdGross"))
+            out.append(
+                {
+                    "employeeId": eid,
+                    "employeeContribution": str(ee),
+                    "employerMatch": str(er),
+                    "ytdGross": str(gross),
+                }
+            )
+        return out
+
+    async def get_scheduled_deductions(
+        self, client_id: str, employee_id: str
+    ) -> list[dict]:
+        body = await self._c.get(
+            "/employee/v1/getScheduledDeductions",
+            params={"clientId": client_id, "employeeId": employee_id},
+        )
+        rows = (
+            _rows(body, "scheduledDeductions")
+            or _rows(body, "scheduledDeduction")
+            or _rows(body, "deductions")
+            or []
+        )
+        return [
+            {"code": r.get("deductionCode") or r.get("code") or ""}
+            for r in rows
+        ]
+
+    async def get_employee_dob(self, client_id: str, employee_id: str):  # type: ignore[no-untyped-def]
+        from datetime import date
+
+        body = await self._c.get(
+            "/employee/v1/getEmployee",
+            params=[
+                ("clientId", client_id),
+                ("options", "Person"),
+                ("employeeId", employee_id),
+            ],
+        )
+        row = _first(body, "employee") or {}
+        person = row.get("person") or {}
+        raw = person.get("birthDate")
+        if not raw or "*" in str(raw):
+            return None
+        try:
+            return date.fromisoformat(str(raw)[:10])
+        except ValueError:
+            return None
+
+
+def _dec(raw) -> Decimal:  # type: ignore[no-untyped-def]
+    if raw in (None, ""):
+        return Decimal("0")
+    try:
+        return Decimal(str(raw))
+    except Exception:  # noqa: BLE001
+        return Decimal("0")
 
 
 class PayrollBatchHealthReader:
