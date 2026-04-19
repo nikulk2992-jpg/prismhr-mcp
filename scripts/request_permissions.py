@@ -214,6 +214,27 @@ DESIRED_SERVICES: list[str] = [
     "EmployeeService.getW2Years",
     "EmployeeService.downloadW2",
     "EmployeeService.reprintW2C",
+    # Broad read coverage for future workflows so we don't block on
+    # approvals per-workflow. Round 8 — kitchen sink of remaining
+    # read endpoints tied to shipped or planned workflow modules.
+    "PayrollService.getManualChecks",
+    "PayrollService.getPayrollNotes",
+    "PayrollService.getBatchInfo",
+    "PayrollService.getPayrollSummary",
+    "PayrollService.getStandardHours",
+    "BenefitService.getDependents",
+    "BenefitService.getBenefitConfirmationList",
+    "ClientMasterService.getRetirementPlanList",
+    "ClientMasterService.getClientAccountingTemplate",
+    "GeneralLedgerService.getClientAccountingTemplate",
+    "GeneralLedgerService.getBulkOutstandingInvoices",
+    "HumanResourcesService.getJobTitleCodesList",
+    "HumanResourcesService.getJobSkillCodesList",
+    "TaxRateService.getTaxRate",
+    "TaxRateService.getWorkersCompClasses",
+    "DeductionService.getGarnishmentDetails",
+    "DeductionService.getGarnishmentPaymentHistory",
+    "DeductionService.getVoluntaryRecurringDeductions",
 ]
 
 

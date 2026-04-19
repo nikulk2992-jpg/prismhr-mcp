@@ -46,6 +46,8 @@ cached-credentials.enc
 # Internal business / strategy docs — Simploy-confidential, never public.
 .planning/CEO-BRIEFING.md
 .planning/*-INTERNAL.md
+.planning/marketing.md
+.planning/nico-competitive.md
 
 # IDE / OS
 .idea/
