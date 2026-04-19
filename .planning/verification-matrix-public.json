@@ -2030,12 +2030,32 @@
     {
       "path": "/payroll/v1/getBatchPayments",
       "status": "verified"
+    },
+    {
+      "path": "/clientMaster/v1/getPayGroupDetails",
+      "status": "verified"
+    },
+    {
+      "path": "/clientMaster/v1/getOSHA300Astats",
+      "status": "verified"
+    },
+    {
+      "path": "/benefits/v1/get401KMatchRules",
+      "status": "verified"
+    },
+    {
+      "path": "/benefits/v1/getSection125Plans",
+      "status": "verified"
+    },
+    {
+      "path": "/clientMaster/v1/getDocExpirations",
+      "status": "verified"
     }
   ],
   "summary": {
     "prismhr_error": 0,
-    "total": 112,
+    "total": 117,
     "transport_error": 10,
-    "verified": 102
+    "verified": 107
   }
 }

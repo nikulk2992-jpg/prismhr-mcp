@@ -1,6 +1,16 @@
 # prismhr-mcp — Product Roadmap
 
-Two-tier model confirmed during dev8:
+Four-tier model (Tier 2.5 added 2026-04-19 — see
+[portal-tier.md](./portal-tier.md)):
+
+| Tier | Product | ICP | Model |
+|---|---|---|---|
+| 1 | `prismhr-mcp` (MIT) | Devs, PEOs | Free OSS |
+| 2 | `prismhr-mcp-simploy` | PEOs running ops | Paid per-PEO license |
+| **2.5** | **`prismhr-mcp-portal`** | **PEO client companies (50K+ addressable SMB employers)** | **SaaS per-seat, PEO resells** |
+| 3 | `prismhr-mcp-broker` | Carriers, ERPs, EDI | Platform fee per partner/tenant |
+
+
 
 ## Tier 1 — `prismhr-mcp` (OSS, MIT)
 
@@ -18,6 +28,34 @@ Ships:
 - Prod-safety gate — opt-in via `PRISMHR_MCP_ALLOW_PROD=true`
 
 Distributed via `pip install prismhr-mcp` and MCP Registry.
+
+## Tier 2.5 — `prismhr-mcp-portal` (Commercial, SaaS, hosted)
+
+**Full spec:** [portal-tier.md](./portal-tier.md)
+
+Client-company-facing portal. Scoped, read-only, multi-tenant. PEOs
+resell to the 50K+ small/mid employers running under them. Every request
+currently emailed to a PEO rep becomes a Claude turn against live data.
+
+Key points:
+- Client companies don't have PrismHR creds — portal pools PEO sessions
+  and scopes calls via JWT `clientId` claim injected by middleware.
+- Read-only by construction. Declarative allowlist; no write paths
+  reachable even through `meta_call`.
+- PII redaction default-on (SSN last-4, DOB year-only, no street
+  addresses). PEO admin can lift per-user with audit trail.
+- 6 portal scopes (roster, payroll, benefits, pto, compliance, billing).
+- White-label per PEO (brand YAML + domain).
+- MVP workflows = read-only subset of Tier 2's 15 workflows.
+- Pricing: per-employee wholesale to PEO; PEO retailer margin 30–50%.
+
+Build unlocks after Tier 2 ships first Named Assistant. Estimated 10–14
+weeks from Tier 2 GA to Tier 2.5 GA.
+
+Strategic role: Tier 2.5 is the **flywheel**. It's the only tier that
+touches non-technical SMB buyers. Every adopting PEO becomes a Tier 2
++ Tier 3 prospect; every adopting employer becomes a future buyer when
+they outgrow the PEO model.
 
 ## Tier 3 — `prismhr-mcp-broker` (Commercial, paid) — Integration Broker
 
@@ -123,6 +161,42 @@ Each tool = composed from verified `meta_call` primitives + domain logic
 - Brand config YAML (logo, palette, typography, footer, legal disclaimer)
 - Per-client co-brand overlays (`brands/clients/<client>.yaml`)
 - Simploy Solution Architect engagement — per-PEO setup + staff training
+
+## Adoption funnel across tiers
+
+```
+                    ┌─────────────────────────┐
+                    │ Tier 1 — OSS core       │
+                    │ Developers install,     │
+                    │ probe their tenant      │
+                    └───────────┬─────────────┘
+                                │ hit workflow ceiling
+                                ▼
+                    ┌─────────────────────────┐
+         ┌─────────▶│ Tier 2 — Named Assistants │
+         │          │ PEO deploys internal ops  │
+         │          │ AI                        │
+         │          └───────────┬───────────────┘
+         │                      │ PEO resells to clients
+         │                      ▼
+         │          ┌─────────────────────────┐
+         │          │ Tier 2.5 — Client Portal  │
+         │          │ SMB employers get        │
+         │ upsell   │ self-serve AI data       │
+         │ ◀────────┤ access                   │
+         │          └───────────┬───────────────┘
+         │                      │ portal exposes broker contracts
+         │                      ▼
+         │          ┌─────────────────────────┐
+         └──────────┤ Tier 3 — Broker platform │
+                    │ Carriers/ERPs integrate  │
+                    │ with every resident PEO  │
+                    └─────────────────────────┘
+```
+
+Every tier feeds every other. The broker serves carriers who serve
+clients in the portal who are run by PEOs using Tier 2 — all on Tier 1
+rails.
 
 ## OSS adoption → Commercial funnel
 
