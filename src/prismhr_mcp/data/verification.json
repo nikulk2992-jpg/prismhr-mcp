@@ -11,7 +11,7 @@
     "employee_id": "1000+",
     "end_date": "1",
     "job_code": "2-10",
-    "naics_code": "1",
+    "naics_code": "1000+",
     "pay_date_end": "1",
     "pay_date_start": "1",
     "pay_group_id": "1",
@@ -116,27 +116,27 @@
     },
     {
       "path": "/codeFiles/v1/getBillingCode",
-      "status": "error"
+      "status": "verified"
     },
     {
       "path": "/codeFiles/v1/getClientCategoryList",
-      "status": "error"
+      "status": "verified"
     },
     {
       "path": "/codeFiles/v1/getContactTypeList",
-      "status": "error"
+      "status": "verified"
     },
     {
       "path": "/codeFiles/v1/getHolidayCodeList",
-      "status": "error"
+      "status": "verified"
     },
     {
       "path": "/codeFiles/v1/getNAICSCodeList",
-      "status": "error"
+      "status": "verified"
     },
     {
       "path": "/codeFiles/v1/getPositionClassifications",
-      "status": "error"
+      "status": "verified"
     },
     {
       "path": "/documentService/v1/getDocumentTypes",
@@ -815,23 +815,23 @@
     },
     {
       "path": "/codeFiles/v1/getCourseCodesList",
-      "status": "error"
+      "status": "verified"
     },
     {
       "path": "/codeFiles/v1/getEventCodes",
-      "status": "error"
+      "status": "verified"
     },
     {
       "path": "/codeFiles/v1/getPayGrades",
-      "status": "error"
+      "status": "verified"
     },
     {
       "path": "/codeFiles/v1/getProjectPhase",
-      "status": "error"
+      "status": "verified"
     },
     {
       "path": "/codeFiles/v1/getRatingCode",
-      "status": "error"
+      "status": "verified"
     },
     {
       "path": "/deductions/v1/getDeductions",
@@ -1733,16 +1733,12 @@
         "payrollVoucher[].otherDeduction[].otherDeductAmount"
       ],
       "status": "verified"
-    },
-    {
-      "path": "/clientMaster/v1/getClientCodes",
-      "status": "verified"
     }
   ],
   "summary": {
     "prismhr_error": 0,
-    "total": 96,
-    "transport_error": 17,
-    "verified": 79
+    "total": 95,
+    "transport_error": 6,
+    "verified": 89
   }
 }
