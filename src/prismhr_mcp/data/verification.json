@@ -1,6 +1,7 @@
 {
   "authorized_services_note": "The upstream authorized-service list is tenant-specific and omitted from the public matrix. Use the `meta_upstream_permissions` tool to see yours.",
   "fixture_key_coverage": {
+    "absence_code": "2-10",
     "as_of_date": "1",
     "batch_id": "2-10",
     "batch_ids_csv": "1",
@@ -57,6 +58,47 @@
       "status": "verified"
     },
     {
+      "path": "/benefits/v1/getPlanYearInfo",
+      "response_keys": [
+        "planYearDetails",
+        "planYearDetails.retirementPlanYears",
+        "planYearDetails.retirementPlanYears[].erisaPlan",
+        "planYearDetails.retirementPlanYears[].peoMatch",
+        "planYearDetails.retirementPlanYears[].matchPercent",
+        "planYearDetails.retirementPlanYears[].matchMaxPercent",
+        "planYearDetails.retirementPlanYears[].planYearReportingPeriods",
+        "planYearDetails.retirementPlanYears[].planYearReportingPeriods[].period",
+        "planYearDetails.retirementPlanYears[].planYearReportingPeriods[].periodDescription",
+        "planYearDetails.retirementPlanYears[].planYearReportingPeriods[].thruDate",
+        "planYearDetails.retirementPlanYears[].planId",
+        "planYearDetails.retirementPlanYears[].planYear",
+        "planYearDetails.retirementPlanYears[].planYearName",
+        "planYearDetails.retirementPlanYears[].startDate",
+        "planYearDetails.retirementPlanYears[].endDate",
+        "planYearDetails.section125PlanYears",
+        "planYearDetails.section125PlanYears[].erisaPlan",
+        "planYearDetails.section125PlanYears[].planYearReportingPeriods",
+        "planYearDetails.section125PlanYears[].planYearReportingPeriods[].period",
+        "planYearDetails.section125PlanYears[].planYearReportingPeriods[].periodDescription",
+        "planYearDetails.section125PlanYears[].planYearReportingPeriods[].thruDate",
+        "planYearDetails.section125PlanYears[].planId",
+        "planYearDetails.section125PlanYears[].planYear",
+        "planYearDetails.section125PlanYears[].planYearName",
+        "planYearDetails.section125PlanYears[].startDate",
+        "planYearDetails.section125PlanYears[].endDate",
+        "planYearDetails.hsaPlanYears",
+        "planYearDetails.hsaPlanYears[].planId",
+        "planYearDetails.hsaPlanYears[].planYear",
+        "planYearDetails.hsaPlanYears[].planYearName",
+        "planYearDetails.hsaPlanYears[].startDate",
+        "planYearDetails.hsaPlanYears[].endDate",
+        "errorCode",
+        "errorMessage",
+        "extension"
+      ],
+      "status": "verified"
+    },
+    {
       "path": "/clientMaster/v1/getClientList",
       "response_keys": [
         "clientListResult",
@@ -77,11 +119,23 @@
       "status": "error"
     },
     {
+      "path": "/codeFiles/v1/getClientCategoryList",
+      "status": "error"
+    },
+    {
+      "path": "/codeFiles/v1/getContactTypeList",
+      "status": "error"
+    },
+    {
       "path": "/codeFiles/v1/getHolidayCodeList",
       "status": "error"
     },
     {
       "path": "/codeFiles/v1/getNAICSCodeList",
+      "status": "error"
+    },
+    {
+      "path": "/codeFiles/v1/getPositionClassifications",
       "status": "error"
     },
     {
@@ -236,6 +290,20 @@
       "status": "verified"
     },
     {
+      "path": "/benefits/v1/getACAOfferedEmployees",
+      "response_keys": [
+        "total",
+        "startpage",
+        "count",
+        "acaEmployeeInformation",
+        "infoMessage",
+        "errorCode",
+        "errorMessage",
+        "extension"
+      ],
+      "status": "verified"
+    },
+    {
       "path": "/benefits/v1/getActiveBenefitPlans",
       "response_keys": [
         "benefitPlan",
@@ -246,6 +314,14 @@
       "status": "verified"
     },
     {
+      "path": "/benefits/v1/getAvailableBenefitPlans",
+      "status": "error"
+    },
+    {
+      "path": "/benefits/v1/getBenefitAdjustments",
+      "status": "verified"
+    },
+    {
       "path": "/benefits/v1/getBenefitConfirmationList",
       "status": "verified"
     },
@@ -253,6 +329,56 @@
       "path": "/benefits/v1/getBenefitPlans",
       "response_keys": [
         "benefitPlan",
+        "errorCode",
+        "errorMessage",
+        "extension"
+      ],
+      "status": "verified"
+    },
+    {
+      "path": "/benefits/v1/getBenefitRule",
+      "response_keys": [
+        "benefitRule",
+        "benefitRule[].planId",
+        "benefitRule[].groupPlanId",
+        "benefitRule[].billingRateGroup",
+        "benefitRule[].employmentStatus",
+        "benefitRule[].effectiveDate",
+        "benefitRule[].ruleAmtMadeBy",
+        "benefitRule[].eligDays",
+        "benefitRule[].rule",
+        "benefitRule[].rule[].planType",
+        "benefitRule[].rule[].method",
+        "benefitRule[].rule[].companyEEBill",
+        "benefitRule[].rule[].employeeEEBill",
+        "benefitRule[].rule[].companyDepBill",
+        "benefitRule[].rule[].employeeDepBill",
+        "benefitRule[].rule[].companyContribution",
+        "benefitRule[].rule[].employeeTotalContribution",
+        "benefitRule[].rule[].totalBilled",
+        "benefitRule[].rule[].employeePremiumBilled",
+        "benefitRule[].rule[].dependentsPremiumBilled",
+        "benefitRule[].historicalRule",
+        "benefitRule[].basicContributionRule",
+        "benefitRule[].takeOnEmpExempt",
+        "benefitRule[].altContributionPlan",
+        "benefitRule[].altRateGroup",
+        "benefitRule[].planApplication",
+        "benefitRule[].planApplicationDesc",
+        "benefitRule[].minimumAge",
+        "benefitRule[].maxAge",
+        "benefitRule[].minDayOrMonth",
+        "benefitRule[].minDayOrMonthValue",
+        "benefitRule[].eligDaysFrom",
+        "benefitRule[].eligDateUsed",
+        "benefitRule[].employmentType",
+        "benefitRule[].exemptOrNonExempt",
+        "benefitRule[].networkStopDate",
+        "benefitRule[].disabilitySalaryBandRule",
+        "benefitRule[].disabilityCoverageRule",
+        "benefitRule[].coverageRule",
+        "benefitRule[].checksum",
+        "infoMessage",
         "errorCode",
         "errorMessage",
         "extension"
@@ -299,6 +425,10 @@
       "status": "verified"
     },
     {
+      "path": "/benefits/v1/getEligibleFlexSpendingPlans",
+      "status": "verified"
+    },
+    {
       "path": "/benefits/v1/getMonthlyACAInfo",
       "status": "verified"
     },
@@ -335,11 +465,95 @@
       "status": "verified"
     },
     {
+      "path": "/benefits/v1/getPtoAbsenceCodes",
+      "response_keys": [
+        "sessionId",
+        "clientId",
+        "absenceCodeDetail",
+        "absenceCodeDetail[].checksum",
+        "absenceCodeDetail[].absenceCode",
+        "absenceCodeDetail[].reason",
+        "absenceCodeDetail[].updatePtoRegister",
+        "absenceCodeDetail[].fmlaLeave",
+        "absenceCodeDetail[].globalPto",
+        "absenceCodeDetail[].combineStateLocal",
+        "absenceCodeDetail[].globalRegisterTypeList",
+        "absenceCodeDetail[].payCodeList",
+        "absenceCodeDetail[].payCodeList[].payCode",
+        "absenceCodeDetail[].payCodeList[].payCodeDesc",
+        "absenceCodeDetail[].registerTypeList",
+        "absenceCodeDetail[].registerTypeList[].registerType",
+        "absenceCodeDetail[].registerTypeList[].registerTypeDesc",
+        "absenceCodeDetail[].registerTypeList[].ptoClass",
+        "absenceCodeDetail[].leaveRequestProcessing",
+        "absenceCodeDetail[].leaveRequestProcessing.enableInEP",
+        "absenceCodeDetail[].leaveRequestProcessing.minHours",
+        "absenceCodeDetail[].leaveRequestProcessing.maxHours",
+        "absenceCodeDetail[].leaveRequestProcessing.daysInAdvance",
+        "absenceCodeDetail[].leaveRequestProcessing.enableIfNegativeBalance",
+        "absenceCodeDetail[].leaveRequestProcessing.maxNegHours",
+        "absenceCodeDetail[].leaveRequestProcessing.retroType",
+        "absenceCodeDetail[].leaveRequestProcessing.retroDays",
+        "absenceCodeDetail[].leaveRequestProcessing.leavePayCode",
+        "absenceCodeDetail[].leaveRequestProcessing.suppressNotifications",
+        "absenceCodeDetail[].leaveRequestProcessing.autoAcceptOnTimeSheet",
+        "absenceCodeDetail[].leaveRequestProcessing.payMethodRule",
+        "absenceCodeDetail[].leaveRequestProcessing.payMethodRule[].payMethod",
+        "absenceCodeDetail[].leaveRequestProcessing.payMethodRule[].leaveOffsetPayCode",
+        "errorCode",
+        "errorMessage",
+        "extension"
+      ],
+      "status": "verified"
+    },
+    {
+      "path": "/benefits/v1/getPtoAutoEnrollRules",
+      "response_keys": [
+        "checksum",
+        "ptoAutoEnrollRules",
+        "errorCode",
+        "errorMessage",
+        "extension"
+      ],
+      "status": "verified"
+    },
+    {
       "path": "/benefits/v1/getPtoClasses",
       "response_keys": [
         "ptoClasses",
         "ptoClasses[].ptoClassCode",
         "ptoClasses[].ptoClassDesc",
+        "errorCode",
+        "errorMessage",
+        "extension"
+      ],
+      "status": "verified"
+    },
+    {
+      "path": "/benefits/v1/getPtoRegisterTypes",
+      "response_keys": [
+        "ptoRegisterType",
+        "ptoRegisterType.sessionId",
+        "ptoRegisterType.clientId",
+        "ptoRegisterType.ptoRegisterTypeDetails",
+        "ptoRegisterType.ptoRegisterTypeDetails[].checksum",
+        "ptoRegisterType.ptoRegisterTypeDetails[].ptoTypeCode",
+        "ptoRegisterType.ptoRegisterTypeDetails[].ptoTypeDesc",
+        "ptoRegisterType.ptoRegisterTypeDetails[].ptoClass",
+        "ptoRegisterType.ptoRegisterTypeDetails[].yearEndBasis",
+        "ptoRegisterType.ptoRegisterTypeDetails[].fiscalEnd",
+        "ptoRegisterType.ptoRegisterTypeDetails[].triggerMethod",
+        "ptoRegisterType.ptoRegisterTypeDetails[].triggerDate",
+        "ptoRegisterType.ptoRegisterTypeDetails[].printOnCheck",
+        "ptoRegisterType.ptoRegisterTypeDetails[].payStubName",
+        "ptoRegisterType.ptoRegisterTypeDetails[].inactiveRegister",
+        "ptoRegisterType.ptoRegisterTypeDetails[].paidAbsence",
+        "ptoRegisterType.ptoRegisterTypeDetails[].autoEnrollBeforeStart",
+        "ptoRegisterType.ptoRegisterTypeDetails[].warnMoreHoursThanAvail",
+        "ptoRegisterType.ptoRegisterTypeDetails[].absenceCode",
+        "ptoRegisterType.ptoRegisterTypeDetails[].scheduledHolidays",
+        "ptoRegisterType.ptoRegisterTypeDetails[].customBasicSub",
+        "ptoRegisterType.ptoRegisterTypeDetails[].scheduledTriggers",
         "errorCode",
         "errorMessage",
         "extension"
@@ -475,6 +689,34 @@
       "status": "verified"
     },
     {
+      "path": "/clientMaster/v1/getLaborAllocations",
+      "status": "verified"
+    },
+    {
+      "path": "/clientMaster/v1/getPayDayRules",
+      "response_keys": [
+        "payDayRules",
+        "payDayRules.whenDateFallsOnSaturdayPayOn",
+        "payDayRules.whenDateFallsOnSaturdayPayOn.dayOfWeek",
+        "payDayRules.whenDateFallsOnSaturdayPayOn.beforeOrAfter",
+        "payDayRules.whenDateFallsOnSundayPayOn",
+        "payDayRules.whenDateFallsOnSundayPayOn.dayOfWeek",
+        "payDayRules.whenDateFallsOnSundayPayOn.beforeOrAfter",
+        "payDayRules.whenPayDateFallsOnHoliday",
+        "payDayRules.whenPayDateFallsOnHoliday[].holidayDay",
+        "payDayRules.whenPayDateFallsOnHoliday[].payOnDay",
+        "payDayRules.whenPayDateFallsOnHoliday[].beforeOrAfter",
+        "payDayRules.holidaysObserved",
+        "payDayRules.checksum",
+        "payDayRules.sessionId",
+        "payDayRules.clientId",
+        "errorCode",
+        "errorMessage",
+        "extension"
+      ],
+      "status": "verified"
+    },
+    {
       "path": "/clientMaster/v1/getPayrollSchedule",
       "response_keys": [
         "clientPayrollSchedule",
@@ -503,11 +745,92 @@
       "status": "verified"
     },
     {
+      "path": "/clientMaster/v1/getRetirementPlanList",
+      "response_keys": [
+        "total",
+        "startpage",
+        "count",
+        "infoMessage",
+        "clientRetirement",
+        "clientRetirement[].clientId",
+        "clientRetirement[].checksum",
+        "clientRetirement[].retirementPlanList",
+        "clientRetirement[].retirementPlanList[].retirePlan",
+        "clientRetirement[].retirementPlanList[].thirdPartyPlanId",
+        "clientRetirement[].retirementPlanList[].startDate",
+        "clientRetirement[].retirementPlanList[].endDate",
+        "errorCode",
+        "errorMessage",
+        "extension"
+      ],
+      "status": "verified"
+    },
+    {
+      "path": "/clientMaster/v1/getUnbundledBillingRules",
+      "response_keys": [
+        "total",
+        "startpage",
+        "count",
+        "infoMessage",
+        "unbundledBillingRule",
+        "unbundledBillingRule[].ruleId",
+        "unbundledBillingRule[].ruleDescription",
+        "unbundledBillingRule[].ruleDescWithRate",
+        "unbundledBillingRule[].rate",
+        "unbundledBillingRule[].rateBasedOn",
+        "unbundledBillingRule[].startDate",
+        "unbundledBillingRule[].endDate",
+        "unbundledBillingRule[].voucherTypes",
+        "unbundledBillingRule[].employeeId",
+        "unbundledBillingRule[].batchTypes",
+        "unbundledBillingRule[].employeeType",
+        "unbundledBillingRule[].paygroup",
+        "unbundledBillingRule[].deductPeriod",
+        "unbundledBillingRule[].position",
+        "unbundledBillingRule[].payPeriod",
+        "unbundledBillingRule[].location",
+        "unbundledBillingRule[].specialRate",
+        "unbundledBillingRule[].specialRateStart",
+        "unbundledBillingRule[].specialRateEnd",
+        "unbundledBillingRule[].billingCode",
+        "unbundledBillingRule[].benefitPlan",
+        "unbundledBillingRule[].benefitClass",
+        "unbundledBillingRule[].benefitOfferType",
+        "unbundledBillingRule[].useTimeSheetLocationOrState",
+        "unbundledBillingRule[].payClassEqual",
+        "unbundledBillingRule[].payClassNotEqual",
+        "unbundledBillingRule[].payCodeEqual",
+        "unbundledBillingRule[].payCodeNotEqual",
+        "unbundledBillingRule[].benefitPlanEqual",
+        "unbundledBillingRule[].benefitPlanNotEqual",
+        "errorCode",
+        "errorMessage",
+        "extension"
+      ],
+      "status": "verified"
+    },
+    {
+      "path": "/clientMaster/v1/getWCAccrualModifiers",
+      "status": "verified"
+    },
+    {
+      "path": "/codeFiles/v1/getCourseCodesList",
+      "status": "error"
+    },
+    {
       "path": "/codeFiles/v1/getEventCodes",
       "status": "error"
     },
     {
       "path": "/codeFiles/v1/getPayGrades",
+      "status": "error"
+    },
+    {
+      "path": "/codeFiles/v1/getProjectPhase",
+      "status": "error"
+    },
+    {
+      "path": "/codeFiles/v1/getRatingCode",
       "status": "error"
     },
     {
@@ -705,15 +1028,7 @@
     },
     {
       "path": "/generalLedger/v1/getClientGLData",
-      "response_keys": [
-        "downloadId",
-        "buildStatus",
-        "dataObject",
-        "errorCode",
-        "errorMessage",
-        "extension"
-      ],
-      "status": "verified"
+      "status": "transport_error"
     },
     {
       "path": "/generalLedger/v2/getClientGLData",
@@ -1167,16 +1482,7 @@
     },
     {
       "path": "/payroll/v1/getPayrollVouchersForEmployee",
-      "response_keys": [
-        "total",
-        "startpage",
-        "count",
-        "errorCode",
-        "errorMessage",
-        "extension",
-        "payrollVoucher"
-      ],
-      "status": "verified"
+      "status": "error"
     },
     {
       "path": "/payroll/v1/getScheduledPayments",
@@ -1430,19 +1736,13 @@
     },
     {
       "path": "/clientMaster/v1/getClientCodes",
-      "response_keys": [
-        "clientCodes",
-        "errorCode",
-        "errorMessage",
-        "extension"
-      ],
       "status": "verified"
     }
   ],
   "summary": {
     "prismhr_error": 0,
-    "total": 76,
-    "transport_error": 8,
-    "verified": 68
+    "total": 96,
+    "transport_error": 17,
+    "verified": 79
   }
 }
