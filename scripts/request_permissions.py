@@ -207,6 +207,32 @@ DESIRED_SERVICES: list[str] = [
 ]
 
 
+# PII-unmask grants — per PrismHR's "Unmasking Personally Identifiable
+# Information" guide. Each entry is a method that should be authorized
+# with one or more NOMASK options passed via the `options` array on
+# the Allowed Methods grant. Applied on top of any matching base grant.
+#
+# Tokens:
+#   NOMASKSSN    -> cobraSSN, ssn
+#   NOMASKDOB    -> birthDate
+#   NOMASKACH    -> accountNum
+#   NOMASKMED    -> allergy, condition, height, weight, bloodType, ...
+#   NOMASKDOC    -> i9 / driver license / identificationDocument / ...
+#   NOMASKPER    -> ethnicCode
+#   NOMASKALTID  -> alternateId
+#
+# Grant only what the shipped workflows actually need. Widening scope
+# here widens PII exposure via the API session.
+DESIRED_UNMASK: dict[str, list[str]] = {
+    # Used by New Hire Audit for real SSN presence (masked still works,
+    # but unmasked enables SSN-format validity checks) and by the 401(k)
+    # catch-up eligibility check which needs birthDate.
+    "EmployeeService.getEmployee": ["NOMASKSSN", "NOMASKDOB"],
+    "EmployeeService.getEmployeeSSNList": ["NOMASKSSN"],
+    "EmployeeService.getEmployeeBySSN": ["NOMASKSSN"],
+}
+
+
 async def main() -> int:
     load_into_environ(Path(".env.local.enc"))
     peo_id = os.environ["PRISMHR_MCP_PEO_ID"]
@@ -225,15 +251,43 @@ async def main() -> int:
         cur = (await c.get(f"{base}/login/v1/getAPIPermissions", headers=h)).json()[
             "currentPermissions"
         ]
-        existing = {m["service"] for m in cur["allowedMethods"]}
+        # Index current grants by service name so we can merge unmask options
+        current_by_svc: dict[str, dict] = {m["service"]: m for m in cur["allowedMethods"]}
+        existing = set(current_by_svc.keys())
+
         additions = [s for s in DESIRED_SERVICES if s not in existing]
-        if not additions:
-            print("no new services needed; nothing to request.")
+        unmask_updates: list[tuple[str, list[str]]] = []
+        for svc, tokens in DESIRED_UNMASK.items():
+            cur_opts = current_by_svc.get(svc, {}).get("options") or []
+            missing = [t for t in tokens if t not in cur_opts]
+            if missing:
+                unmask_updates.append((svc, missing))
+
+        if not additions and not unmask_updates:
+            print("no new services or unmask options needed; nothing to request.")
             return 0
 
         merged = list(cur["allowedMethods"])
         for s in additions:
             merged.append({"service": s, "options": [], "fromTime": "", "toTime": ""})
+        # Apply unmask updates: ensure the service is present and options
+        # include the requested NOMASK tokens (union with existing).
+        by_svc_in_merged = {m["service"]: m for m in merged}
+        for svc, tokens in unmask_updates:
+            entry = by_svc_in_merged.get(svc)
+            if entry is None:
+                entry = {"service": svc, "options": list(tokens), "fromTime": "", "toTime": ""}
+                merged.append(entry)
+            else:
+                opts = list(entry.get("options") or [])
+                for t in tokens:
+                    if t not in opts:
+                        opts.append(t)
+                entry["options"] = opts
+        if unmask_updates:
+            print("requesting unmask tokens:")
+            for svc, tokens in unmask_updates:
+                print(f"  {svc} += {tokens}")
 
         payload = {
             "sessionId": sid,
