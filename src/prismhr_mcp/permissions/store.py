@@ -3,7 +3,7 @@
 Structure:
   {
     "version": 1,
-    "peo_id": "624*D",
+    "peo_id": "<your-peo-id>",
     "environment": "uat",
     "granted": ["client:read", "employee:read", ...],
     "granted_at": "2026-04-18T12:34:56+00:00",

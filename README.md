@@ -77,7 +77,7 @@ labeled `username` and `password` (optionally `peoId`).
 ```powershell
 $env:PRISMHR_MCP_USERNAME = "claudedemo"
 $env:PRISMHR_MCP_PASSWORD = "<paste>"
-$env:PRISMHR_MCP_PEO_ID   = "624*D"
+$env:PRISMHR_MCP_PEO_ID   = "<your-peo-id>"
 ```
 
 ### 3. Sanity check
@@ -101,7 +101,7 @@ Add to your Claude Code `.mcp.json`:
         "PRISMHR_MCP_ENVIRONMENT": "uat",
         "PRISMHR_MCP_USERNAME": "claudedemo",
         "PRISMHR_MCP_PASSWORD": "<paste or reference>",
-        "PRISMHR_MCP_PEO_ID": "624*D"
+        "PRISMHR_MCP_PEO_ID": "<your-peo-id>"
       }
     }
   }
@@ -214,7 +214,7 @@ exist for prismhr-mcp?" and it will describe them.
 env vars or the direct `PRISMHR_MCP_USERNAME`/`_PASSWORD` pair.
 
 **`PrismHR login rejected (status=401)`** — wrong username/password/peo_id.
-UAT's `peo_id` is `624*D` (asterisk literal). Prod differs per PEO.
+The `peo_id` is tenant-specific; ask your PrismHR admin. Prod and UAT have different values.
 
 **`environment=prod requires PRISMHR_MCP_ALLOW_PROD=true`** — safety gate.
 Set `PRISMHR_MCP_ALLOW_PROD=true` explicitly once you're ready.

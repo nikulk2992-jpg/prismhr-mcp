@@ -12,11 +12,21 @@ from prismhr_mcp.config import Settings
 def test_defaults_target_uat(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("PRISMHR_MCP_CACHE_DIR", str(tmp_path))
     monkeypatch.delenv("PRISMHR_MCP_ENVIRONMENT", raising=False)
+    monkeypatch.delenv("PRISMHR_MCP_PEO_ID", raising=False)
     s = Settings()
     assert s.environment == "uat"
     assert "uatapi" in s.prismhr_base_url
-    assert s.prismhr_peo_id == "624*D"
+    # peo_id has no default in the OSS core — every install provides their own
+    # via PRISMHR_MCP_PEO_ID.
+    assert s.prismhr_peo_id == ""
     assert s.cache_dir.exists()
+
+
+def test_peo_id_loaded_from_env(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("PRISMHR_MCP_CACHE_DIR", str(tmp_path))
+    monkeypatch.setenv("PRISMHR_MCP_PEO_ID", "TEST*PEO")
+    s = Settings()
+    assert s.prismhr_peo_id == "TEST*PEO"
 
 
 def test_prod_switch_requires_allow_prod(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:

@@ -27,7 +27,7 @@
         },
         {
           "name": "PRISMHR_MCP_PEO_ID",
-          "description": "PrismHR PEO identifier (e.g. '624*D' for Simploy UAT).",
+          "description": "PrismHR PEO identifier. Ask your PrismHR admin for the value assigned to your web service user.",
           "isRequired": true
         },
         {
