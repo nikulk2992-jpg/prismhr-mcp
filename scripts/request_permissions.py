@@ -174,6 +174,27 @@ DESIRED_SERVICES: list[str] = [
     # DocumentService
     "DocumentService.getDocumentTypes",
     "DocumentService.getRuleset",
+    # Round 4: additional payroll/benefits/client/employee coverage
+    "PayrollService.getBillingVouchers",
+    "PayrollService.getBillingCodeTotalsByPayGroup",
+    "PayrollService.getBillingVouchersByBatch",
+    "PayrollService.getBatchPayments",
+    "PayrollService.getProcessSchedule",
+    "PayrollService.getProcessScheduleCodes",
+    "PayrollService.getClientsWithVouchers",
+    "PayrollService.getEmployeeOverrideRates",
+    "PayrollService.getEmployee401KContributionsByDate",
+    "PayrollService.getEmployeePayrollSummary",
+    "PayrollService.getRetirementAdjVoucherListByDate",
+    "PayrollService.getExternalPtoBalance",
+    "BenefitService.getBenefitWorkflowGrid",
+    "BenefitService.getBenefitsEnrollmentTrace",
+    "BenefitService.benefitEnrollmentStatus",
+    "ClientMasterService.getDocExpirations",
+    "ClientMasterService.getGeoLocations",
+    "ClientMasterService.getOSHA300Astats",
+    "EmployeeService.getEmployeeSSNList",
+    "EmployeeService.getEmployeesReadyForEverify",
 ]
 
 
