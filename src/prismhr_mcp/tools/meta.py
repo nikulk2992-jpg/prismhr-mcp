@@ -234,7 +234,7 @@ def register(
                 "Simploy, Inc. — a PEO running its internal ops on top of this server. "
                 "Simploy maintains the project and funds ongoing development."
             ),
-            tool_groups_live=["meta", "client", "payroll"],
+            tool_groups_live=["meta", "catalog", "client", "payroll"],
             tool_groups_planned=[
                 "benefits",
                 "compliance",
