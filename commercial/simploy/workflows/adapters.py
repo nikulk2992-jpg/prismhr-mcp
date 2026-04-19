@@ -8,8 +8,11 @@ talking to real PrismHR in production.
 
 from __future__ import annotations
 
+import asyncio
 from datetime import date
 from typing import Any
+
+import httpx
 
 from prismhr_mcp.clients.prismhr import PrismHRClient
 
@@ -168,6 +171,219 @@ class PrismHRClientReader:
             "hasGarnishments": has,
             "setupComplete": bool(row.get("setupComplete", has)),
         }
+
+
+class BenefitsDeductionAuditReader:
+    """Live-data implementation of benefits_deduction_audit.PrismHRReader.
+
+    PrismHR's getBenefitConfirmationList is per-employee (despite the
+    'List' name), so this adapter iterates the client's employee roster
+    and aggregates confirmations. Bounded by `max_employees` to avoid
+    accidentally probing hundreds of records on a large client.
+    """
+
+    _DEFAULT_EMPLOYEE_CAP = 100
+
+    def __init__(
+        self,
+        client: PrismHRClient,
+        *,
+        max_employees: int = _DEFAULT_EMPLOYEE_CAP,
+    ) -> None:
+        self._c = client
+        self._cap = max_employees
+
+    async def get_active_benefit_plans(self, client_id: str) -> list[dict]:
+        # getActiveBenefitPlans requires an employeeId; for a client-level
+        # plan catalog we use getClientBenefitPlans instead (same shape,
+        # 'benefitPlanOverview' rows).
+        body = await self._c.get(
+            "/benefits/v1/getClientBenefitPlans",
+            params={"clientId": client_id},
+        )
+        rows = _rows(body, "benefitPlanOverview") or _rows(body, "benefitPlan") or []
+        out: list[dict] = []
+        for r in rows:
+            code = r.get("planId") or r.get("planCode") or ""
+            if not code:
+                continue
+            # Best-effort mapping: pull deduction codes off any field named
+            # like deductionCode / dedCode / payrollDeductionCode. This is
+            # carrier-guide-dependent; operators will tune via config later.
+            expected: set[str] = set()
+            for k in ("deductionCode", "deductionCodes", "dedCode", "payrollDeductionCode"):
+                v = r.get(k)
+                if isinstance(v, str) and v:
+                    expected.add(v)
+                elif isinstance(v, list):
+                    expected.update(str(x) for x in v if x)
+            out.append({"planId": code, "expectedDeductionCodes": sorted(expected)})
+        return out
+
+    async def get_benefit_confirmations(self, client_id: str) -> list[dict]:
+        # Fetch the active employee roster (IDs only), then iterate
+        # getBenefitConfirmationList per-employee up to the cap.
+        list_body = await self._c.get(
+            "/employee/v1/getEmployeeList",
+            params={"clientId": client_id, "employmentStatus": "A"},
+        )
+        ids = _extract_ids(list_body)[: self._cap]
+        out: list[dict] = []
+        for eid in ids:
+            try:
+                body = await self._c.get(
+                    "/benefits/v1/getBenefitConfirmationList",
+                    params={"clientId": client_id, "employeeId": eid},
+                )
+            except Exception:  # noqa: BLE001
+                continue
+            rows = (
+                _rows(body, "benefitConfirmationList")
+                or _rows(body, "benefitConfirmation")
+                or _rows(body, "confirmations")
+                or []
+            )
+            if not rows:
+                continue
+            first = rows[0] if isinstance(rows[0], dict) else {}
+            out.append(
+                {
+                    "employeeId": eid,
+                    "firstName": first.get("firstName", ""),
+                    "lastName": first.get("lastName", ""),
+                    "plans": [
+                        {
+                            "planId": str(
+                                r.get("planId")
+                                or r.get("planCode")
+                                or r.get("benefitPlan")
+                                or ""
+                            )
+                        }
+                        for r in rows
+                        if r.get("planId") or r.get("planCode") or r.get("benefitPlan")
+                    ],
+                }
+            )
+        return out
+
+    async def get_scheduled_deductions(
+        self, client_id: str, employee_id: str
+    ) -> list[dict]:
+        body = await self._c.get(
+            "/employee/v1/getScheduledDeductions",
+            params={"clientId": client_id, "employeeId": employee_id},
+        )
+        rows = (
+            _rows(body, "scheduledDeductions")
+            or _rows(body, "scheduledDeduction")
+            or _rows(body, "deductions")
+            or []
+        )
+        return [
+            {
+                "code": r.get("deductionCode") or r.get("code") or "",
+                "amount": r.get("amount") or r.get("deductionAmount") or "0",
+                "frequency": r.get("frequency", ""),
+            }
+            for r in rows
+        ]
+
+
+class YTDReconciliationReader:
+    """Live-data implementation of ytd_reconciliation.PrismHRReader."""
+
+    def __init__(self, client: PrismHRClient) -> None:
+        self._c = client
+
+    async def get_bulk_ytd(self, client_id: str, year: int) -> list[dict]:
+        # getBulkYearToDateValues is an async download:
+        #   1. First call returns {downloadId, buildStatus: "INIT"}.
+        #   2. Subsequent calls with the same params + downloadId return
+        #      buildStatus=BUILD or DONE.
+        #   3. When DONE, `dataObject` holds a URL where the compiled
+        #      JSON is served; the session token is required to fetch it.
+        base_params = {"clientId": client_id, "asOfDate": f"{year}-12-31"}
+        body = await self._c.get("/payroll/v1/getBulkYearToDateValues", params=base_params)
+        if not isinstance(body, dict):
+            return []
+
+        download_id = body.get("downloadId")
+        status = (body.get("buildStatus") or "").upper()
+        while download_id and status not in ("DONE", "ERROR", ""):
+            await asyncio.sleep(2)
+            body = await self._c.get(
+                "/payroll/v1/getBulkYearToDateValues",
+                params={**base_params, "downloadId": download_id},
+            )
+            status = (body.get("buildStatus") or "").upper()
+
+        if status != "DONE":
+            return []
+
+        data_url = body.get("dataObject")
+        if not data_url:
+            return []
+        # Fetch the compiled JSON via the same session. The OSS client
+        # speaks PrismHR paths only, so use its underlying session token
+        # against an absolute URL via a fresh httpx call.
+        token = await self._c._session.token()  # type: ignore[attr-defined]
+        http = httpx.AsyncClient(timeout=120.0)
+        try:
+            resp = await http.get(
+                data_url,
+                headers={"sessionId": token, "Accept": "application/json"},
+            )
+            if resp.status_code != 200:
+                # Stream server returned an error — log nothing (silent in
+                # dogfood) and let the workflow report as YTD_MISSING.
+                return []
+            try:
+                payload = resp.json()
+            except ValueError:
+                return []
+        finally:
+            await http.aclose()
+        # Payload shape per bible: { "data": [ { "employeeId": ..., "YTD": {...} } ] }
+        if isinstance(payload, dict):
+            return _rows(payload, "data") or _rows(payload, "values") or []
+        return []
+
+    async def get_vouchers(self, client_id: str, year: int) -> list[dict]:
+        # PrismHR caps getPayrollVouchers at 5000 per response; paginate
+        # via startpage + count until exhausted. Walk by quarter to stay
+        # well under the cap for high-voucher clients.
+        out: list[dict] = []
+        quarters = [
+            (f"{year}-01-01", f"{year}-03-31"),
+            (f"{year}-04-01", f"{year}-06-30"),
+            (f"{year}-07-01", f"{year}-09-30"),
+            (f"{year}-10-01", f"{year}-12-31"),
+        ]
+        for start, end in quarters:
+            page = 0
+            while True:
+                try:
+                    body = await self._c.get(
+                        "/payroll/v1/getPayrollVouchers",
+                        params={
+                            "clientId": client_id,
+                            "payDateStart": start,
+                            "payDateEnd": end,
+                            "startpage": str(page),
+                            "count": "1000",
+                        },
+                    )
+                except Exception:  # noqa: BLE001 — empty window or throttle
+                    break
+                rows = _rows(body, "payrollVoucher") or _rows(body, "vouchers") or []
+                if not rows:
+                    break
+                out.extend(rows)
+                if len(rows) < 1000:
+                    break
+                page += 1
+        return out
 
 
 class PayrollBatchHealthReader:
