@@ -204,6 +204,11 @@ DESIRED_SERVICES: list[str] = [
     "ClientMasterService.getOSHA300Astats",
     "EmployeeService.getEmployeeSSNList",
     "EmployeeService.getEmployeesReadyForEverify",
+    # ACA deep-dive — 2025 data exists in UAT per the Simploy internal
+    # 1095 status report; getACAOfferedEmployees returns 0 at the
+    # client level, so we need the per-employee + per-client routes.
+    "EmployeeService.download1095C",
+    "ClientMasterService.getACALargeEmployer",
 ]
 
 

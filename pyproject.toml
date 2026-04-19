@@ -1,6 +1,6 @@
 [project]
 name = "prismhr-mcp"
-version = "0.1.0.dev26"
+version = "0.1.0.dev27"
 description = "Open-source Model Context Protocol server for PrismHR — PEO workflow tools + Microsoft 365 connectors for Claude and other MCP-aware agents."
 authors = [{ name = "Nihar Kulkarni", email = "nihar@simploy.com" }]
 readme = "README.md"
