@@ -17,6 +17,7 @@ import os
 import sys
 import time
 import traceback
+from pathlib import Path
 from typing import Any
 
 import httpx
@@ -91,8 +92,25 @@ async def call(server: Any, name: str, args: dict[str, Any]) -> tuple[bool, dict
 
 
 async def main() -> int:
-    username = os.environ["PRISMHR_MCP_USERNAME"]
-    password = os.environ["PRISMHR_MCP_PASSWORD"]
+    # Prefer an encrypted local env file if present. Falls through to any
+    # env vars already set by the caller.
+    enc_path = Path(".env.local.enc")
+    if enc_path.exists():
+        from prismhr_mcp.secure_env import load_into_environ
+
+        loaded = load_into_environ(enc_path)
+        dim(f"loaded {len(loaded)} keys from {enc_path}: {loaded}")
+
+    try:
+        username = os.environ["PRISMHR_MCP_USERNAME"]
+        password = os.environ["PRISMHR_MCP_PASSWORD"]
+    except KeyError as missing:
+        fail(
+            f"missing env var {missing.args[0]}. Either set PRISMHR_MCP_USERNAME + "
+            "PRISMHR_MCP_PASSWORD in your shell, or run "
+            "`scripts/encrypt_env.py` to create .env.local.enc."
+        )
+        return 2
     peo_id = os.environ.get("PRISMHR_MCP_PEO_ID", "TEST-PEO")
 
     settings = Settings()  # default uat + scrypt cache dir
@@ -124,6 +142,39 @@ async def main() -> int:
     chosen_batch: str | None = None
 
     try:
+        step(0, "PrismHR getAPIPermissions — what can this account actually call?")
+        authorized_services: set[str] = set()
+        try:
+            raw = await prismhr.get("/login/v1/getAPIPermissions")
+        except Exception as exc:  # noqa: BLE001
+            fail(f"getAPIPermissions failed: {exc}")
+            raw = None
+        if isinstance(raw, dict):
+            # Shape: {"currentPermissions": {"allowedMethods": [{"service": "..."}]}}
+            cp = raw.get("currentPermissions") or {}
+            allowed = cp.get("allowedMethods") if isinstance(cp, dict) else None
+            if isinstance(allowed, list):
+                for item in allowed:
+                    if isinstance(item, dict) and item.get("service"):
+                        authorized_services.add(str(item["service"]))
+            if authorized_services:
+                groups: dict[str, int] = {}
+                for s in authorized_services:
+                    prefix = s.split(".", 1)[0]
+                    groups[prefix] = groups.get(prefix, 0) + 1
+                ok(f"account authorized for {len(authorized_services)} methods")
+                dim(f"by service: {dict(sorted(groups.items(), key=lambda kv: -kv[1]))}")
+            else:
+                warn("no allowedMethods found — account has zero upstream privileges")
+        elif raw is None:
+            warn("could not fetch permissions; continuing anyway")
+
+        def _missing(*candidates: str) -> bool:
+            """True if NONE of the given PrismHR service names are authorized."""
+            if not authorized_services:
+                return False  # can't tell; let the call proceed
+            return not any(c in authorized_services for c in candidates)
+
         step(1, "meta_ping — liveness")
         ok_flag, data = await call(server, "meta_ping", {})
         if ok_flag:
@@ -151,19 +202,26 @@ async def main() -> int:
             dim(f"granted now: {data.get('granted')}")
 
         step(5, "client_list — expect ~the client roster in UAT")
-        ok_flag, data = await call(server, "client_list", {})
-        if not ok_flag:
-            return 1
+        if _missing("ClientMasterService.getClientList"):
+            warn(
+                "SKIP: account lacks ClientMasterService.getClientList. "
+                "Ask PrismHR admin to grant ClientMasterService + EmployeeService."
+            )
+            ok_flag, data = False, {}
+        else:
+            ok_flag, data = await call(server, "client_list", {})
+            if not ok_flag:
+                dim("client_list failed — payroll steps still run with fallback client id")
         clients = data.get("clients") or []
-        dim(f"count={data.get('count')}")
         if clients:
+            dim(f"count={data.get('count')}")
             sample = clients[:3]
             dim(f"sample: {[(c.get('client_id'), c.get('name'), c.get('status')) for c in sample]}")
             chosen_client = clients[0].get("client_id")
-        else:
+        elif ok_flag:
             warn("no clients returned — UAT may be empty or endpoint shape changed")
 
-        if chosen_client:
+        if chosen_client and not _missing("EmployeeService.getEmployeeList"):
             step(6, f"client_employees — active at {chosen_client}")
             ok_flag, data = await call(
                 server,
@@ -176,7 +234,7 @@ async def main() -> int:
                 dim(f"sample: {[(e.get('employee_id'), e.get('first_name'), e.get('last_name')) for e in employees[:3]]}")
                 chosen_employee = employees[0].get("employee_id")
 
-        if chosen_client and chosen_employee:
+        if chosen_client and chosen_employee and not _missing("EmployeeService.getEmployee"):
             step(7, f"client_employee — detail for {chosen_employee}")
             ok_flag, data = await call(
                 server,
@@ -191,15 +249,27 @@ async def main() -> int:
                     dim(f"fields present: {keys}")
 
         step(8, "client_employee_search — query=claude")
-        ok_flag, data = await call(
-            server,
-            "client_employee_search",
-            {"query": "claude"},
-        )
+        if _missing("EmployeeService.getEmployeeList", "ClientMasterService.getClientList"):
+            warn("SKIP: needs EmployeeService + ClientMasterService privileges")
+            ok_flag, data = False, {}
+        else:
+            ok_flag, data = await call(
+                server,
+                "client_employee_search",
+                {"query": "claude"},
+            )
         if ok_flag:
             dim(f"searched={data.get('searched_clients')} matches={data.get('count')}")
 
-        if chosen_client:
+        # Payroll tools only need a client_id; if we lack ClientMasterService,
+        # seed from a known UAT client instead. Pick the first ACME-like guess.
+        if not chosen_client:
+            fallback_client = os.environ.get("PRISMHR_MCP_FALLBACK_CLIENT")
+            if fallback_client:
+                chosen_client = fallback_client
+                dim(f"using fallback client_id from env: {chosen_client}")
+
+        if chosen_client and not _missing("PayrollService.getBatchListByDate"):
             step(9, f"payroll_batch_status — Q1 2026 at {chosen_client}")
             ok_flag, data = await call(
                 server,

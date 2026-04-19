@@ -22,8 +22,10 @@ from mcp.server.fastmcp import FastMCP
 from pydantic import Field
 
 from .. import __version__
+from ..clients.prismhr import PrismHRClient
 from ..models.about import AboutResponse, CommercialTier
 from ..models.meta import PingResponse
+from pydantic import BaseModel
 from ..models.permissions import (
     PermissionCurrentResponse,
     PermissionGrantResponse,
@@ -40,10 +42,26 @@ from ..permissions import scopes as _scopes  # noqa: F401 — keeps module impor
 from ..registry import ToolRegistry
 
 
+class UpstreamPermissionsResponse(BaseModel):
+    """What PrismHR authorizes the current API account to call.
+
+    Distinct from `meta_list_permissions` — that's which tools the MCP
+    user has opted into locally; this is what the PrismHR admin granted
+    upstream. Tools that map to unauthorized services will 403 even if
+    the MCP scope is granted.
+    """
+
+    authorized_method_count: int
+    services_by_prefix: dict[str, int]
+    methods: list[str]
+    error: str | None = None
+
+
 def register(
     server: FastMCP,
     registry: ToolRegistry,
     permissions: PermissionManager,
+    prismhr: PrismHRClient,
 ) -> None:
     async def meta_ping() -> PingResponse:
         """Health check. Returns server name, version, and UTC time.
@@ -268,11 +286,53 @@ def register(
             ],
         )
 
+    async def meta_upstream_permissions() -> UpstreamPermissionsResponse:
+        """Ask PrismHR which API methods this account is actually allowed to call.
+
+        Calls `/login/v1/getAPIPermissions`. If the account lacks a method,
+        even a fully-scope-granted MCP tool will 403 at the PrismHR edge.
+        Use this to diagnose 'permission denied' errors when
+        `meta_list_permissions` shows the scope is granted.
+
+        Always callable — no scope required.
+        """
+        try:
+            raw = await prismhr.get("/login/v1/getAPIPermissions")
+        except Exception as exc:  # noqa: BLE001
+            return UpstreamPermissionsResponse(
+                authorized_method_count=0,
+                services_by_prefix={},
+                methods=[],
+                error=f"getAPIPermissions failed: {exc}",
+            )
+
+        methods: list[str] = []
+        if isinstance(raw, dict):
+            cp = raw.get("currentPermissions") or {}
+            allowed = cp.get("allowedMethods") if isinstance(cp, dict) else None
+            if isinstance(allowed, list):
+                for item in allowed:
+                    if isinstance(item, dict) and item.get("service"):
+                        methods.append(str(item["service"]))
+
+        methods.sort()
+        by_prefix: dict[str, int] = {}
+        for m in methods:
+            prefix = m.split(".", 1)[0]
+            by_prefix[prefix] = by_prefix.get(prefix, 0) + 1
+
+        return UpstreamPermissionsResponse(
+            authorized_method_count=len(methods),
+            services_by_prefix=dict(sorted(by_prefix.items(), key=lambda kv: -kv[1])),
+            methods=methods,
+        )
+
     registry.register(server, "meta_ping", meta_ping)
     registry.register(server, "meta_about", meta_about)
     registry.register(server, "meta_request_permissions", meta_request_permissions)
     registry.register(server, "meta_grant_permissions", meta_grant_permissions)
     registry.register(server, "meta_list_permissions", meta_list_permissions)
+    registry.register(server, "meta_upstream_permissions", meta_upstream_permissions)
 
 
 def _consent_path(permissions: PermissionManager) -> str:

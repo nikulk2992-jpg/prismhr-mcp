@@ -88,7 +88,9 @@ class SessionManager:
         token = await self.token()
         url = f"{self._settings.prismhr_base_url}{KEEPALIVE_PATH}"
         try:
-            resp = await self._http.get(url, headers={"Authorization": f"Bearer {token}"})
+            resp = await self._http.get(
+                url, headers={"sessionId": token, "Accept": "application/json"}
+            )
         except httpx.HTTPError as exc:
             log.warning("Keepalive request failed: %s", exc)
             return
@@ -146,7 +148,13 @@ class SessionManager:
         except ValueError as exc:
             raise SessionError(f"PrismHR login response not JSON: {exc}") from exc
 
-        token = payload.get("token") or payload.get("sessionToken")
+        # PrismHR UAT returns `sessionId`; some older tenants use `token` or
+        # `sessionToken`. Accept any of them.
+        token = (
+            payload.get("sessionId")
+            or payload.get("token")
+            or payload.get("sessionToken")
+        )
         if not token:
             raise SessionError(f"PrismHR login response missing token field: {payload}")
 
