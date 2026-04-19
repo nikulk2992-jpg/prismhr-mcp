@@ -111,7 +111,7 @@ async def main() -> int:
             "`scripts/encrypt_env.py` to create .env.local.enc."
         )
         return 2
-    peo_id = os.environ.get("PRISMHR_MCP_PEO_ID", "TEST-PEO")
+    peo_id = os.environ["PRISMHR_MCP_PEO_ID"]
 
     settings = Settings()  # default uat + scrypt cache dir
     http = httpx.AsyncClient(timeout=60.0)

@@ -50,9 +50,11 @@ class Settings(BaseSettings):
     prismhr_uat_base_url: str = "https://uatapi.prismhr.com/demo/prismhr-api/services/rest"
     prismhr_prod_base_url: str = "https://api.prismhr.com/prismhr-api/services/rest"
 
-    # PrismHR PEO ID — UAT default is "TEST-PEO".
+    # PrismHR PEO ID — no default; every install sets their own. Leaving
+    # this blank here keeps tenant-specific values out of the public OSS
+    # core. Consumers set PRISMHR_MCP_PEO_ID in their own env.
     prismhr_peo_id: str = Field(
-        default="TEST-PEO",
+        default="",
         validation_alias=AliasChoices("PRISMHR_MCP_PEO_ID", "prismhr_peo_id"),
     )
 
