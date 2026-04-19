@@ -2050,12 +2050,36 @@
     {
       "path": "/clientMaster/v1/getDocExpirations",
       "status": "verified"
+    },
+    {
+      "path": "/benefits/v1/getGroupBenefitPlan",
+      "status": "verified"
+    },
+    {
+      "path": "/benefits/v1/getClientBenefitPlanSetupDetails",
+      "status": "authorized_no_fixture"
+    },
+    {
+      "path": "/benefits/v1/getEnrollmentPlanDetails",
+      "status": "authorized_no_fixture"
+    },
+    {
+      "path": "/benefits/v1/getGroupBenefitRates",
+      "status": "authorized_no_fixture"
+    },
+    {
+      "path": "/benefits/v1/getGroupBenefitTypes",
+      "status": "authorized_no_fixture"
+    },
+    {
+      "path": "/benefits/v1/getFlexPlans",
+      "status": "authorized_no_fixture"
     }
   ],
   "summary": {
     "prismhr_error": 0,
-    "total": 117,
+    "total": 123,
     "transport_error": 10,
-    "verified": 107
+    "verified": 108
   }
 }

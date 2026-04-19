@@ -10,11 +10,14 @@ from __future__ import annotations
 
 import asyncio
 from datetime import date
-from typing import Any
+from typing import Any, TYPE_CHECKING
 
 import httpx
 
 from prismhr_mcp.clients.prismhr import PrismHRClient
+
+if TYPE_CHECKING:
+    from simploy.config.plan_deduction_map import PlanDeductionMap
 
 
 class PrismHRClientReader:
@@ -189,14 +192,20 @@ class BenefitsDeductionAuditReader:
         client: PrismHRClient,
         *,
         max_employees: int = _DEFAULT_EMPLOYEE_CAP,
+        plan_deduction_map: "PlanDeductionMap | None" = None,
     ) -> None:
         self._c = client
         self._cap = max_employees
+        self._pdm = plan_deduction_map
 
     async def get_active_benefit_plans(self, client_id: str) -> list[dict]:
-        # getActiveBenefitPlans requires an employeeId; for a client-level
-        # plan catalog we use getClientBenefitPlans instead (same shape,
-        # 'benefitPlanOverview' rows).
+        # Plan -> deduction-code mapping resolution order:
+        #   1. Operator-supplied YAML (self._pdm) — works even without
+        #      getGroupBenefitPlan permission.
+        #   2. getGroupBenefitPlan(planId) — the authoritative source.
+        #      Fields: prDednCode, prDednCodepp (payroll), pr125Dedn,
+        #      pr125Dednpp (Section 125), billCode, prepayBillCode.
+        #   3. Inline fields on getClientBenefitPlans response (rare).
         body = await self._c.get(
             "/benefits/v1/getClientBenefitPlans",
             params={"clientId": client_id},
@@ -207,18 +216,55 @@ class BenefitsDeductionAuditReader:
             code = r.get("planId") or r.get("planCode") or ""
             if not code:
                 continue
-            # Best-effort mapping: pull deduction codes off any field named
-            # like deductionCode / dedCode / payrollDeductionCode. This is
-            # carrier-guide-dependent; operators will tune via config later.
             expected: set[str] = set()
+
+            # Source 1: YAML mapping.
+            if self._pdm is not None:
+                expected.update(self._pdm.expected_deduction_codes(client_id, code))
+
+            # Source 2: getGroupBenefitPlan — authoritative when authorized.
+            if not expected:
+                expected.update(await self._fetch_gbp_deduction_codes(code))
+
+            # Source 3: inline fields on getClientBenefitPlans (defensive).
             for k in ("deductionCode", "deductionCodes", "dedCode", "payrollDeductionCode"):
                 v = r.get(k)
                 if isinstance(v, str) and v:
                     expected.add(v)
                 elif isinstance(v, list):
                     expected.update(str(x) for x in v if x)
+
             out.append({"planId": code, "expectedDeductionCodes": sorted(expected)})
         return out
+
+    async def _fetch_gbp_deduction_codes(self, plan_id: str) -> set[str]:
+        """Pull the deduction codes off a plan's Group Benefit Plan record.
+
+        Returns an empty set on 403 (permission gated) or any other
+        error, so the workflow degrades gracefully to skipping the plan.
+        """
+        try:
+            body = await self._c.get(
+                "/benefits/v1/getGroupBenefitPlan",
+                params={"planId": plan_id},
+            )
+        except Exception:  # noqa: BLE001 — permission / transport issues are non-fatal
+            return set()
+        if not isinstance(body, dict):
+            return set()
+        if body.get("errorCode") not in (None, "", "0"):
+            return set()
+        gbp = body.get("groupBenefitPlan")
+        if isinstance(gbp, list):
+            gbp = gbp[0] if gbp else {}
+        if not isinstance(gbp, dict):
+            return set()
+        codes: set[str] = set()
+        for field_name in ("prDednCode", "prDednCodepp", "pr125Dedn", "pr125Dednpp"):
+            v = gbp.get(field_name)
+            if isinstance(v, str) and v.strip():
+                codes.add(v.strip())
+        return codes
 
     async def get_benefit_confirmations(self, client_id: str) -> list[dict]:
         # Fetch the active employee roster (IDs only), then iterate

@@ -154,6 +154,15 @@ DESIRED_SERVICES: list[str] = [
     "BenefitService.getEligibleFlexSpendingPlans",
     "BenefitService.getPlanYearInfo",
     "BenefitService.retirementCensusExport",
+    # Plan-to-deduction-code mapping — per PrismHR bible (Group Benefit
+    # Plans form carries Deduction Code + 125 Deduction Code + Bill Code
+    # at plan level). Required for Benefits-Deduction Audit workflow.
+    "BenefitService.getGroupBenefitPlan",
+    "BenefitService.getClientBenefitPlanSetupDetails",
+    "BenefitService.getEnrollmentPlanDetails",
+    "BenefitService.getGroupBenefitRates",
+    "BenefitService.getGroupBenefitTypes",
+    "BenefitService.getFlexPlans",
     # TaxRateService — tax setup
     "TaxRateService.getFutaTaxRates",
     "TaxRateService.getSutaTaxRates",

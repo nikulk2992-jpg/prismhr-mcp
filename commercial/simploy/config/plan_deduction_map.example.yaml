@@ -1,0 +1,40 @@
+# Plan-to-Deduction-Code Mapping — per-client override
+#
+# PrismHR's Group Benefit Plans form carries Deduction Code + 125
+# Deduction Code + Bill Code at the plan level, but those fields are
+# only exposed via getGroupBenefitPlan / getClientBenefitPlanSetupDetails
+# (permission-gated). Until those methods are authorized on a given
+# tenant, operators supply the mapping here.
+#
+# The Benefits-Deduction Audit workflow consults this file first and
+# falls back to the API mapping once it's available. Any plan not
+# listed gets skipped (cannot evaluate without an expected deduction
+# code — same as today's default).
+#
+# Structure:
+#   <clientId>:
+#     <planId>:
+#       deduction_codes: [CODE_A, CODE_B]        # payroll deduction codes expected
+#       section125_deduction_codes: [CODE_C]      # 125-side deduction codes (optional)
+#       bill_codes: [BILL_A]                      # billing side (optional)
+#
+# Wildcards:
+#   _default:                                     # applies to every client
+#     <planId>:
+#       deduction_codes: [...]
+#
+# Example:
+#
+# _default:
+#   MED-BASE:
+#     deduction_codes: [MEDEE]
+#     bill_codes: [MEDBILL]
+#   DEN-PPO:
+#     deduction_codes: [DENEE]
+#
+# 001010:                                         # override per client
+#   DEN-PPO:
+#     deduction_codes: [DENEE-HIGH]
+#
+# Keep this file OUT of the public OSS repo — it carries client-specific
+# config. Live copy goes in a gitignored simploy-config/ directory.
