@@ -8,13 +8,13 @@
     "url": "https://github.com/nikulk2992-jpg/prismhr-mcp",
     "source": "github"
   },
-  "version": "0.1.0.dev8",
+  "version": "0.1.0.dev9",
   "packages": [
     {
       "registryType": "pypi",
       "registryBaseUrl": "https://pypi.org",
       "identifier": "prismhr-mcp",
-      "version": "0.1.0.dev8",
+      "version": "0.1.0.dev9",
       "transport": {
         "type": "stdio"
       },
