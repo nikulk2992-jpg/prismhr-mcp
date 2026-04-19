@@ -38,7 +38,7 @@ def test_fetch_parses_fields(tmp_path: Path) -> None:
     runner = _ok_runner(_fake_op_payload("test-user", "s3cret", "TEST-PEO"))
     client = OnePasswordClient(cache_dir=tmp_path, runner=runner)
 
-    creds = client.get(item="PrismHR UAT", vault="Simploy")
+    creds = client.get(item="PrismHR UAT", vault="TestVault")
 
     assert creds == {"username": "test-user", "password": "s3cret", "peoId": "TEST-PEO"}
     assert runner.calls[0][:3] == ["op", "item", "get"]  # type: ignore[attr-defined]

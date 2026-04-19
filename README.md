@@ -154,7 +154,7 @@ labeled `username` and `password` (optionally `peoId`).
 
 **Path B — direct env vars (fast, CI-friendly):**
 ```powershell
-$env:PRISMHR_MCP_USERNAME = "test-user"
+$env:PRISMHR_MCP_USERNAME = "<your-api-username>"
 $env:PRISMHR_MCP_PASSWORD = "<paste>"
 $env:PRISMHR_MCP_PEO_ID   = "<your-peo-id>"
 ```
@@ -178,7 +178,7 @@ Add to your Claude Code `.mcp.json`:
       "args": ["run", "--directory", "C:\\path\\to\\prismhr-mcp", "prismhr-mcp"],
       "env": {
         "PRISMHR_MCP_ENVIRONMENT": "uat",
-        "PRISMHR_MCP_USERNAME": "test-user",
+        "PRISMHR_MCP_USERNAME": "<your-api-username>",
         "PRISMHR_MCP_PASSWORD": "<paste or reference>",
         "PRISMHR_MCP_PEO_ID": "<your-peo-id>"
       }
@@ -202,7 +202,7 @@ You: Grant everything recommended (reads only, no writes).
 Claude: [calls meta_grant_permissions(accept_recommended_defaults=true)]
 
 You: List all clients in UAT.
-Claude: [calls client_list] → the client roster.
+Claude: [calls client_list] → returns the full client roster.
 ```
 
 ### 6. Run tests

@@ -53,9 +53,10 @@ def _redact(value: Any) -> Any:
         return _SSN_RE.sub("***REDACTED***", value)
     return value
 
-CID = "TEST-CLIENT"
-CID_ALT = "TEST-CLIENT"
-EID = "TEST-EMPLOYEE"
+# Runtime-supplied fixture IDs — never hardcode tenant values here.
+CID = os.environ.get("PROBE_CLIENT_ID", "")
+CID_ALT = os.environ.get("PROBE_CLIENT_ID_ALT", "")
+EID = os.environ.get("PROBE_EMPLOYEE_ID", "")
 
 
 def _load(name: str) -> dict:

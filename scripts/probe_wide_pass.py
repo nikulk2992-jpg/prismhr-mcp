@@ -16,9 +16,12 @@ import httpx
 
 from prismhr_mcp.secure_env import load_into_environ
 
-CID = "TEST-CLIENT"
-EID = "TEST-EMPLOYEE"
-BATCH = "TEST-BATCH"
+# Fixture IDs supplied at runtime via env so this script ships no
+# tenant-specific values. Set PROBE_CLIENT_ID / PROBE_EMPLOYEE_ID /
+# PROBE_BATCH_ID before running.
+CID = os.environ.get("PROBE_CLIENT_ID", "")
+EID = os.environ.get("PROBE_EMPLOYEE_ID", "")
+BATCH = os.environ.get("PROBE_BATCH_ID", "")
 
 
 async def main() -> int:

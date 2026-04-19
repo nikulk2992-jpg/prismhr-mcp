@@ -149,8 +149,8 @@ live under the PEO's umbrella session.
 ┌────────────────────────┐ 2. Portal issues scoped JWT:
 │ Portal auth service    │    {
 │ (Auth0 / WorkOS /      │      sub: user@company.com,
-│  custom OIDC)          │      clientId: "TEST-CLIENT",
-│                        │      peoId: "TEST-PEO",
+│  custom OIDC)          │      clientId: "<scoped-client-id>",
+│                        │      peoId: "<peo-tenant-id>",
 │                        │      scopes: [portal.read.*],
 │                        │      exp: +4h
 │                        │    }

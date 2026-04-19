@@ -12,8 +12,8 @@ the approval-flow endpoints, this script:
      options=ITEMIZEDDEDUCTIONS.
   5. Saves the response under .planning/verified-responses/.
 
-Confirmed response shape for getApprovalSummary (2026-04-19 against
-UAT tenant TEST-PEO):
+Confirmed response shape for getApprovalSummary (verified against
+a UAT tenant):
     batchId, batchDescription, periodStart, periodEnd, payDate,
     approvalStatus, approvalStatusMessage, netPay, deduction,
     taxWithholding, employerContribution, employerTaxes, providerFee,

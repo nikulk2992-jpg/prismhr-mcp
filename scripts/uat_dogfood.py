@@ -201,7 +201,7 @@ async def main() -> int:
         if ok_flag:
             dim(f"granted now: {data.get('granted')}")
 
-        step(5, "client_list — expect ~the client roster in UAT")
+        step(5, "client_list — returns full client roster in UAT")
         if _missing("ClientMasterService.getClientList"):
             warn(
                 "SKIP: account lacks ClientMasterService.getClientList. "
