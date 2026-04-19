@@ -19,6 +19,39 @@ Ships:
 
 Distributed via `pip install prismhr-mcp` and MCP Registry.
 
+## Tier 3 — `prismhr-mcp-broker` (Commercial, paid) — Integration Broker
+
+A multi-tenant hosted MCP endpoint that third-party carriers, benefit
+administrators, accounting tools, payroll-adjacent apps, etc. call
+instead of building their own PrismHR integration. Inspired by what
+detamoov does for QuickBooks/Xero on the PrismHR marketplace — but
+generic and MCP-native rather than per-connector.
+
+What the broker provides:
+- **Unified MCP + REST surface** — partner apps can talk MCP or plain
+  HTTPS against one endpoint; broker proxies to PrismHR with correct
+  session, headers, retries, and quirks handled.
+- **Session pooling + auth custody** — Simploy keeps the PrismHR
+  credentials; partners never see them. Permissions scoped per partner
+  agreement.
+- **Multi-tenant routing** — one broker, many PEOs. Partner tells us
+  which tenant via a routing key; broker picks the right credentials
+  and applies per-PEO policy.
+- **Read AND write** — unlike the OSS core which encourages writes
+  only via workflow tools, the broker exposes `meta_call` for both
+  GET and POST with full schema validation + audit log per call.
+- **Webhook dispatch** — optional: push events (new voucher posted,
+  benefit enrollment changed) to partner webhooks.
+- **Audit trail + observability** — every call attributed to a partner
+  integration for billing and compliance.
+
+Primary customers: carriers (health, dental, 401k, disability), accounting
+and ERP tools, EDI providers, workforce platforms that want PrismHR
+data without owning the PrismHR relationship.
+
+Pricing: per-call / per-tenant / per-partner — separate from the Named
+AI Assistants tier.
+
 ## Tier 2 — `prismhr-mcp-simploy` (Commercial, paid)
 
 The product layer. Turnkey AI for PEO ops. Source-available; paid license.
