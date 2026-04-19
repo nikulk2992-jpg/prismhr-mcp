@@ -518,6 +518,9 @@ class PrismHRW2Source:
     async def get_employee_contact(
         self, client_id: str, employee_id: str
     ) -> dict:
+        # For W-2 mailing we prefer the Person.w2Address* fields (the
+        # IRS-specific mailing address an employee can set) and fall
+        # back to ContactInformation for the primary residence.
         body = await self._c.get(
             "/employee/v1/getEmployee",
             params=[
@@ -529,12 +532,28 @@ class PrismHRW2Source:
         row = _first(body, "employee") or {}
         contact = row.get("contactInformation") or {}
         person = row.get("person") or {}
+
+        w2_line1 = (person.get("w2AddressLine1") or "").strip()
+        w2_city = (person.get("w2City") or "").strip()
+        w2_state = (person.get("w2State") or "").strip()
+        w2_zip = (person.get("w2PostalCode") or "").strip()
+        uses_w2_addr = bool(w2_line1 and w2_city and w2_state)
+
         return {
-            "line1": contact.get("addressLine1") or "",
-            "line2": contact.get("addressLine2") or "",
-            "city": contact.get("city") or "",
-            "state": contact.get("state") or "",
-            "zip": contact.get("zipcode") or contact.get("postalCode") or "",
+            "line1": w2_line1 if uses_w2_addr else (contact.get("addressLine1") or ""),
+            "line2": (
+                (person.get("w2AddressLine2") or "")
+                if uses_w2_addr
+                else (contact.get("addressLine2") or "")
+            ),
+            "city": w2_city if uses_w2_addr else (contact.get("city") or ""),
+            "state": w2_state if uses_w2_addr else (contact.get("state") or ""),
+            "zip": (
+                w2_zip
+                if uses_w2_addr
+                else (contact.get("zipcode") or contact.get("postalCode") or "")
+            ),
+            "address_source": "W2" if uses_w2_addr else "PRIMARY",
             "email": contact.get("emailAddress")
             or contact.get("personalEmail")
             or person.get("personalEmail")

@@ -60,6 +60,7 @@ class EmployeeW2Delivery:
     pdf_size_bytes: int
     modes_attempted: list[DeliveryMode] = field(default_factory=list)
     mail_tracking_id: str | None = None
+    mail_address_source: str | None = None  # "W2" or "PRIMARY"
     email_message_id: str | None = None
     archive_url: str | None = None
     findings: list[Finding] = field(default_factory=list)
@@ -306,13 +307,19 @@ async def run_w2_distribution(
                 )
             else:
                 rec.modes_attempted.append(DeliveryMode.MAIL)
+                rec.mail_address_source = contact.get("address_source", "PRIMARY")
                 try:
                     rec.mail_tracking_id = await mail_sender.send_letter(
                         to_name=f"{first} {last}".strip(),
                         to_address=addr,
                         pdf_bytes=pdf,
                         certified=certified_mail,
-                        metadata={"clientId": client_id, "employeeId": eid, "year": year},
+                        metadata={
+                            "clientId": client_id,
+                            "employeeId": eid,
+                            "year": year,
+                            "addressSource": rec.mail_address_source,
+                        },
                     )
                 except Exception as exc:  # noqa: BLE001
                     rec.findings.append(

@@ -96,7 +96,8 @@ async def main() -> int:
     for emp in report.employees:
         print(f"  {emp.last_name}, {emp.first_name} ({emp.employee_id})  pdf={emp.pdf_size_bytes}B")
         if emp.mail_tracking_id:
-            print(f"    MAIL     -> {emp.mail_tracking_id}")
+            addr_tag = f" [addr={emp.mail_address_source}]" if emp.mail_address_source else ""
+            print(f"    MAIL     -> {emp.mail_tracking_id}{addr_tag}")
         if emp.email_message_id:
             print(f"    EMAIL    -> {emp.email_message_id}")
         if emp.archive_url:
