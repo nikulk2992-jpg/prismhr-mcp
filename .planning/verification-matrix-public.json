@@ -237,7 +237,13 @@
     },
     {
       "path": "/benefits/v1/getActiveBenefitPlans",
-      "status": "error"
+      "response_keys": [
+        "benefitPlan",
+        "errorCode",
+        "errorMessage",
+        "extension"
+      ],
+      "status": "verified"
     },
     {
       "path": "/benefits/v1/getBenefitConfirmationList",
@@ -245,7 +251,13 @@
     },
     {
       "path": "/benefits/v1/getBenefitPlans",
-      "status": "error"
+      "response_keys": [
+        "benefitPlan",
+        "errorCode",
+        "errorMessage",
+        "extension"
+      ],
+      "status": "verified"
     },
     {
       "path": "/benefits/v1/getClientBenefitPlans",
@@ -276,7 +288,15 @@
     },
     {
       "path": "/benefits/v1/getDependents",
-      "status": "error"
+      "response_keys": [
+        "employeeId",
+        "clientId",
+        "dependent",
+        "errorCode",
+        "errorMessage",
+        "extension"
+      ],
+      "status": "verified"
     },
     {
       "path": "/benefits/v1/getMonthlyACAInfo",
@@ -284,7 +304,13 @@
     },
     {
       "path": "/benefits/v1/getPaidTimeOff",
-      "status": "error"
+      "response_keys": [
+        "paidTimeOff",
+        "errorCode",
+        "errorMessage",
+        "extension"
+      ],
+      "status": "verified"
     },
     {
       "path": "/benefits/v1/getPaidTimeOffPlans",
@@ -322,11 +348,17 @@
     },
     {
       "path": "/benefits/v1/getRetirementLoans",
-      "status": "error"
+      "response_keys": [
+        "retirementLoan",
+        "errorCode",
+        "errorMessage",
+        "extension"
+      ],
+      "status": "verified"
     },
     {
       "path": "/benefits/v1/getRetirementPlan",
-      "status": "error"
+      "status": "verified"
     },
     {
       "path": "/clientMaster/v1/getClientEvents",
@@ -480,19 +512,34 @@
     },
     {
       "path": "/deductions/v1/getDeductions",
-      "status": "error"
+      "response_keys": [
+        "employeeDeductions",
+        "employeeDeductions.deduction",
+        "errorCode",
+        "errorMessage",
+        "extension"
+      ],
+      "status": "verified"
     },
     {
       "path": "/deductions/v1/getGarnishmentDetails",
-      "status": "error"
+      "status": "verified"
     },
     {
       "path": "/deductions/v1/getGarnishmentPaymentHistory",
-      "status": "error"
+      "status": "verified"
     },
     {
       "path": "/deductions/v1/getVoluntaryRecurringDeductions",
-      "status": "error"
+      "response_keys": [
+        "voluntaryDeduction",
+        "voluntaryDeduction.deduction",
+        "checksum",
+        "errorCode",
+        "errorMessage",
+        "extension"
+      ],
+      "status": "verified"
     },
     {
       "path": "/employee/v1/checkForGarnishments",
@@ -507,23 +554,92 @@
     },
     {
       "path": "/employee/v1/get1095CYears",
-      "status": "error"
+      "status": "verified"
     },
     {
       "path": "/employee/v1/get1099Years",
-      "status": "error"
+      "status": "verified"
     },
     {
       "path": "/employee/v1/getACHDeductions",
-      "status": "error"
+      "response_keys": [
+        "achDeductionSettings",
+        "achChecksum",
+        "errorCode",
+        "errorMessage",
+        "extension"
+      ],
+      "status": "verified"
     },
     {
       "path": "/employee/v1/getAddressInfo",
-      "status": "error"
+      "response_keys": [
+        "addressInfo",
+        "addressInfo.checksum",
+        "addressInfo.homeGeoCode",
+        "addressInfo.homeAddress",
+        "addressInfo.homeAddress.unincorporatedResidence",
+        "addressInfo.homeAddress.addressLine1",
+        "addressInfo.homeAddress.addressLine2",
+        "addressInfo.homeAddress.city",
+        "addressInfo.homeAddress.county",
+        "addressInfo.homeAddress.stateAbbr",
+        "addressInfo.homeAddress.zipCode",
+        "addressInfo.homeAddress.zipSuffix",
+        "addressInfo.w2Address",
+        "addressInfo.w2Address.addressLine1",
+        "addressInfo.w2Address.addressLine2",
+        "addressInfo.w2Address.city",
+        "addressInfo.w2Address.county",
+        "addressInfo.w2Address.stateAbbr",
+        "addressInfo.w2Address.zipCode",
+        "addressInfo.w2Address.zipSuffix",
+        "addressInfo.altAddress",
+        "addressInfo.altAddress.internationalAddress",
+        "addressInfo.altAddress.mailAddressCountry",
+        "addressInfo.altAddress.addressLine1",
+        "addressInfo.altAddress.addressLine2",
+        "addressInfo.altAddress.city",
+        "addressInfo.altAddress.county",
+        "addressInfo.altAddress.stateAbbr",
+        "addressInfo.altAddress.zipCode",
+        "addressInfo.altAddress.zipSuffix",
+        "errorCode",
+        "errorMessage",
+        "extension"
+      ],
+      "status": "verified"
     },
     {
       "path": "/employee/v1/getEmployee",
-      "status": "error"
+      "response_keys": [
+        "employee",
+        "employee[].id",
+        "employee[].lastName",
+        "employee[].firstName",
+        "employee[].middleInitial",
+        "employee[].preferredName",
+        "employee[].person",
+        "employee[].contactInformation",
+        "employee[].client",
+        "employee[].compensation",
+        "employee[].directDeposit",
+        "employee[].hsa",
+        "employee[].employeeEvents",
+        "employee[].health",
+        "employee[].skillsAndEducation",
+        "employee[].absenceJournalId",
+        "employee[].benefitEnrollmentCompleted",
+        "employee[].scheduledDeduction",
+        "employee[].newHireQuestions",
+        "employee[].enrollmentInProgress",
+        "infoMessage",
+        "updateMessage",
+        "errorCode",
+        "errorMessage",
+        "extension"
+      ],
+      "status": "verified"
     },
     {
       "path": "/employee/v1/getEmployeeEvents",
@@ -542,15 +658,46 @@
     },
     {
       "path": "/employee/v1/getEmployersInfo",
-      "status": "error"
+      "response_keys": [
+        "employerUpdate",
+        "employerUpdate.sessionId",
+        "employerUpdate.clientId",
+        "employerUpdate.employeeId",
+        "employerUpdate.employeeChecksum",
+        "employerUpdate.employerId",
+        "possibleEmployers",
+        "errorCode",
+        "errorMessage",
+        "extension"
+      ],
+      "status": "verified"
     },
     {
       "path": "/employee/v1/getEverifyStatus",
-      "status": "error"
+      "response_keys": [
+        "everifyStatus",
+        "everifyStatus.everifyFlag",
+        "everifyStatus.everifyCaseNo",
+        "everifyStatus.everifyCaseStatus",
+        "errorCode",
+        "errorMessage",
+        "extension"
+      ],
+      "status": "verified"
     },
     {
       "path": "/employee/v1/getScheduledDeductions",
-      "status": "error"
+      "response_keys": [
+        "sessionId",
+        "clientId",
+        "employeeId",
+        "checksum",
+        "scheduledDeduction",
+        "errorCode",
+        "errorMessage",
+        "extension"
+      ],
+      "status": "verified"
     },
     {
       "path": "/generalLedger/v1/getClientAccountingTemplate",
@@ -1276,7 +1423,7 @@
   "summary": {
     "prismhr_error": 0,
     "total": 75,
-    "transport_error": 27,
-    "verified": 48
+    "transport_error": 9,
+    "verified": 66
   }
 }
