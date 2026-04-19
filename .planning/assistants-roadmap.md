@@ -52,6 +52,36 @@ data without owning the PrismHR relationship.
 Pricing: per-call / per-tenant / per-partner — separate from the Named
 AI Assistants tier.
 
+### Positioning vs detamoov
+
+detamoov is the closest existing comparable — a PrismHR Marketplace
+partner that automates the PrismHR → QuickBooks Online / Xero general-
+ledger sync. Solid point solution covering ~90% of the SMB accounting
+market, setup in minutes.
+
+`prismhr-mcp-broker` is not a competitor in the accounting vertical —
+it is the platform layer underneath. The distinction:
+
+| | detamoov | prismhr-mcp-broker |
+|---|---|---|
+| Vertical | Accounting (QBO + Xero) | Every vertical PrismHR touches |
+| Interface | REST + no-code UI | MCP + REST |
+| Auth model | Per-connector OAuth | Pooled session + partner keys |
+| AI-native | No | Yes — any MCP agent talks to it |
+| Write path | Yes (GL posts) | Yes (schema-validated, audit-logged) |
+| Per-partner audit | Not public | First-class |
+| Schema source | Hand-built per integration | Bundled 447-method bible + live probes |
+
+A carrier integrating with PrismHR today runs EDI file drops with day-
+long turnaround. With the broker, the same carrier calls `meta_call`
+once to read coverage, posts a deduction back in the same request, and
+gets a webhook when the enrollment changes. One integration = access
+to every PEO running the broker.
+
+Simploy can ship a detamoov-equivalent QBO/Xero assistant as a
+*consumer* of the broker — the broker is the substrate, the assistants
+are the products.
+
 ## Tier 2 — `prismhr-mcp-simploy` (Commercial, paid)
 
 The product layer. Turnkey AI for PEO ops. Source-available; paid license.
