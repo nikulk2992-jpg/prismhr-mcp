@@ -35,6 +35,22 @@ Common PrismHR 1095-C defects we check for:
 
   ICHRA_CODE_INVALID_YEAR
     Line 14 in {1L..1S} for a report year before 2020.
+
+  STATUS_TYPE_CHANGE_MISMATCH
+    Employee's employmentType (FT/PT/etc) changed mid-year but
+    Line 14 didn't shift around the transition month. PrismHR's
+    1095-C generator sometimes holds the prior-status code.
+
+  WAITING_PERIOD_MISCODED
+    PT->FT transition within the report year + Line 14 = 1H during
+    the 90-day waiting period. Should be 1H with Line 16 = 2D
+    (limited non-assessment period); if Line 16 is anything else
+    it looks like refused-offer.
+
+  FT_TO_PT_COVERAGE_LAG
+    FT->PT transition + employee still shows Line 14 = 1E for
+    post-transition months (PrismHR carries forward the FT code
+    even when employment type dropped).
 """
 
 from __future__ import annotations
@@ -104,6 +120,11 @@ class PrismHRReader(Protocol):
     async def get_employment_events(
         self, client_id: str, employee_id: str, year: int
     ) -> list[dict]: ...
+    async def get_status_type_changes(
+        self, client_id: str, employee_id: str, year: int
+    ) -> list[dict]:
+        """List of {date, from_type, to_type} records for FT/PT/etc transitions."""
+        ...
 
 
 async def run_1095c_consistency_audit(
@@ -130,12 +151,26 @@ async def run_1095c_consistency_audit(
 
         enrolled = await reader.get_benefit_enrollment_months(client_id, eid, year)
         events = await reader.get_employment_events(client_id, eid, year)
+        type_changes = await reader.get_status_type_changes(client_id, eid, year)
 
         # Months when the employee had a life event (hire, term, rehire).
         event_months: set[int] = set()
         for ev in events:
             dt = _parse(ev.get("statusDate") or ev.get("effectiveDate") or ev.get("eventDate"))
             if dt and dt.year == year:
+                event_months.add(dt.month)
+
+        # Parse status-type changes (FT/PT/etc transitions).
+        type_change_months: dict[int, tuple[str, str]] = {}
+        for ch in type_changes:
+            dt = _parse(ch.get("date") or ch.get("effectiveDate") or ch.get("typeDate"))
+            if dt and dt.year == year:
+                type_change_months[dt.month] = (
+                    str(ch.get("from_type") or ch.get("fromType") or "").upper(),
+                    str(ch.get("to_type") or ch.get("toType") or "").upper(),
+                )
+                # Treat the change itself as a life-event month so
+                # CODE_CHANGE_WITHOUT_EVENT doesn't double-fire.
                 event_months.add(dt.month)
 
         # ICHRA year check
@@ -208,6 +243,50 @@ async def run_1095c_consistency_audit(
                             f"Month {m}: Line 14 changed {prev_code}->{code} with no employment event.",
                         )
                     )
+
+            # Status-type transition handling.
+            if m in type_change_months:
+                from_t, to_t = type_change_months[m]
+                # FT/FULLTIME -> PT/PARTTIME demote: code should not stay 1E past this month.
+                if from_t in {"FT", "FULLTIME", "FULL_TIME"} and to_t in {"PT", "PARTTIME", "PART_TIME"}:
+                    # Look at post-transition months: any still 1E is lag.
+                    for later in range(m + 1, 13):
+                        if (line14.get(later) or "").strip().upper() == "1E":
+                            audit.findings.append(
+                                Finding(
+                                    "FT_TO_PT_COVERAGE_LAG",
+                                    "warning",
+                                    f"FT->PT at month {m} but Line 14 still 1E in month {later}.",
+                                )
+                            )
+                            break
+                # PT -> FT promote: 90-day waiting period likely.
+                if from_t in {"PT", "PARTTIME", "PART_TIME"} and to_t in {"FT", "FULLTIME", "FULL_TIME"}:
+                    waiting_months = [mm for mm in range(m, min(m + 3, 13))]
+                    for mm in waiting_months:
+                        wait_code = (line14.get(mm) or "").strip().upper()
+                        wait_harbor = (line16.get(mm) or "").strip().upper()
+                        if wait_code == "1H" and wait_harbor != "2D":
+                            audit.findings.append(
+                                Finding(
+                                    "WAITING_PERIOD_MISCODED",
+                                    "critical",
+                                    f"Month {mm}: PT->FT waiting period, 1H present but Line 16 = {wait_harbor or 'blank'}, expected 2D.",
+                                )
+                            )
+                            break
+                # Any type change where Line 14 doesn't shift around the month.
+                code_prev = (line14.get(m - 1) or "").strip().upper() if m > 1 else ""
+                code_next = (line14.get(m + 1) or "").strip().upper() if m < 12 else ""
+                if code_prev and code_next and code_prev == code_next and from_t != to_t:
+                    audit.findings.append(
+                        Finding(
+                            "STATUS_TYPE_CHANGE_MISMATCH",
+                            "warning",
+                            f"Month {m}: employmentType {from_t}->{to_t} but Line 14 unchanged ({code_prev}).",
+                        )
+                    )
+
             if code:
                 prev_code = code
 

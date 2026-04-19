@@ -15,11 +15,12 @@ from simploy.workflows.form_1095c_consistency import run_1095c_consistency_audit
 
 
 class FakeReader:
-    def __init__(self, roster, monthly, enrolled, events) -> None:
+    def __init__(self, roster, monthly, enrolled, events, type_changes=None) -> None:
         self.roster = roster
         self.monthly = monthly
         self.enrolled = enrolled
         self.events = events
+        self.type_changes = type_changes or {}
 
     async def list_employees_with_1095c(self, cid, year):
         return self.roster
@@ -29,6 +30,8 @@ class FakeReader:
         return self.enrolled.get(eid, {})
     async def get_employment_events(self, cid, eid, year):
         return self.events.get(eid, [])
+    async def get_status_type_changes(self, cid, eid, year):
+        return self.type_changes.get(eid, [])
 
 
 @pytest.mark.asyncio
@@ -111,6 +114,55 @@ async def test_code_change_without_event_warning() -> None:
     rep = await run_1095c_consistency_audit(r, client_id="T", year=2025)
     codes = [f.code for f in rep.employees[0].findings]
     assert "CODE_CHANGE_WITHOUT_EVENT" in codes
+
+
+@pytest.mark.asyncio
+async def test_ft_to_pt_lag_warning() -> None:
+    # Employee went FT->PT in month 6 but Line 14 still 1E in months 7-12.
+    l14 = {str(m): "1E" for m in range(1, 13)}
+    r = FakeReader(
+        roster=[{"employeeId": "E8"}],
+        monthly={"E8": {"line14": l14, "line16": {str(m): "2C" for m in range(1, 13)}}},
+        enrolled={"E8": {m: True for m in range(1, 13)}},
+        events={},
+        type_changes={"E8": [{"date": "2025-06-15", "from_type": "FT", "to_type": "PT"}]},
+    )
+    rep = await run_1095c_consistency_audit(r, client_id="T", year=2025)
+    codes = {f.code for f in rep.employees[0].findings}
+    assert "FT_TO_PT_COVERAGE_LAG" in codes
+
+
+@pytest.mark.asyncio
+async def test_waiting_period_miscoded_critical() -> None:
+    # PT->FT in month 3; months 3-5 = 1H but Line 16 = blank (should be 2D).
+    l14 = {str(m): "1H" for m in range(3, 6)}
+    l16 = {}  # blank across waiting period
+    r = FakeReader(
+        roster=[{"employeeId": "E9"}],
+        monthly={"E9": {"line14": l14, "line16": l16}},
+        enrolled={"E9": {}},
+        events={},
+        type_changes={"E9": [{"date": "2025-03-10", "from_type": "PT", "to_type": "FT"}]},
+    )
+    rep = await run_1095c_consistency_audit(r, client_id="T", year=2025)
+    codes = {f.code for f in rep.employees[0].findings}
+    assert "WAITING_PERIOD_MISCODED" in codes
+
+
+@pytest.mark.asyncio
+async def test_status_type_change_mismatch() -> None:
+    # employmentType change in month 4 but Line 14 unchanged around it.
+    l14 = {str(m): "1E" for m in range(1, 13)}
+    r = FakeReader(
+        roster=[{"employeeId": "E10"}],
+        monthly={"E10": {"line14": l14, "line16": {str(m): "2C" for m in range(1, 13)}}},
+        enrolled={"E10": {m: True for m in range(1, 13)}},
+        events={},
+        type_changes={"E10": [{"date": "2025-04-01", "from_type": "SALARIED", "to_type": "HOURLY"}]},
+    )
+    rep = await run_1095c_consistency_audit(r, client_id="T", year=2025)
+    codes = {f.code for f in rep.employees[0].findings}
+    assert "STATUS_TYPE_CHANGE_MISMATCH" in codes
 
 
 @pytest.mark.asyncio
