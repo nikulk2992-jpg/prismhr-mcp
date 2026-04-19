@@ -1,14 +1,23 @@
 # prismhr-mcp
 
-**The open-source Model Context Protocol server for PrismHR.**
-Turn Claude (and any MCP-aware agent) into a PEO operations native — payroll,
-benefits, compliance, billing, and Microsoft 365 actions, all exposed as
-composable, scope-gated tools.
+**The open-source Model Context Protocol (MCP) server for PrismHR.**
+Connect Claude, Cursor, or any MCP-compatible AI agent directly to your
+PrismHR PEO platform. Automate payroll, benefits enrollment, compliance
+reporting, AR/billing, carrier EDI files, and Microsoft 365 actions — with
+verified-schema tools, scope-gated consent, and zero custom integration code.
 
-Maintained by [Simploy](https://simploy.com) as the fundamental layer for
-PrismHR × agentic AI. MIT-licensed, PyPI-distributed, plugin-friendly.
+Built for PEOs, brokers, and payroll operators who want **AI agents that
+actually work against PrismHR** — not another brittle script farm.
+
+Maintained by [Simploy](https://simploy.com). MIT-licensed, PyPI-distributed,
+plugin-friendly. The fundamental layer for **PrismHR × agentic AI**.
 
 `mcp-name: io.github.nikulk2992-jpg/prismhr-mcp`
+
+**Keywords:** PrismHR API, PrismHR integration, MCP server, Model Context
+Protocol, PEO automation, payroll automation, AI for HR, Claude for PrismHR,
+agentic AI, benefits enrollment automation, 834 EDI, 401(k) file automation,
+HRIS AI agent, PEO software integration.
 
 ---
 
@@ -16,36 +25,106 @@ PrismHR × agentic AI. MIT-licensed, PyPI-distributed, plugin-friendly.
 
 Every PEO running PrismHR ends up with the same Frankenstein stack: Python
 scripts, Postman collections, Playwright automations, one-off Node apps.
-Each one re-implements login, session refresh, retry, pagination, and
-PrismHR's quirks (camelCase schemas, `500 "No data found"` gotchas, batch-of-20
-caps, silent 401s).
+Each one re-implements login, session keepalive, retry logic, pagination,
+and PrismHR's quirks (camelCase schemas, `500 "No data found"` gotchas,
+batch-of-20 caps, silent 401s).
 
-`prismhr-mcp` centralizes that once, as an MCP server. Claude orchestrates;
-the server owns auth, caching, retries, normalization, and PEO domain logic.
-Other PEOs drop it in and immediately get a productive Claude experience
-against their own PrismHR instance — no custom code.
+`prismhr-mcp` centralizes all of that once, as a production-grade MCP server.
+The AI agent orchestrates; the server owns auth, caching, retries,
+normalization, and PEO domain logic. Any PEO drops it in and gets a
+productive AI experience against their own PrismHR tenant — no glue code,
+no guesswork, no hallucinated endpoints.
+
+**Who this is for:**
+- PEOs running PrismHR who want to wire Claude / Cursor / ChatGPT Desktop
+  directly into their ops stack
+- Benefit brokers and carriers building enrollment automations
+- Payroll teams replacing brittle Postman / Playwright workflows
+- Consultants shipping PEO AI pilots on tight timelines
 
 ---
 
 ## Status
 
-Early but working. Current milestone: **Phase 1.5 complete.**
+Production-ready core. Live on PyPI and the MCP Registry.
 
-- **Auth + session + HTTP client:** done. 1Password CLI, scrypt-encrypted
-  disk cache, PrismHR session with 55-min TTL, proactive + forced + 401
-  refresh, keepalive, concurrency cap, retry with jittered backoff,
-  500→empty quirk handling, pagination, batching.
-- **Connect-time consent system:** done. Scope manifest across 14 scopes,
-  per-(peo, env) JSON consent store with prerequisite expansion and cascade
-  revoke. Default posture = **deny all**. Tools enforce scope at call time.
+- **Auth + session + HTTP client:** done. 1Password CLI integration,
+  scrypt-encrypted disk credential cache, PrismHR session with proactive
+  keepalive (no mid-workflow 401s), automatic refresh on failure,
+  concurrency cap, retry with jittered backoff, 500→empty quirk handling,
+  pagination, batching.
+- **Verified-schema gate:** every tool grounded in a live UAT probe —
+  **no guessed endpoints, no invented fields**. 102 response shapes
+  verified and rising.
+- **447-method catalog:** full PrismHR REST surface indexed across 18
+  services. `meta_call` lets the agent invoke any verified method safely.
+- **Connect-time consent system:** 15-scope manifest, per-(peo, env) JSON
+  consent store with prerequisite expansion and cascade revoke. Default
+  posture = **deny all**. Tools enforce scope at call time.
 - **Production safety gate:** `PRISMHR_MCP_ALLOW_PROD=true` required to
   point at prod PrismHR. Prevents accidental first-run blast radius.
-- **Tool inventory:** 9 live (`meta_*` ×5, `client_*` ×4). 39 more across
-  payroll, benefits, compliance, billing, branded reporting, and M365
-  connectors planned.
-- **Test suite:** 60 passing (pytest + respx).
+- **MCP Registry listed:** discoverable by every MCP-aware client.
+- **Test suite:** passing via pytest + respx.
 
-See `.planning/architecture.md` for the full 48-tool plan.
+See `.planning/architecture.md` for the full roadmap and
+`.planning/assistants-roadmap.md` for the paid tier details.
+
+---
+
+## Editions
+
+`prismhr-mcp` ships in three tiers. Core is free forever. Paid tiers layer
+commercial PEO intelligence on top.
+
+### Tier 1 — `prismhr-mcp` (this repo, MIT, free)
+
+The foundation. What's in the box:
+
+- PrismHR session manager with keepalive + auto-refresh
+- 447-method catalog + verified-schema `meta_call`
+- Scope-gated consent, prod safety gate, encrypted credential cache
+- `meta_find`, `meta_describe`, `meta_capabilities`
+- Client + employee + payroll read tools grounded in live UAT
+- MCP Registry listing, PyPI distribution
+
+Use this if you want to run Claude against your PrismHR tenant today with
+zero custom code.
+
+### Tier 2 — `prismhr-mcp-simploy` (paid, source-available) — *in active build*
+
+Named AI Assistants that ship PEO workflows end-to-end. Built on the OSS
+core. Licensed per-PEO.
+
+**Shipping now:**
+- **Carrier Enrollment Assistant** — generic 834 5010 EDI writer + carrier
+  companion-guide configs. Guardian model prototype live (8 tests green).
+  BCBS Michigan, Sun Life EDX, Voya PDI, Empower PDI on deck for Phase 1
+  pilot. SFTP delivery + delta tracking next.
+- **401(k) file automation** — Empower PDI, Voya payroll, Fidelity
+  tape-spec fixed-width formats.
+
+**On the roadmap:**
+- **Payroll Ops Assistant** — void/correction workflows, deduction
+  conflict detection, overtime anomaly flags, superbatch reconciliation
+- **Benefits Admin Assistant** — benefit election audits, COBRA
+  eligibility, ACA status, carrier sync verification
+- **Compliance Assistant** — W2/941 reconciliation, garnishment tracking,
+  state tax setup, I-9 audits, workers' comp codes
+- **AR / Billing Assistant** — billing-vs-payroll audits, invoice
+  summaries, employer tax liability
+- **Branded reporting** — Simploy-branded PDF/XLSX via pluggable brand +
+  template registry (white-label ready)
+- **Microsoft 365 connectors** — Graph API email, SharePoint upload,
+  Teams posts, Outlook events/tasks
+
+### Tier 3 — `prismhr-mcp-broker` (paid, hosted) — *planned*
+
+Multi-tenant hosted MCP endpoint so carriers, ERPs, and EDI providers can
+reach any PrismHR PEO through a single integration. One endpoint, many
+tenants, centralized compliance. Deferred until Tier 2 ships with a second
+PEO.
+
+Interested in Tier 2 or Tier 3? Contact `nihar@simploy.com`.
 
 ---
 

@@ -1,10 +1,13 @@
-"""PrismHR session lifecycle: login, proactive refresh, forced refresh, keepalive.
+"""PrismHR session lifecycle: login, keepalive, forced refresh on 401.
 
 Ports the behavior from `simploy-prismhr-app/src/main/services/prismhr-client.ts`:
-- Session TTL is 55 min (PrismHR idle timeout is 60 min; we refresh early).
 - Keepalive pings `/clientMaster/v1/getClientList` every 10 min if the client
-  hasn't made an API call; prevents surprise 401s mid-workflow.
+  hasn't made an API call; keeps the session warm indefinitely and prevents
+  surprise 401s mid-workflow.
 - A forced refresh is what a 401 handler triggers before retrying the request.
+- The proactive expiry check (`session_ttl_seconds`) is an internal fallback
+  for edge cases where keepalive couldn't run (e.g., process suspend); not
+  part of the documented user contract.
 """
 
 from __future__ import annotations

@@ -1,0 +1,16 @@
+Simploy Commercial License — prismhr-mcp commercial tier
+
+Copyright (c) 2026 Simploy, Inc.
+
+All rights reserved.
+
+The contents of this `commercial/` directory are NOT covered by the MIT
+license that governs the OSS core under `src/prismhr_mcp/`. This code is
+made available for evaluation and review only. Production use, hosted
+deployment, redistribution, modification for redistribution, or commercial
+resale requires a separate paid license from Simploy, Inc.
+
+Contact: nihar@simploy.com
+
+For the OSS core license terms, see the `LICENSE` file at the repository
+root (MIT).

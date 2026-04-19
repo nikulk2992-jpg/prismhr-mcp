@@ -1,13 +1,13 @@
 [project]
 name = "prismhr-mcp"
-version = "0.1.0.dev16"
+version = "0.1.0.dev17"
 description = "Open-source Model Context Protocol server for PrismHR — PEO workflow tools + Microsoft 365 connectors for Claude and other MCP-aware agents."
 authors = [{ name = "Nihar Kulkarni", email = "nihar@simploy.com" }]
 readme = "README.md"
 license = "MIT"
 license-files = ["LICENSE"]
 requires-python = ">=3.11,<3.14"
-keywords = ["mcp", "prismhr", "peo", "payroll", "hr", "claude", "anthropic", "agentic", "automation"]
+keywords = ["mcp", "model-context-protocol", "prismhr", "prismhr-api", "peo", "payroll", "payroll-automation", "hr", "hris", "benefits", "benefits-enrollment", "834-edi", "401k", "claude", "anthropic", "cursor", "agentic", "ai-agent", "automation"]
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
