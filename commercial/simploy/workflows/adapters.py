@@ -158,6 +158,117 @@ class PrismHRClientReader:
         }
 
 
+class PayrollBatchHealthReader:
+    """Live-data implementation of `payroll_batch_health.PrismHRReader`."""
+
+    def __init__(self, client: PrismHRClient) -> None:
+        self._c = client
+
+    async def list_open_batches(self, client_id: str) -> list[dict]:
+        """Combine the open-batch-list endpoints + a recent-dated fallback.
+
+        getBatchListForApproval and getBatchListForInitialization both
+        return rows under `availableBatches`. When those are empty (a
+        very quiet client or a UAT sandbox), fall back to the last 30
+        days of getBatchListByDate so the workflow has something to
+        audit.
+        """
+        out: dict[str, dict] = {}
+        for path in (
+            "/payroll/v1/getBatchListForApproval",
+            "/payroll/v1/getBatchListForInitialization",
+        ):
+            try:
+                body = await self._c.get(path, params={"clientId": client_id})
+            except Exception:  # noqa: BLE001 — one endpoint may be unauthorized
+                continue
+            for row in (
+                _rows(body, "availableBatches")
+                + _rows(body, "batchList")
+                + _rows(body, "batches")
+            ):
+                bid = str(row.get("batchId") or row.get("id") or "")
+                if bid and bid not in out:
+                    out[bid] = row
+
+        if not out:
+            from datetime import date, timedelta
+
+            today = date.today()
+            try:
+                body = await self._c.get(
+                    "/payroll/v1/getBatchListByDate",
+                    params={
+                        "clientId": client_id,
+                        "startDate": (today - timedelta(days=90)).isoformat(),
+                        "endDate": today.isoformat(),
+                        "dateType": "POST",
+                    },
+                )
+                for row in (
+                    _rows(body, "batchList")
+                    + _rows(body, "availableBatches")
+                ):
+                    bid = str(row.get("batchId") or "")
+                    if bid:
+                        out[bid] = row
+            except Exception:  # noqa: BLE001
+                pass
+
+        return list(out.values())
+
+    async def get_batch_status(self, client_id: str, batch_id: str) -> dict:
+        body = await self._c.get(
+            "/payroll/v1/getBatchStatus",
+            params={"clientId": client_id, "batchIds": batch_id},
+        )
+        rows = (
+            _rows(body, "batchStatus")
+            or _rows(body, "batchStatusCodes")
+            or _rows(body, "batches")
+            or []
+        )
+        if not rows:
+            return {}
+        row = rows[0]
+        return {
+            "status": row.get("status") or row.get("batchStatus") or "",
+            "statusDescription": (
+                row.get("statusDescription")
+                or row.get("batchStatusDescription")
+                or ""
+            ),
+        }
+
+    async def get_batch_info(self, client_id: str, batch_id: str) -> dict:
+        body = await self._c.get(
+            "/payroll/v1/getBatchInfo",
+            params={"clientId": client_id, "batchId": batch_id},
+        )
+        return _first(body, "batchInfo") or {}
+
+    async def get_batch_vouchers(self, client_id: str, batch_id: str) -> list[dict]:
+        body = await self._c.get(
+            "/payroll/v1/getPayrollVoucherForBatch",
+            params={"clientId": client_id, "batchId": batch_id},
+        )
+        return _rows(body, "voucher") or _rows(body, "vouchers") or []
+
+    async def get_approval_summary(self, client_id: str, batch_id: str) -> dict:
+        try:
+            body = await self._c.get(
+                "/payroll/v1/getApprovalSummary",
+                params={"clientId": client_id, "batchId": batch_id},
+            )
+        except Exception:
+            # getApprovalSummary is INIT-only and returns 400 on other states;
+            # treat as "no summary available" rather than a workflow failure.
+            return {}
+        if isinstance(body, dict) and body.get("errorCode") not in (None, "", "0"):
+            return {}
+        return body if isinstance(body, dict) else {}
+
+
 def _rows(body: Any, key: str) -> list[dict]:
     if not isinstance(body, dict):
         return []
