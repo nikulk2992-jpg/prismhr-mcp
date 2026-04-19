@@ -35,6 +35,13 @@ credentials.json
 .simploy-mcp/
 cached-credentials.enc
 
+# Probe outputs may contain UAT PII (client IDs, employee IDs, payroll detail)
+# and must never land in the public repo. Summary stats are fine; raw bodies are not.
+.planning/verified-responses/
+.planning/probe-responses/
+.planning/verification-matrix.json
+.planning/probe-summary.json
+
 # IDE / OS
 .idea/
 .vscode/
