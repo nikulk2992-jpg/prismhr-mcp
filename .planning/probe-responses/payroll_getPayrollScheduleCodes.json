@@ -1,0 +1,287 @@
+{
+  "payrollScheduleCodes": [
+    {
+      "scheduleCode": "B5PE6B",
+      "description": "BIWEEKLY PAID FRIDAY PERIOD ENDING 6 DAYS BEFORE"
+    },
+    {
+      "scheduleCode": "M09",
+      "description": "Monthly Paid on 9th"
+    },
+    {
+      "scheduleCode": "B4PE5B",
+      "description": "BIWEEKLY PAID THURSDAY PERIOD ENDING 5 DAYS BEFORE"
+    },
+    {
+      "scheduleCode": "M10",
+      "description": "Monthly Paid on 10th"
+    },
+    {
+      "scheduleCode": "B3PE4B",
+      "description": "BIWEEKLY PAID WEDNESDAY PERIOD ENDING 4 DAYS BEFORE"
+    },
+    {
+      "scheduleCode": "B1PE9B",
+      "description": "BIWEEKLY PAID MONDAY PERIOD ENDING 9 DAYS BEFORE"
+    },
+    {
+      "scheduleCode": "W5PE3B",
+      "description": "WEEKLY PAID FRIDAY PERIOD ENDING 3 DAYS BEFORE"
+    },
+    {
+      "scheduleCode": "MPDL5",
+      "description": "Monthly Pay Date Last Friday of the Month"
+    },
+    {
+      "scheduleCode": "M15",
+      "description": "MONTHLY PAID ON THE 15TH"
+    },
+    {
+      "scheduleCode": "MEOMPPE20",
+      "description": "MONTHLY PAID END OF MONTH PP ENDS 20th"
+    },
+    {
+      "scheduleCode": "S722PE7B",
+      "description": "SEMI-MONTHLY PAID 7TH & 22ND;  PERIOD ENDING EOM & 15"
+    },
+    {
+      "scheduleCode": "B5PE7B",
+      "description": "BIWEEKLY PAID FRIDAY PERIOD ENDING 7 DAYS BEFORE"
+    },
+    {
+      "scheduleCode": "S520PE5B",
+      "description": "SEMI-MONTHY PAID 5TH & 20TH PERIOD ENDING 5 DAYS BEFORE"
+    },
+    {
+      "scheduleCode": "B5PE0B",
+      "description": "BIWEEKLY PAID FRIDAY PERIOD ENDING SAME DAY"
+    },
+    {
+      "scheduleCode": "S318PE3B",
+      "description": "SEMI-MONTHLY PAID 3RD & 18TH PERIOD ENDS 3 DAY PRIOR"
+    },
+    {
+      "scheduleCode": "M20",
+      "description": "MONTHLY PAID ON THE 20th"
+    },
+    {
+      "scheduleCode": "S15EOMPD4A",
+      "description": "SEMI-MONTHLY PERIOD ENDS 15TH & EOM; PAID 4 BUS DAYS AFTER"
+    },
+    {
+      "scheduleCode": "W5PE4A",
+      "description": "WEEKLY PAID FRIDAY PERIOD ENDING 4 DAYS AFTER"
+    },
+    {
+      "scheduleCode": "W5PE4B",
+      "description": "WEEKLY PAID FRIDAY PERIOD ENDING 4 DAYS BEFORE"
+    },
+    {
+      "scheduleCode": "S15EOMPEEOM15",
+      "description": "SEMI-MONTHLY PAID 15TH & EOM; PERIOD END EOM & 15TH PRIOR"
+    },
+    {
+      "scheduleCode": "W2PE8B",
+      "description": "WEEKLY PAID TUESDAY PERIOD END 8 BEFORE"
+    },
+    {
+      "scheduleCode": "S115PE1025",
+      "description": "SEMI MONTHLY PAID 1ST & 15TH; PE 10TH & 25TH"
+    },
+    {
+      "scheduleCode": "M26",
+      "description": "MONTHLY PAID ON THE 26th"
+    },
+    {
+      "scheduleCode": "S1530PD10A",
+      "description": "SEMI-MONTHLY PERIOD ENDING 15TH & 30TH PAID 10 DAYS AFTER"
+    },
+    {
+      "scheduleCode": "B5PE8B",
+      "description": "BIWEEKLY PAID FRIDAY PERIOD ENDING 8 DAYS BEFORE"
+    },
+    {
+      "scheduleCode": "S115PE15EOM",
+      "description": "SEMI-MONTHLY PAID 1ST & 15TH PERIOD END 15TH & EOM"
+    },
+    {
+      "scheduleCode": "B3PE6B",
+      "description": "BIWEEKLY PAID WEDNESDAY PERIOD ENDING 6 DAYS BEFORE"
+    },
+    {
+      "scheduleCode": "SM116",
+      "description": "SEMI-MONTHLY PAID 1ST & 16TH, PE 15TH & EOM PD 1 DAY AFTER"
+    },
+    {
+      "scheduleCode": "W5PE5B",
+      "description": "WEEKLY PAID FRIDAY PERIOD ENDING 5 DAYS BEFORE"
+    },
+    {
+      "scheduleCode": "W4PE4B",
+      "description": "WEEKLY PAID THURSDAY PERIOD ENDING 4 DAYS BEFORE"
+    },
+    {
+      "scheduleCode": "W2PE9B",
+      "description": "WEEKLY PAID TUESDAY PERIOD END 9 DAYS BEFORE"
+    },
+    {
+      "scheduleCode": "W1PE8B",
+      "description": "WEEKLY PAID MONDAY PERIOD END 8 DAYS BEFORE"
+    },
+    {
+      "scheduleCode": "W2PE2B",
+      "description": "WEEKLY PAID TUESDAY PERIOD END 2 DAYS BEFORE"
+    },
+    {
+      "scheduleCode": "W5PE12B",
+      "description": "WEEKLY PAID FRIDAY PERIOD ENDING 12 DAYS BEFORE"
+    },
+    {
+      "scheduleCode": "B5PE2B",
+      "description": "BIWEEKLY PAID FRIDAY PERIOD ENDING 2 DAYS BEFORE"
+    },
+    {
+      "scheduleCode": "B3PE7B",
+      "description": "BIWEEKLY PAID WEDNESDAY PERIOD ENDING 7 DAYS BEFORE"
+    },
+    {
+      "scheduleCode": "W5PE6B",
+      "description": "WEEKLY PAID FRIDAY PERIOD ENDING 6 DAYS BEFORE"
+    },
+    {
+      "scheduleCode": "W4PE5B",
+      "description": "WEEKLY PAID THURSDAY PERIOD ENDING 5 DAYS BEFORE"
+    },
+    {
+      "scheduleCode": "W3PE4B",
+      "description": "WEEKLY PAID WEDNESDAY PERIOD ENDING 4 DAYS BEFORE"
+    },
+    {
+      "scheduleCode": "W1PE9B",
+      "description": "WEEKLY PAID MONDAY PERIOD ENDING 9 DAYS BEFORE"
+    },
+    {
+      "scheduleCode": "M1",
+      "description": "Monthly Paid in Advance on First"
+    },
+    {
+      "scheduleCode": "W5PE13B",
+      "description": "WEEKLY PAID 5 PERIOD ENDING 13 DAYS BEFORE"
+    },
+    {
+      "scheduleCode": "B5PE3B",
+      "description": "BIWEEKLY PAID FRIDAY PERIOD ENDING 3 DAYS BEFORE"
+    },
+    {
+      "scheduleCode": "B3PE8B",
+      "description": "BI-WEEKLY PAID WEDNESDAY; PERIOD ENDING 8 DAYS BEFORE"
+    },
+    {
+      "scheduleCode": "B4PE2B",
+      "description": "BI-WEEKLY PAID THURSDAY PAY PERIOD ENDS 2 DAYS BEFORE"
+    },
+    {
+      "scheduleCode": "W5PE7B",
+      "description": "WEEKLY PAID FRIDAY PERIOD ENDING 7 DAYS BEFORE"
+    },
+    {
+      "scheduleCode": "S115PE3B",
+      "description": "SEMI-MONTHLY PAID 1ST & 15TH PERIOD ENDING 3 DAYS BEFORE"
+    },
+    {
+      "scheduleCode": "W5PE0B",
+      "description": "WEEKLY PAID FRIDAY PERIOD ENDING 0 DAYS BEFORE"
+    },
+    {
+      "scheduleCode": "S621PE6B",
+      "description": "SEMI-MONTHLY PAID 6TH & 21ST PERIOD ENDING 6 DAYS BEFORE"
+    },
+    {
+      "scheduleCode": "S419PE4B",
+      "description": "SEMI MONTHLY PAID 4TH & 19TH PERIOD ENDING 4 DAYS BEFORE"
+    },
+    {
+      "scheduleCode": "S15EOM",
+      "description": "SEMI-MONTHLY PAID 15th & EOM PERIOD ENDS ON PAY DAY"
+    },
+    {
+      "scheduleCode": "S116",
+      "description": "SEMI-MONTHLY PAID 1ST & 16TH; PERIOD ENDING 15TH & EOM BEFORE"
+    },
+    {
+      "scheduleCode": "S1530PEEOM15",
+      "description": "SEMI-MONTHLY PAID 15TH & 30TH PE EOM AND 15TH"
+    },
+    {
+      "scheduleCode": "B5PE4B",
+      "description": "BIWEEKLY PAID FRIDAY PERIOD ENDING 4 DAYS BEFORE"
+    },
+    {
+      "scheduleCode": "S15EOMPE5B",
+      "description": "SM PAID 15 AND EOM PE 5 DAYS BEFORE"
+    },
+    {
+      "scheduleCode": "W4PE7B",
+      "description": "WEEKLY PAID THURSDAY PERIOD ENDING 7 DAYS BEFORE"
+    },
+    {
+      "scheduleCode": "W2PE10B",
+      "description": "WEEKLY PAID TUESDAY PERIOD END 10 DAYS BEFORE"
+    },
+    {
+      "scheduleCode": "W2PE5B",
+      "description": "WEEKLY PAID TUESDAY PERIOD END 5 DAYS BEFORE"
+    },
+    {
+      "scheduleCode": "S520PE15EOM",
+      "description": "SEMI-MONTHLY PAID 5TH & 20TH PERIOD END 15TH & EOM"
+    },
+    {
+      "scheduleCode": "B5PE5B",
+      "description": "BIWEEKLY PAID FRIDAY PERIOD ENDING 5 DAYS BEFORE"
+    },
+    {
+      "scheduleCode": "S115PE2207",
+      "description": "SEMI MONTHLY PAID 1ST & 15TH; PE 22ND & 7TH"
+    },
+    {
+      "scheduleCode": "B4PE4B",
+      "description": "BIWEEKLY PAID THURSDAY PERIOD ENDING 4 DAYS BEFORE"
+    },
+    {
+      "scheduleCode": "MEOM",
+      "description": "MONTHLY PAID END OF MONTH"
+    },
+    {
+      "scheduleCode": "W5PE2A",
+      "description": "WEEKLY PAID FRIDAY PERIOD ENDING 2 DAYS AFTER"
+    },
+    {
+      "scheduleCode": "M01",
+      "description": "Monthly Paid on First"
+    },
+    {
+      "scheduleCode": "B3PE3B",
+      "description": "BIWEEKLY PAID WEDNESDAY PERIOD ENDING 3 DAYS BEFORE"
+    },
+    {
+      "scheduleCode": "W5PE2B",
+      "description": "WEEKLY PAID FRIDAY PERIOD ENDING 2 DAYS BEFORE"
+    },
+    {
+      "scheduleCode": "B5PE13B",
+      "description": "BIWEEKLY PAID FRIDAY PERIOD ENDING 13 DAYS BEFORE"
+    },
+    {
+      "scheduleCode": "S1530PD3A",
+      "description": "SEMI-MONTHLY PERIOD ENDING 15TH & 30TH PAID 3 DAYS AFTER"
+    },
+    {
+      "scheduleCode": "M05",
+      "description": "MONTHLY PAID ON 5TH"
+    }
+  ],
+  "errorCode": "0",
+  "errorMessage": "",
+  "extension": null
+}

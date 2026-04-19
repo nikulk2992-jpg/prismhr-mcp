@@ -1,0 +1,576 @@
+[
+  {
+    "path": "/login/v1/checkPermissionsRequestStatus",
+    "service": "login",
+    "operation": "checkPermissionsRequestStatus",
+    "summary": "get status for API permissions request",
+    "elapsed_ms": 2143,
+    "status": "error",
+    "error": "PRISMHR_HTTP_ERROR: GET /login/v1/checkPermissionsRequestStatus failed (status=400). PrismHR says: \"webServiceUser\" cannot be blank. (errorCode=400)"
+  },
+  {
+    "path": "/login/v1/getAPIPermissions",
+    "service": "login",
+    "operation": "getAPIPermissions",
+    "summary": "get current API permissions",
+    "elapsed_ms": 261,
+    "status": "ok",
+    "http": 200,
+    "shape": {
+      "currentPermissions": {
+        "appVersion": "str",
+        "description": "str",
+        "minApiVersion": "str",
+        "contactInfo": "str",
+        "allowedIps": [],
+        "allowedMethods": [
+          {
+            "service": "str",
+            "options": [],
+            "fromTime": "str",
+            "toTime": "str"
+          },
+          "+53 more"
+        ]
+      },
+      "errorCode": "str",
+      "errorMessage": "str",
+      "extension": "NoneType"
+    }
+  },
+  {
+    "path": "/payroll/v1/checkInitializationStatus",
+    "service": "payroll",
+    "operation": "checkInitializationStatus",
+    "summary": "Check payroll batch initialization status",
+    "elapsed_ms": 260,
+    "status": "error",
+    "error": "PRISMHR_HTTP_ERROR: GET /payroll/v1/checkInitializationStatus failed (status=400). PrismHR says: Client ID is required for this operation (errorCode=1)"
+  },
+  {
+    "path": "/payroll/v1/getApprovalSummary",
+    "service": "payroll",
+    "operation": "getApprovalSummary",
+    "summary": "Get payroll batch summary for approval",
+    "elapsed_ms": 262,
+    "status": "error",
+    "error": "PRISMHR_HTTP_ERROR: GET /payroll/v1/getApprovalSummary failed (status=400). PrismHR says: Client ID is required for this operation (errorCode=1)"
+  },
+  {
+    "path": "/payroll/v1/getBatchInfo",
+    "service": "payroll",
+    "operation": "getBatchInfo",
+    "summary": "Get payroll batch information",
+    "elapsed_ms": 265,
+    "status": "error",
+    "error": "PRISMHR_HTTP_ERROR: GET /payroll/v1/getBatchInfo failed (status=400). PrismHR says: Client ID is required for this operation (errorCode=1)"
+  },
+  {
+    "path": "/payroll/v1/getBatchListByDate",
+    "service": "payroll",
+    "operation": "getBatchListByDate",
+    "summary": "Return Payroll Batches Within a Date Range",
+    "elapsed_ms": 266,
+    "status": "error",
+    "error": "PRISMHR_HTTP_ERROR: GET /payroll/v1/getBatchListByDate failed (status=400). PrismHR says: Client ID is required for this operation (errorCode=1)"
+  },
+  {
+    "path": "/payroll/v1/getBatchListForApproval",
+    "service": "payroll",
+    "operation": "getBatchListForApproval",
+    "summary": "Get a list of batchids available for approval for client.",
+    "elapsed_ms": 261,
+    "status": "error",
+    "error": "PRISMHR_HTTP_ERROR: GET /payroll/v1/getBatchListForApproval failed (status=400). PrismHR says: Client ID is required for this operation (errorCode=1)"
+  },
+  {
+    "path": "/payroll/v1/getBatchListForInitialization",
+    "service": "payroll",
+    "operation": "getBatchListForInitialization",
+    "summary": "Get a list of batch IDs available for initialization for specified client.",
+    "elapsed_ms": 258,
+    "status": "error",
+    "error": "PRISMHR_HTTP_ERROR: GET /payroll/v1/getBatchListForInitialization failed (status=400). PrismHR says: Client ID is required for this operation (errorCode=1)"
+  },
+  {
+    "path": "/payroll/v1/getBatchPayments",
+    "service": "payroll",
+    "operation": "getBatchPayments",
+    "summary": "Get batch payments information for an employee",
+    "elapsed_ms": 263,
+    "status": "error",
+    "error": "PRISMHR_HTTP_ERROR: GET /payroll/v1/getBatchPayments failed (status=403). PrismHR says: this user session is not authorized for the method specified (errorCode=1)"
+  },
+  {
+    "path": "/payroll/v1/getBatchStatus",
+    "service": "payroll",
+    "operation": "getBatchStatus",
+    "summary": "Get the statuses for a list of batches",
+    "elapsed_ms": 259,
+    "status": "error",
+    "error": "PRISMHR_HTTP_ERROR: GET /payroll/v1/getBatchStatus failed (status=400). PrismHR says: Client ID is required for this operation (errorCode=1)"
+  },
+  {
+    "path": "/payroll/v1/getBillingCodeTotalsByPayGroup",
+    "service": "payroll",
+    "operation": "getBillingCodeTotalsByPayGroup",
+    "summary": "Get total billing amount for a client and batch broken out by pay group",
+    "elapsed_ms": 266,
+    "status": "error",
+    "error": "PRISMHR_HTTP_ERROR: GET /payroll/v1/getBillingCodeTotalsByPayGroup failed (status=403). PrismHR says: this user session is not authorized for the method specified (errorCode=1)"
+  },
+  {
+    "path": "/payroll/v1/getBillingCodeTotalsForBatch",
+    "service": "payroll",
+    "operation": "getBillingCodeTotalsForBatch",
+    "summary": "Get total billing amount for a client and and batch",
+    "elapsed_ms": 261,
+    "status": "error",
+    "error": "PRISMHR_HTTP_ERROR: GET /payroll/v1/getBillingCodeTotalsForBatch failed (status=400). PrismHR says: Client ID is required for this operation (errorCode=1)"
+  },
+  {
+    "path": "/payroll/v1/getBillingCodeTotalsWithCosts",
+    "service": "payroll",
+    "operation": "getBillingCodeTotalsWithCosts",
+    "summary": "Get total billing amount with costs for a client and batch",
+    "elapsed_ms": 263,
+    "status": "error",
+    "error": "PRISMHR_HTTP_ERROR: GET /payroll/v1/getBillingCodeTotalsWithCosts failed (status=400). PrismHR says: Client ID is required for this operation (errorCode=1)"
+  },
+  {
+    "path": "/payroll/v1/getBillingRuleUnbundled",
+    "service": "payroll",
+    "operation": "getBillingRuleUnbundled",
+    "summary": "Get an unbundled billing rule for clientId and billingRuleNum",
+    "elapsed_ms": 261,
+    "status": "error",
+    "error": "PRISMHR_HTTP_ERROR: GET /payroll/v1/getBillingRuleUnbundled failed (status=403). PrismHR says: this user session is not authorized for the method specified (errorCode=1)"
+  },
+  {
+    "path": "/payroll/v1/getBillingVouchers",
+    "service": "payroll",
+    "operation": "getBillingVouchers",
+    "summary": "Get list of billing vouchers for clientId and date range",
+    "elapsed_ms": 258,
+    "status": "error",
+    "error": "PRISMHR_HTTP_ERROR: GET /payroll/v1/getBillingVouchers failed (status=403). PrismHR says: this user session is not authorized for the method specified (errorCode=1)"
+  },
+  {
+    "path": "/payroll/v1/getBillingVouchersByBatch",
+    "service": "payroll",
+    "operation": "getBillingVouchersByBatch",
+    "summary": "Get list of initialized or finalized billing vouchers for clientId and batchId",
+    "elapsed_ms": 266,
+    "status": "error",
+    "error": "PRISMHR_HTTP_ERROR: GET /payroll/v1/getBillingVouchersByBatch failed (status=403). PrismHR says: this user session is not authorized for the method specified (errorCode=1)"
+  },
+  {
+    "path": "/payroll/v1/getBulkYearToDateValues",
+    "service": "payroll",
+    "operation": "getBulkYearToDateValues",
+    "summary": "Get bulk year to date values",
+    "elapsed_ms": 1303,
+    "status": "ok",
+    "http": 200,
+    "shape": {
+      "warnings": "NoneType",
+      "errorCode": "str",
+      "errorMessage": "str",
+      "extension": "NoneType",
+      "downloadId": "str",
+      "buildStatus": "str",
+      "dataObject": "NoneType"
+    }
+  },
+  {
+    "path": "/payroll/v1/getClientsWithVouchers",
+    "service": "payroll",
+    "operation": "getClientsWithVouchers",
+    "summary": "Get the list of clients with at least one payroll voucher",
+    "elapsed_ms": 266,
+    "status": "error",
+    "error": "PRISMHR_HTTP_ERROR: GET /payroll/v1/getClientsWithVouchers failed (status=403). PrismHR says: this user session is not authorized for the method specified (errorCode=1)"
+  },
+  {
+    "path": "/payroll/v1/getEmployee401KContributionsByDate",
+    "service": "payroll",
+    "operation": "getEmployee401KContributionsByDate",
+    "summary": "Get list of employee 401K contributions",
+    "elapsed_ms": 263,
+    "status": "error",
+    "error": "PRISMHR_HTTP_ERROR: GET /payroll/v1/getEmployee401KContributionsByDate failed (status=403). PrismHR says: this user session is not authorized for the method specified (errorCode=1)"
+  },
+  {
+    "path": "/payroll/v1/getEmployeeForBatch",
+    "service": "payroll",
+    "operation": "getEmployeeForBatch",
+    "summary": "Get list of employee IDs for clientId and batchId",
+    "elapsed_ms": 261,
+    "status": "error",
+    "error": "PRISMHR_HTTP_ERROR: GET /payroll/v1/getEmployeeForBatch failed (status=403). PrismHR says: this user session is not authorized for the method specified (errorCode=1)"
+  },
+  {
+    "path": "/payroll/v1/getEmployeeOverrideRates",
+    "service": "payroll",
+    "operation": "getEmployeeOverrideRates",
+    "summary": "Get list of employee override rates",
+    "elapsed_ms": 260,
+    "status": "error",
+    "error": "PRISMHR_HTTP_ERROR: GET /payroll/v1/getEmployeeOverrideRates failed (status=403). PrismHR says: this user session is not authorized for the method specified (errorCode=1)"
+  },
+  {
+    "path": "/payroll/v1/getEmployeePayrollSummary",
+    "service": "payroll",
+    "operation": "getEmployeePayrollSummary",
+    "summary": "Get an employee's payroll summary",
+    "elapsed_ms": 252,
+    "status": "error",
+    "error": "PRISMHR_HTTP_ERROR: GET /payroll/v1/getEmployeePayrollSummary failed (status=403). PrismHR says: this user session is not authorized for the method specified (errorCode=1)"
+  },
+  {
+    "path": "/payroll/v1/getExternalPtoBalance",
+    "service": "payroll",
+    "operation": "getExternalPtoBalance",
+    "summary": "Get external PTO balance data",
+    "elapsed_ms": 259,
+    "status": "error",
+    "error": "PRISMHR_HTTP_ERROR: GET /payroll/v1/getExternalPtoBalance failed (status=403). PrismHR says: this user session is not authorized for the method specified (errorCode=1)"
+  },
+  {
+    "path": "/payroll/v1/getManualChecks",
+    "service": "payroll",
+    "operation": "getManualChecks",
+    "summary": "Retrieve information about manual checks",
+    "elapsed_ms": 260,
+    "status": "error",
+    "error": "PRISMHR_HTTP_ERROR: GET /payroll/v1/getManualChecks failed (status=400). PrismHR says: Client ID is required for this operation (errorCode=1)"
+  },
+  {
+    "path": "/payroll/v1/getPayrollApproval",
+    "service": "payroll",
+    "operation": "getPayrollApproval",
+    "summary": "Get payroll approval info for a client.",
+    "elapsed_ms": 261,
+    "status": "error",
+    "error": "PRISMHR_HTTP_ERROR: GET /payroll/v1/getPayrollApproval failed (status=400). PrismHR says: Client ID is required for this operation (errorCode=1)"
+  },
+  {
+    "path": "/payroll/v1/getPayrollBatchWithOptions",
+    "service": "payroll",
+    "operation": "getPayrollBatchWithOptions",
+    "summary": "Get a list of batches with payroll control options",
+    "elapsed_ms": 262,
+    "status": "error",
+    "error": "PRISMHR_HTTP_ERROR: GET /payroll/v1/getPayrollBatchWithOptions failed (status=400). PrismHR says: Client ID is required for this operation (errorCode=1)"
+  },
+  {
+    "path": "/payroll/v1/getPayrollNotes",
+    "service": "payroll",
+    "operation": "getPayrollNotes",
+    "summary": "Get payroll notes",
+    "elapsed_ms": 263,
+    "status": "error",
+    "error": "PRISMHR_HTTP_ERROR: GET /payroll/v1/getPayrollNotes failed (status=400). PrismHR says: Client ID is required for this operation (errorCode=1)"
+  },
+  {
+    "path": "/payroll/v1/getPayrollSchedule",
+    "service": "payroll",
+    "operation": "getPayrollSchedule",
+    "summary": "Get a payroll schedule using scheduleCode",
+    "elapsed_ms": 5305,
+    "status": "error",
+    "error": "PRISMHR_HTTP_ERROR: GET /payroll/v1/getPayrollSchedule failed (status=500). PrismHR says: Cannot find payroll schedule for schedule code: null (errorCode=1)"
+  },
+  {
+    "path": "/payroll/v1/getPayrollScheduleCodes",
+    "service": "payroll",
+    "operation": "getPayrollScheduleCodes",
+    "summary": "Get a list of available schedule codes with their description",
+    "elapsed_ms": 262,
+    "status": "ok",
+    "http": 200,
+    "shape": {
+      "payrollScheduleCodes": [
+        {
+          "scheduleCode": "str",
+          "description": "str"
+        },
+        "+69 more"
+      ],
+      "errorCode": "str",
+      "errorMessage": "str",
+      "extension": "NoneType"
+    }
+  },
+  {
+    "path": "/payroll/v1/getPayrollSummary",
+    "service": "payroll",
+    "operation": "getPayrollSummary",
+    "summary": "Get payroll summary",
+    "elapsed_ms": 262,
+    "status": "error",
+    "error": "PRISMHR_HTTP_ERROR: GET /payroll/v1/getPayrollSummary failed (status=400). PrismHR says: Client ID is required for this operation (errorCode=1)"
+  },
+  {
+    "path": "/payroll/v1/getPayrollVoucherById",
+    "service": "payroll",
+    "operation": "getPayrollVoucherById",
+    "summary": "Get a payroll voucher for clientId and voucherId",
+    "elapsed_ms": 253,
+    "status": "error",
+    "error": "PRISMHR_HTTP_ERROR: GET /payroll/v1/getPayrollVoucherById failed (status=400). PrismHR says: Client ID is required for this operation (errorCode=1)"
+  },
+  {
+    "path": "/payroll/v1/getPayrollVoucherForBatch",
+    "service": "payroll",
+    "operation": "getPayrollVoucherForBatch",
+    "summary": "Get list of employee payroll vouchers for clientId and batchId",
+    "elapsed_ms": 262,
+    "status": "error",
+    "error": "PRISMHR_HTTP_ERROR: GET /payroll/v1/getPayrollVoucherForBatch failed (status=400). PrismHR says: Client ID is required for this operation (errorCode=1)"
+  },
+  {
+    "path": "/payroll/v1/getPayrollVouchers",
+    "service": "payroll",
+    "operation": "getPayrollVouchers",
+    "summary": "Get list of employee payroll vouchers for clientId and date range",
+    "elapsed_ms": 264,
+    "status": "error",
+    "error": "PRISMHR_HTTP_ERROR: GET /payroll/v1/getPayrollVouchers failed (status=400). PrismHR says: PayDateStart is required for this operation (errorCode=1)"
+  },
+  {
+    "path": "/payroll/v1/getPayrollVouchersForEmployee",
+    "service": "payroll",
+    "operation": "getPayrollVouchersForEmployee",
+    "summary": "Get list of employee payroll vouchers for employeeId, clientId, and dates",
+    "elapsed_ms": 261,
+    "status": "error",
+    "error": "PRISMHR_HTTP_ERROR: GET /payroll/v1/getPayrollVouchersForEmployee failed (status=400). PrismHR says: PayDateStart is required for this operation (errorCode=1)"
+  },
+  {
+    "path": "/payroll/v1/getProcessSchedule",
+    "service": "payroll",
+    "operation": "getProcessSchedule",
+    "summary": "Get a process schedule using processScheduleId",
+    "elapsed_ms": 252,
+    "status": "error",
+    "error": "PRISMHR_HTTP_ERROR: GET /payroll/v1/getProcessSchedule failed (status=403). PrismHR says: this user session is not authorized for the method specified (errorCode=1)"
+  },
+  {
+    "path": "/payroll/v1/getProcessScheduleCodes",
+    "service": "payroll",
+    "operation": "getProcessScheduleCodes",
+    "summary": "Get a list of available process schedule IDs with their corresponding description",
+    "elapsed_ms": 255,
+    "status": "error",
+    "error": "PRISMHR_HTTP_ERROR: GET /payroll/v1/getProcessScheduleCodes failed (status=403). PrismHR says: this user session is not authorized for the method specified (errorCode=1)"
+  },
+  {
+    "path": "/payroll/v1/getRetirementAdjVoucherListByDate",
+    "service": "payroll",
+    "operation": "getRetirementAdjVoucherListByDate",
+    "summary": "Get retirement adj voucher-list by date",
+    "elapsed_ms": 254,
+    "status": "error",
+    "error": "PRISMHR_HTTP_ERROR: GET /payroll/v1/getRetirementAdjVoucherListByDate failed (status=403). PrismHR says: this user session is not authorized for the method specified (errorCode=1)"
+  },
+  {
+    "path": "/payroll/v1/getScheduledPayments",
+    "service": "payroll",
+    "operation": "getScheduledPayments",
+    "summary": "Get scheduled payments information for an employee",
+    "elapsed_ms": 256,
+    "status": "error",
+    "error": "PRISMHR_HTTP_ERROR: GET /payroll/v1/getScheduledPayments failed (status=400). PrismHR says: Client ID is required for this operation (errorCode=1)"
+  },
+  {
+    "path": "/payroll/v1/getStandardHours",
+    "service": "payroll",
+    "operation": "getStandardHours",
+    "summary": "Get the list of standardHours objects for clientId",
+    "elapsed_ms": 261,
+    "status": "error",
+    "error": "PRISMHR_HTTP_ERROR: GET /payroll/v1/getStandardHours failed (status=400). PrismHR says: Client ID is required for this operation (errorCode=1)"
+  },
+  {
+    "path": "/payroll/v1/getYearToDateValues",
+    "service": "payroll",
+    "operation": "getYearToDateValues",
+    "summary": "Get period to date payroll values",
+    "elapsed_ms": 262,
+    "status": "error",
+    "error": "PRISMHR_HTTP_ERROR: GET /payroll/v1/getYearToDateValues failed (status=400). PrismHR says: Client ID is required for this operation (errorCode=1)"
+  },
+  {
+    "path": "/payroll/v1/payGroupScheduleReport",
+    "service": "payroll",
+    "operation": "payGroupScheduleReport",
+    "summary": "Pay Group Schedule Report",
+    "elapsed_ms": 254,
+    "status": "error",
+    "error": "PRISMHR_HTTP_ERROR: GET /payroll/v1/payGroupScheduleReport failed (status=400). PrismHR says: Client ID is required for this operation (errorCode=1)"
+  },
+  {
+    "path": "/payroll/v1/reprintCheckStub",
+    "status": "skipped",
+    "reason": "download-like"
+  },
+  {
+    "path": "/system/v1/getACHFileList",
+    "service": "system",
+    "operation": "getACHFileList",
+    "summary": "Get ACH files list",
+    "elapsed_ms": 259,
+    "status": "error",
+    "error": "PRISMHR_HTTP_ERROR: GET /system/v1/getACHFileList failed (status=400). PrismHR says: originatorId is a required parameter (errorCode=400)"
+  },
+  {
+    "path": "/system/v1/getARTransactionReport",
+    "service": "system",
+    "operation": "getARTransactionReport",
+    "summary": "Generate an AR transaction report",
+    "elapsed_ms": 252,
+    "status": "error",
+    "error": "PRISMHR_HTTP_ERROR: GET /system/v1/getARTransactionReport failed (status=403). PrismHR says: this user session is not authorized for the method specified (errorCode=1)"
+  },
+  {
+    "path": "/system/v1/getData",
+    "service": "system",
+    "operation": "getData",
+    "summary": "Retrieve datasets from the system",
+    "elapsed_ms": 253,
+    "status": "error",
+    "error": "PRISMHR_HTTP_ERROR: GET /system/v1/getData failed (status=403). PrismHR says: this user session is not authorized for the method specified (errorCode=1)"
+  },
+  {
+    "path": "/system/v1/getEmployerDetails",
+    "service": "system",
+    "operation": "getEmployerDetails",
+    "summary": "Get Employer Details",
+    "elapsed_ms": 263,
+    "status": "error",
+    "error": "PRISMHR_HTTP_ERROR: GET /system/v1/getEmployerDetails failed (status=403). PrismHR says: this user session is not authorized for the method specified (errorCode=1)"
+  },
+  {
+    "path": "/system/v1/getInvoiceData",
+    "service": "system",
+    "operation": "getInvoiceData",
+    "summary": "Get Invoice Data",
+    "elapsed_ms": 253,
+    "status": "error",
+    "error": "PRISMHR_HTTP_ERROR: GET /system/v1/getInvoiceData failed (status=403). PrismHR says: this user session is not authorized for the method specified (errorCode=1)"
+  },
+  {
+    "path": "/system/v1/getMultiEntityGroupList",
+    "service": "system",
+    "operation": "getMultiEntityGroupList",
+    "summary": "Get Multi Entity Group List",
+    "elapsed_ms": 254,
+    "status": "error",
+    "error": "PRISMHR_HTTP_ERROR: GET /system/v1/getMultiEntityGroupList failed (status=403). PrismHR says: this user session is not authorized for the method specified (errorCode=1)"
+  },
+  {
+    "path": "/system/v1/getPayee",
+    "service": "system",
+    "operation": "getPayee",
+    "summary": "Retrieve payee information",
+    "elapsed_ms": 254,
+    "status": "error",
+    "error": "PRISMHR_HTTP_ERROR: GET /system/v1/getPayee failed (status=403). PrismHR says: this user session is not authorized for the method specified (errorCode=1)"
+  },
+  {
+    "path": "/system/v1/getPaymentsPending",
+    "service": "system",
+    "operation": "getPaymentsPending",
+    "summary": "Payments Pending information",
+    "elapsed_ms": 260,
+    "status": "error",
+    "error": "PRISMHR_HTTP_ERROR: GET /system/v1/getPaymentsPending failed (status=403). PrismHR says: this user session is not authorized for the method specified (errorCode=1)"
+  },
+  {
+    "path": "/system/v1/getPositivePayCheckStub",
+    "service": "system",
+    "operation": "getPositivePayCheckStub",
+    "summary": "Get positive pay check stub",
+    "elapsed_ms": 258,
+    "status": "error",
+    "error": "PRISMHR_HTTP_ERROR: GET /system/v1/getPositivePayCheckStub failed (status=403). PrismHR says: this user session is not authorized for the method specified (errorCode=1)"
+  },
+  {
+    "path": "/system/v1/getPositivePayFileList",
+    "service": "system",
+    "operation": "getPositivePayFileList",
+    "summary": "Get positive pay files list",
+    "elapsed_ms": 261,
+    "status": "error",
+    "error": "PRISMHR_HTTP_ERROR: GET /system/v1/getPositivePayFileList failed (status=403). PrismHR says: this user session is not authorized for the method specified (errorCode=1)"
+  },
+  {
+    "path": "/system/v1/getUnbilledBenefitAdjustments",
+    "service": "system",
+    "operation": "getUnbilledBenefitAdjustments",
+    "summary": "Unbilled Benefit Adjustments information",
+    "elapsed_ms": 253,
+    "status": "error",
+    "error": "PRISMHR_HTTP_ERROR: GET /system/v1/getUnbilledBenefitAdjustments failed (status=403). PrismHR says: this user session is not authorized for the method specified (errorCode=1)"
+  },
+  {
+    "path": "/system/v1/identifyACHProcessLock",
+    "service": "system",
+    "operation": "identifyACHProcessLock",
+    "summary": "Identify ACH Process Lock",
+    "elapsed_ms": 253,
+    "status": "error",
+    "error": "PRISMHR_HTTP_ERROR: GET /system/v1/identifyACHProcessLock failed (status=403). PrismHR says: this user session is not authorized for the method specified (errorCode=1)"
+  },
+  {
+    "path": "/system/v1/positivePayDownload",
+    "status": "skipped",
+    "reason": "download-like"
+  },
+  {
+    "path": "/system/v1/recreatePositivePay",
+    "service": "system",
+    "operation": "recreatePositivePay",
+    "summary": "Recreate positive pay report",
+    "elapsed_ms": 268,
+    "status": "error",
+    "error": "PRISMHR_HTTP_ERROR: GET /system/v1/recreatePositivePay failed (status=403). PrismHR says: this user session is not authorized for the method specified (errorCode=1)"
+  },
+  {
+    "path": "/system/v1/streamACHData",
+    "service": "system",
+    "operation": "streamACHData",
+    "summary": "Stream ACH Data",
+    "elapsed_ms": 318,
+    "status": "error",
+    "error": "PRISMHR_HTTP_ERROR: GET /system/v1/streamACHData failed (status=406)."
+  },
+  {
+    "path": "/timesheet/v1/getBatchStatus",
+    "service": "timesheet",
+    "operation": "getBatchStatus",
+    "summary": "Get the status of a payroll batch",
+    "elapsed_ms": 260,
+    "status": "error",
+    "error": "PRISMHR_HTTP_ERROR: GET /timesheet/v1/getBatchStatus failed (status=400). PrismHR says: Client ID is required for this operation (errorCode=1)"
+  },
+  {
+    "path": "/timesheet/v1/getParamData",
+    "service": "timesheet",
+    "operation": "getParamData",
+    "summary": "Get the list of available templates and batches",
+    "elapsed_ms": 252,
+    "status": "error",
+    "error": "PRISMHR_HTTP_ERROR: GET /timesheet/v1/getParamData failed (status=400). PrismHR says: Client ID is required for this operation (errorCode=1)"
+  },
+  {
+    "path": "/timesheet/v1/getTimeSheetData",
+    "service": "timesheet",
+    "operation": "getTimeSheetData",
+    "summary": "Get the timesheet data for a payroll batch",
+    "elapsed_ms": 262,
+    "status": "error",
+    "error": "PRISMHR_HTTP_ERROR: GET /timesheet/v1/getTimeSheetData failed (status=400). PrismHR says: Client ID is required for this operation (errorCode=1)"
+  }
+]
