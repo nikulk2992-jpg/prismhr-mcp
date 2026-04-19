@@ -19,9 +19,11 @@ venv/
 .coverage.*
 htmlcov/
 
-# Secrets / local config
+# Secrets / local config — NEVER commit.
 .env
+.env.*
 .env.local
+.env.local.enc
 .env.*.local
 *.pem
 *.key

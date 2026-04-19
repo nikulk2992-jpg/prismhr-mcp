@@ -131,7 +131,10 @@ class PrismHRClient:
         for attempt in range(attempts):
             async with self._sem:
                 token = await self._session.token()
-                headers = {"Authorization": f"Bearer {token}"}
+                # PrismHR expects its session token in a custom `sessionId`
+                # header, not HTTP Bearer auth. Confirmed against UAT during
+                # Phase 2 dogfood: Bearer auth returns 401 for every endpoint.
+                headers = {"sessionId": token, "Accept": "application/json"}
                 try:
                     resp = await self._http.request(
                         method,
@@ -195,13 +198,35 @@ class PrismHRClient:
                     await asyncio.sleep(self._backoff(attempt, base))
                     continue
 
-            # Unrecoverable — surface structured error.
+            # Unrecoverable — surface structured error. If PrismHR returned
+            # its usual `{errorCode, errorMessage}` JSON envelope, include
+            # that text so Claude can relay a specific remediation to the user
+            # (e.g. "not authorized for method" → admin must grant privilege).
+            prismhr_error_message: str | None = None
+            prismhr_error_code: str | None = None
+            try:
+                body_json = resp.json()
+                if isinstance(body_json, dict):
+                    prismhr_error_message = body_json.get("errorMessage") or None
+                    raw_err_code = body_json.get("errorCode")
+                    if raw_err_code not in (None, "", "0"):
+                        prismhr_error_code = str(raw_err_code)
+            except ValueError:
+                pass  # non-JSON body, fall through to generic message
+            if prismhr_error_message:
+                hint = f" PrismHR says: {prismhr_error_message}"
+                if prismhr_error_code:
+                    hint += f" (errorCode={prismhr_error_code})"
+            else:
+                hint = ""
             raise PrismHRRequestError(
                 code="PRISMHR_HTTP_ERROR",
-                message=f"{method} {path} failed (status={status})",
+                message=f"{method} {path} failed (status={status}).{hint}",
                 context={
                     "status": status,
                     "body": resp.text[:500],
+                    "prismhr_error_code": prismhr_error_code,
+                    "prismhr_error_message": prismhr_error_message,
                     "attempt": attempt + 1,
                 },
             )

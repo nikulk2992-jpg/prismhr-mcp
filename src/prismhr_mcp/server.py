@@ -35,7 +35,7 @@ def build(runtime: Runtime | None = None) -> BuiltServer:
     rt = runtime or build_runtime()
     server, registry = create_server()
 
-    meta_tools.register(server, registry, rt.permissions)
+    meta_tools.register(server, registry, rt.permissions, rt.prismhr)
     client_tools.register(server, registry, rt.prismhr, rt.permissions)
     payroll_tools.register(server, registry, rt.prismhr, rt.permissions)
     # Phase 3+ modules plug in below:
