@@ -41,6 +41,8 @@ cached-credentials.enc
 .planning/probe-responses/
 .planning/verification-matrix.json
 .planning/probe-summary.json
+# Audit files reference authorized-services list (tenant-specific).
+.planning/uat-coverage-audit.md
 
 # IDE / OS
 .idea/
