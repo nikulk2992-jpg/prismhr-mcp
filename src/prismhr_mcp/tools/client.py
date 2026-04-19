@@ -45,31 +45,29 @@ def register(
     permissions: PermissionManager,
 ) -> None:
     async def client_list() -> ClientListResponse:
-        """List all clients visible to the current PrismHR PEO account.
+        """List every client the current PEO account can see.
 
-        Returns client IDs, names, and status. Use this before any tool
-        that needs a `client_id`. Downstream: feeds `client_employees`,
-        `client_employee_search`, and most billing/payroll tools.
-
-        Requires scope: client:read.
+        Use when the user says "show me the clients" or "which companies
+        are on our platform". Returns each client's ID, name, and active
+        status. Most other tools need a client ID, so call this first
+        when you don't have one.
         """
         permissions.check(Scope.CLIENT_READ)
         raw = await prismhr.get(PATH_CLIENT_LIST)
         return ClientListResponse.from_raw(raw)
 
     async def client_employees(
-        client_id: Annotated[str, Field(description="PrismHR client ID (from client_list).")],
+        client_id: Annotated[str, Field(description="Which client's employees to list.")],
         status: Annotated[
             StatusFilter,
-            Field(description="Filter by employment status. 'active' excludes terminated employees."),
+            Field(description="Active employees only, terminated only, or everyone."),
         ] = "active",
     ) -> EmployeeListResponse:
-        """List employees for a single client.
+        """List the employees at a single client.
 
-        Downstream: feeds `client_employee` for batched detail lookup,
-        payroll tools, and branded roster exports.
-
-        Requires scope: employee:read.
+        Use when the user says "who works at Acme" or "show me active
+        employees at client XYZ". Returns each employee's ID, name, work
+        email, hire date, and status.
         """
         permissions.check(Scope.EMPLOYEE_READ)
         params: dict[str, object] = {"clientId": client_id}
@@ -79,21 +77,21 @@ def register(
         return EmployeeListResponse.from_raw(client_id, raw)
 
     async def client_employee(
-        client_id: Annotated[str, Field(description="PrismHR client ID.")],
+        client_id: Annotated[str, Field(description="Which client the employees belong to.")],
         employee_ids: Annotated[
             list[str],
             Field(
-                description="Employee IDs to fetch. PrismHR accepts batches of 20; this tool chunks automatically.",
+                description="Which employees to look up (one or many).",
                 min_length=1,
             ),
         ],
     ) -> EmployeeDetailResponse:
-        """Fetch full detail records for one or more employees of a single client.
+        """Pull full profile detail for one or more employees.
 
-        Uses PrismHR's batch endpoint (`getEmployee` accepts up to 20 IDs
-        per call) and chunks automatically.
-
-        Requires scope: employee:read.
+        Use when the user asks "show me John's full record" or "get details
+        on these five employees at Acme". Returns the complete employee
+        profile: name, hire/termination dates, pay group, status, and
+        the termination reason if applicable.
         """
         permissions.check(Scope.EMPLOYEE_READ)
         unique_ids = list(dict.fromkeys(employee_ids))
@@ -115,26 +113,25 @@ def register(
         query: Annotated[
             str,
             Field(
-                description="Case-insensitive substring to match against first/last name or work email.",
+                description="Name or email fragment to search for.",
                 min_length=1,
             ),
         ],
         status: Annotated[
             StatusFilter,
-            Field(description="Limit search to employees with this status."),
+            Field(description="Active employees only, terminated only, or everyone."),
         ] = "active",
         client_ids: Annotated[
             list[str] | None,
-            Field(description="Restrict to these clients. Omit to search every client in the PEO."),
+            Field(description="Limit search to specific clients. Leave blank to search all."),
         ] = None,
     ) -> EmployeeSearchResponse:
-        """Search employees across clients by name or work email.
+        """Find an employee by name or email, across every client at once.
 
-        Slow path: walks the client list and paginates employees. Prefer
-        `client_employees` if you already know the `client_id`.
-
-        Requires scopes: employee:read and client:read (client:read is
-        auto-included as a prerequisite when you grant employee:read).
+        Use when the user says "find Jane Doe" or "is there anyone named
+        Smith in our system" without knowing which client they're at. Slow
+        path because it walks every client, so prefer `client_employees`
+        when you already know the client.
         """
         permissions.check(Scope.EMPLOYEE_READ)
         permissions.check(Scope.CLIENT_READ)

@@ -6,6 +6,7 @@ Write tools are stubbed until Phase 6 (preview→confirm two-step).
 
 from __future__ import annotations
 
+from datetime import date
 from decimal import Decimal
 from typing import Annotated, Any
 
@@ -55,17 +56,15 @@ def register(
     # ------------- read tools -------------
 
     async def payroll_batch_status(
-        client_id: Annotated[str, Field(description="PrismHR client ID.")],
-        start_date: Annotated[
-            str, Field(description="Inclusive start date (YYYY-MM-DD). Matches PrismHR's batch list filter.")
-        ],
-        end_date: Annotated[str, Field(description="Inclusive end date (YYYY-MM-DD).")],
+        client_id: Annotated[str, Field(description="The client to look at.")],
+        start_date: Annotated[str, Field(description="First day to include (YYYY-MM-DD).")],
+        end_date: Annotated[str, Field(description="Last day to include (YYYY-MM-DD).")],
     ) -> BatchStatusResponse:
-        """List payroll batches for a client between two dates.
+        """Find the payroll batches a client ran in a date window.
 
-        Returns batch IDs, pay dates, status, voucher counts, and gross totals.
-        Downstream: feeds `payroll_register_reconcile`, `payroll_overtime_anomalies`,
-        `payroll_superbatch_status`, and branded payroll summary reports.
+        Use when the user asks things like "what payrolls ran at Acme in March"
+        or "show me this quarter's batches for client ABC". Returns batch IDs,
+        pay dates, status, voucher counts, and gross totals.
         """
         permissions.check(Scope.PAYROLL_READ)
         raw = await prismhr.get(
@@ -85,20 +84,18 @@ def register(
         )
 
     async def payroll_pay_history(
-        client_id: Annotated[str, Field(description="PrismHR client ID.")],
-        employee_id: Annotated[str, Field(description="Employee ID within the client.")],
-        start_date: Annotated[str, Field(description="Inclusive start date (YYYY-MM-DD).")],
-        end_date: Annotated[str, Field(description="Inclusive end date (YYYY-MM-DD).")],
-        include_ytd: Annotated[
-            bool,
-            Field(description="If true, also fetches year-to-date totals as of end_date."),
-        ] = True,
+        client_id: Annotated[str, Field(description="The client the employee belongs to.")],
+        employee_id: Annotated[str, Field(description="Which employee.")],
+        start_date: Annotated[str, Field(description="First day to include (YYYY-MM-DD).")],
+        end_date: Annotated[str, Field(description="Last day to include (YYYY-MM-DD).")],
     ) -> PayHistoryResponse:
-        """Fetch pay vouchers for an employee across a date range, optionally with YTD totals.
+        """Get an employee's paychecks in a date window, plus year-to-date totals.
 
-        Returns a list of `PayVoucher` records (gross, net, regular/overtime hours,
-        pay dates, voided flag) plus optional `YTDValues`.
+        Use when the user asks "what did Jane get paid this quarter" or
+        "pull up John's checks for Q1". Returns each paycheck (gross, net,
+        regular/overtime hours) plus YTD gross/net/taxes.
         """
+        include_ytd = True  # always fetch YTD — hiding the knob; cheap extra call
         permissions.check(Scope.PAYROLL_READ)
         voucher_raw = await prismhr.get(
             PATH_VOUCHERS_FOR_EMPLOYEE,
@@ -137,14 +134,15 @@ def register(
         )
 
     async def payroll_pay_group_check(
-        client_id: Annotated[str, Field(description="PrismHR client ID.")],
-        employee_id: Annotated[str, Field(description="Employee ID within the client.")],
+        client_id: Annotated[str, Field(description="The client the employee belongs to.")],
+        employee_id: Annotated[str, Field(description="Which employee.")],
     ) -> PayGroupAssignment:
-        """Verify that an employee is assigned to a pay group, and surface frequency.
+        """Check whether an employee is set up to be paid (pay group assigned).
 
-        Unassigned or mis-assigned pay groups are the most common cause of
-        missed payroll. This tool returns a clear `assigned` boolean plus a
-        warning message when something looks off.
+        Use when the user asks "why didn't Jane get paid" or "is this new hire
+        ready for payroll". Returns whether a pay group is assigned and the
+        pay frequency (weekly/biweekly/etc). Unassigned pay group is the #1
+        reason an employee is skipped in a payroll run.
         """
         permissions.check(Scope.PAYROLL_READ)
         raw = await prismhr.post(
@@ -180,20 +178,16 @@ def register(
         )
 
     async def payroll_deduction_conflicts(
-        client_id: Annotated[str, Field(description="PrismHR client ID.")],
-        employee_id: Annotated[str, Field(description="Employee ID within the client.")],
-        today: Annotated[
-            str | None,
-            Field(
-                description="YYYY-MM-DD; used to flag `expired_active` deductions. Defaults to empty (no date check).",
-            ),
-        ] = None,
+        client_id: Annotated[str, Field(description="The client the employee belongs to.")],
+        employee_id: Annotated[str, Field(description="Which employee.")],
     ) -> DeductionConflictsResponse:
-        """Scan an employee's scheduled deductions for conflicts (priority clashes, duplicates, expired-but-active, goal missing).
+        """Find problems in an employee's scheduled deductions BEFORE payroll runs.
 
-        Wraps `normalizers.payroll.detect_deduction_conflicts`. Use this
-        before running payroll to avoid surprise underwithholdings or
-        duplicate deduction amounts.
+        Use when the user asks "check Jane's deductions" or "is this employee
+        ready to run" or "why is so-and-so's garnishment doubled". Flags four
+        issues: two deductions sharing the same priority, duplicate deductions
+        with the same code, active deductions whose end date has already passed,
+        and garnishment/loan deductions with no goal amount.
         """
         permissions.check(Scope.PAYROLL_READ)
         raw = await prismhr.get(
@@ -201,7 +195,8 @@ def register(
             params={"clientId": client_id, "employeeId": employee_id},
         )
         rows = _coerce_list(raw)
-        conflicts = detect_deduction_conflicts(rows, today=today)
+        today_str = date.today().isoformat()  # hide the knob; always compare against today
+        conflicts = detect_deduction_conflicts(rows, today=today_str)
         return DeductionConflictsResponse(
             client_id=client_id,
             employee_id=employee_id,
@@ -210,20 +205,21 @@ def register(
         )
 
     async def payroll_overtime_anomalies(
-        client_id: Annotated[str, Field(description="PrismHR client ID.")],
-        employee_id: Annotated[str, Field(description="Employee ID within the client.")],
-        start_date: Annotated[str, Field(description="Inclusive start date (YYYY-MM-DD).")],
-        end_date: Annotated[str, Field(description="Inclusive end date (YYYY-MM-DD).")],
+        client_id: Annotated[str, Field(description="The client the employee belongs to.")],
+        employee_id: Annotated[str, Field(description="Which employee.")],
+        start_date: Annotated[str, Field(description="First day to include (YYYY-MM-DD).")],
+        end_date: Annotated[str, Field(description="Last day to include (YYYY-MM-DD).")],
         batch_id: Annotated[
             str | None,
-            Field(description="Optional — filter anomalies to vouchers in this batch only."),
+            Field(description="Optional — narrow the scan to a single payroll batch."),
         ] = None,
     ) -> OvertimeAnomaliesResponse:
-        """Analyze an employee's vouchers for overtime anomalies.
+        """Find overtime problems in an employee's paychecks.
 
-        Detects negative regular hours, OT without regular hours, excessive
-        OT, and OT/regular rate mismatches. Wraps
-        `normalizers.payroll.detect_overtime_anomalies`.
+        Use when the user asks "does Jane's OT look right" or "flag weird
+        overtime at Acme last month". Surfaces negative regular hours,
+        overtime with no regular hours, excessive OT over 30/week, and
+        overtime-rate/regular-rate mismatches that aren't ~1.5x.
         """
         permissions.check(Scope.PAYROLL_READ)
         raw = await prismhr.get(
@@ -249,14 +245,16 @@ def register(
         )
 
     async def payroll_superbatch_status(
-        client_id: Annotated[str, Field(description="PrismHR client ID.")],
-        start_date: Annotated[str, Field(description="Inclusive start date (YYYY-MM-DD).")],
-        end_date: Annotated[str, Field(description="Inclusive end date (YYYY-MM-DD).")],
+        client_id: Annotated[str, Field(description="The client.")],
+        start_date: Annotated[str, Field(description="First day to include (YYYY-MM-DD).")],
+        end_date: Annotated[str, Field(description="Last day to include (YYYY-MM-DD).")],
     ) -> SuperBatchSummary:
-        """Aggregate payroll-batch status across a date range, mirroring PrismHR's SuperBatch UI.
+        """Summarize a client's payroll cycle health across a date range.
 
-        Counts open/pending/posted/voided batches and totals gross across
-        all of them. Useful for morning-of-pay status checks.
+        Use for morning-of-pay status checks: "how's Acme's payroll looking
+        this week" or "show me everything that's open vs. posted for
+        client XYZ this quarter". Counts batches by status (open / pending
+        / posted / voided) and totals gross payroll across them.
         """
         permissions.check(Scope.PAYROLL_READ)
         raw = await prismhr.get(
@@ -290,19 +288,18 @@ def register(
         )
 
     async def payroll_register_reconcile(
-        client_id: Annotated[str, Field(description="PrismHR client ID.")],
-        batch_id: Annotated[str, Field(description="Batch to reconcile.")],
-        threshold_pct: Annotated[
-            float,
-            Field(description="Tolerance in percent. Default 0.05 (5 cents per $100)."),
-        ] = REGISTER_RECONCILE_THRESHOLD_PCT,
+        client_id: Annotated[str, Field(description="The client.")],
+        batch_id: Annotated[str, Field(description="Which payroll batch.")],
     ) -> RegisterReconciliation:
-        """Compare voucher gross totals to billing-code totals for a batch.
+        """Explain why a payroll batch's gross does not match billing.
 
-        If the two agree within `threshold_pct` of gross, the batch is
-        considered reconciled. Otherwise surfaces the delta in both dollars
-        and percentage so ops can find the discrepancy.
+        Use when the user says "something's off with this batch" or "why
+        doesn't the register match the invoice for Acme's last pay run".
+        Compares paycheck gross totals against billing-code totals; says
+        reconciled=true if they agree within 5 cents per $100, otherwise
+        returns the dollar delta and a plain-English finding.
         """
+        threshold_pct = REGISTER_RECONCILE_THRESHOLD_PCT  # hidden constant
         permissions.check(Scope.PAYROLL_READ)
 
         billing_raw = await prismhr.get(
@@ -404,8 +401,12 @@ def register(
     registry.register(server, "payroll_overtime_anomalies", payroll_overtime_anomalies)
     registry.register(server, "payroll_superbatch_status", payroll_superbatch_status)
     registry.register(server, "payroll_register_reconcile", payroll_register_reconcile)
-    registry.register(server, "payroll_void_workflow", payroll_void_workflow)
-    registry.register(server, "payroll_correction_workflow", payroll_correction_workflow)
+    # payroll_void_workflow + payroll_correction_workflow intentionally NOT
+    # registered. They exist above as placeholders for Phase 6's preview→confirm
+    # design but registering them now would create fake tools — permissioned,
+    # visible to Claude, but nonfunctional — which pollutes consent and burns
+    # user trust. Phase 6 will register them once they actually mutate data.
+    _ = (payroll_void_workflow, payroll_correction_workflow)  # silence unused warnings
 
 
 # ---------- helpers ----------

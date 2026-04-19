@@ -95,12 +95,14 @@ async def test_payroll_pay_history_with_ytd(runtime) -> None:  # noqa: ANN001
     assert data["ytd"]["net_ytd"] == "3800"
 
 
-async def test_payroll_pay_history_skips_ytd_when_disabled(runtime) -> None:  # noqa: ANN001
+async def test_payroll_pay_history_always_fetches_ytd(runtime) -> None:  # noqa: ANN001
+    # `include_ytd` knob was removed (Codex #3 — hide implementation toggles
+    # from the tool surface); YTD is always fetched alongside vouchers.
     built = build(runtime=runtime)
-    with respx.mock(base_url=runtime.settings.prismhr_base_url, assert_all_called=False) as mock:
+    with respx.mock(base_url=runtime.settings.prismhr_base_url) as mock:
         _login_ok(mock)
         mock.get(PATH_VOUCHERS_FOR_EMPLOYEE).mock(return_value=httpx.Response(200, json=[]))
-        ytd_route = mock.get(PATH_YTD)
+        ytd_route = mock.get(PATH_YTD).mock(return_value=httpx.Response(200, json={}))
         await built.server.call_tool(
             "payroll_pay_history",
             {
@@ -108,10 +110,9 @@ async def test_payroll_pay_history_skips_ytd_when_disabled(runtime) -> None:  # 
                 "employee_id": "E1",
                 "start_date": "2026-01-01",
                 "end_date": "2026-01-31",
-                "include_ytd": False,
             },
         )
-        assert ytd_route.call_count == 0
+        assert ytd_route.call_count == 1
 
 
 # ---------- payroll_pay_group_check ----------
@@ -297,25 +298,11 @@ async def test_register_reconcile_flags_mismatch(runtime) -> None:  # noqa: ANN0
 # ---------- write stubs ----------
 
 
-async def test_void_workflow_returns_not_implemented_when_scope_granted(runtime) -> None:  # noqa: ANN001
-    from prismhr_mcp.permissions import Scope
-
-    runtime.permissions.grant([Scope.PAYROLL_WRITE])  # cascade-includes PAYROLL_READ, CLIENT_READ
+async def test_void_and_correction_workflows_are_not_yet_registered(runtime) -> None:  # noqa: ANN001
+    """Phase 2 intentionally hides the write-path stubs. Phase 6 will register
+    them behind preview→confirm. Until then, visible-but-fake tools would
+    pollute Claude's picker and consent UX."""
     built = build(runtime=runtime)
-    result = await built.server.call_tool(
-        "payroll_void_workflow",
-        {"client_id": "ACME", "voucher_id": "V1", "reason": "duplicate payroll"},
-    )
-    data = _structured(result)
-    assert data["code"] == "NOT_YET_IMPLEMENTED"
-    assert "Phase 6" in data["planned_for"]
-
-
-async def test_void_workflow_denied_without_scope(runtime_no_grants) -> None:  # noqa: ANN001
-    built = build(runtime=runtime_no_grants)
-    with pytest.raises(Exception) as exc_info:
-        await built.server.call_tool(
-            "payroll_void_workflow",
-            {"client_id": "ACME", "voucher_id": "V1", "reason": "dup"},
-        )
-    assert "payroll:write" in str(exc_info.value) or "PERMISSION_NOT_GRANTED" in str(exc_info.value)
+    tools = {t.name for t in await built.server.list_tools()}
+    assert "payroll_void_workflow" not in tools
+    assert "payroll_correction_workflow" not in tools
