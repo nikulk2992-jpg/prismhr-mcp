@@ -148,17 +148,20 @@ async def run_manual_check_audit(
 
         audits.append(audit)
 
-    # Repeat-monthly: employees with manual checks in 3+ consecutive months.
+    # Repeat-monthly: employees with manual checks in 3+ consecutive
+    # months. Encode each month as year*12 + month so a Dec -> Jan
+    # transition still reads as consecutive (e.g. 2025-12 -> 2026-01).
     for eid, rows in by_emp.items():
-        months = sorted({
-            (_parse(r.get("checkDate") or r.get("payDate")) or date.min).month
-            for r in rows
-            if _parse(r.get("checkDate") or r.get("payDate")) is not None
-        })
+        month_ids: set[int] = set()
+        for r in rows:
+            dt = _parse(r.get("checkDate") or r.get("payDate"))
+            if dt is not None:
+                month_ids.add(dt.year * 12 + (dt.month - 1))
+        ordered = sorted(month_ids)
         streak = 1
-        longest = 1
-        for i in range(1, len(months)):
-            if months[i] == months[i - 1] + 1:
+        longest = 1 if ordered else 0
+        for i in range(1, len(ordered)):
+            if ordered[i] == ordered[i - 1] + 1:
                 streak += 1
                 longest = max(longest, streak)
             else:

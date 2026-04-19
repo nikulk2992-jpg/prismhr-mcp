@@ -105,6 +105,19 @@ async def test_manual_check_no_approver() -> None:
 
 
 @pytest.mark.asyncio
+async def test_manual_check_repeat_monthly_crosses_year() -> None:
+    # Dec 2025, Jan 2026, Feb 2026 -> 3 consecutive months across year.
+    r = MCFake([
+        {"checkId": "M5", "employeeId": "E1", "checkDate": "2025-12-10", "amount": "500", "reasonCode": "A", "approver": "X"},
+        {"checkId": "M6", "employeeId": "E1", "checkDate": "2026-01-15", "amount": "500", "reasonCode": "A", "approver": "X"},
+        {"checkId": "M7", "employeeId": "E1", "checkDate": "2026-02-20", "amount": "500", "reasonCode": "A", "approver": "X"},
+    ])
+    rep = await run_manual_check_audit(r, client_id="T", window_start=date(2025,12,1), window_end=date(2026,3,31))
+    codes = [f.code for a in rep.audits for f in a.findings]
+    assert "REPEAT_MONTHLY" in codes
+
+
+@pytest.mark.asyncio
 async def test_manual_check_duplicate_window() -> None:
     r = MCFake([
         {"checkId": "M3", "employeeId": "E1", "checkDate": "2026-01-05", "amount": "500", "reasonCode": "A", "approver": "X"},
@@ -148,6 +161,16 @@ async def test_dep_no_dob_warning() -> None:
     assert any(f.code == "NO_DOB_ON_FILE" for f in rep.audits[0].findings)
 
 
+@pytest.mark.asyncio
+async def test_dep_feb_29_handled() -> None:
+    # Feb 29 2000 + age_threshold 26 -> Feb 29 2026, which doesn't
+    # exist. Workflow must not crash.
+    today = date(2026, 1, 15)
+    r = DepFake([{"dependentId": "D4", "employeeId": "E4", "dob": "2000-02-29"}])
+    rep = await run_dependent_age_out(r, client_id="T", as_of=today)
+    assert rep.audits[0].current_age == 25
+
+
 # ---- #22 401(k) True-up ----
 
 
@@ -170,6 +193,21 @@ async def test_true_up_owed_critical() -> None:
     )
     rep = await run_retirement_true_up(r, client_id="T", plan_id="401K", year=2025)
     assert any(f.code == "TRUE_UP_OWED" for f in rep.audits[0].findings)
+
+
+@pytest.mark.asyncio
+async def test_true_up_partial_match_under_cap() -> None:
+    # 50% match up to 6% of $100K wages = $3000 max match.
+    # Deferrals $8000 exceed the cap ($6000 at 6%), so eligible
+    # deferrals = $6000, expected match = $3000. Actual $2500 -> owed $500.
+    r = TrueUpFake(
+        formula={"matchPercent": 50, "matchUpToPercent": 6},
+        contribs=[{"employeeId": "E3", "employeeContribution": "8000", "employerMatch": "2500", "ytdGross": "100000"}],
+        gross={"E3": Decimal("100000")},
+    )
+    rep = await run_retirement_true_up(r, client_id="T", plan_id="401K", year=2025)
+    assert rep.audits[0].formula_full_year_match == Decimal("3000.00")
+    assert rep.audits[0].true_up_owed == Decimal("500.00")
 
 
 @pytest.mark.asyncio

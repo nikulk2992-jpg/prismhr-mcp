@@ -99,11 +99,23 @@ async def run_retirement_true_up(
         ytd_match = _dec(c.get("employerMatch") or c.get("employerContribution"))
         ytd_gross = _dec(c.get("ytdGross")) or await reader.get_employee_ytd_gross(client_id, eid, year)
 
-        # Full-year formula match: min(deferrals * match_pct, ytd_gross * match_cap)
-        deferral_based = ytd_deferrals * match_pct
-        wage_cap = ytd_gross * match_cap if match_cap > 0 else deferral_based
-        full_match = min(deferral_based, wage_cap) if match_cap > 0 else deferral_based
-        full_match = full_match.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+        # Full-year formula match: apply match_pct AFTER capping
+        # eligible deferrals at match_cap * wages.
+        #
+        # Example: plan is "50% match up to 6% of pay."
+        #   eligible_deferrals = min(ytd_deferrals, 6% * ytd_gross)
+        #   expected_match    = 50% * eligible_deferrals
+        #
+        # The earlier min(deferrals*pct, cap*wages) was wrong whenever
+        # match_pct < 100% and deferrals exceeded the cap: it would
+        # under-credit the cap side and over-credit the deferral side.
+        if match_cap > 0:
+            eligible_deferrals = min(ytd_deferrals, ytd_gross * match_cap)
+        else:
+            eligible_deferrals = ytd_deferrals
+        full_match = (eligible_deferrals * match_pct).quantize(
+            Decimal("0.01"), rounding=ROUND_HALF_UP
+        )
 
         owed = (full_match - ytd_match).quantize(Decimal("0.01"))
         audit = TrueUpAudit(

@@ -97,7 +97,7 @@ async def run_dependent_age_out(
         # Compute current age + date of next birthday reaching threshold.
         age = today.year - dob.year - ((today.month, today.day) < (dob.month, dob.day))
         audit.current_age = age
-        threshold_birthday = date(dob.year + age_threshold, dob.month, dob.day)
+        threshold_birthday = _safe_birthday_in_year(dob, dob.year + age_threshold)
         days_to_threshold = (threshold_birthday - today).days
 
         if age >= age_threshold:
@@ -137,3 +137,17 @@ def _parse(raw) -> date | None:  # type: ignore[no-untyped-def]
         return date.fromisoformat(str(raw)[:10])
     except ValueError:
         return None
+
+
+def _safe_birthday_in_year(dob: date, year: int) -> date:
+    """Compute the birthday in a target year, handling Feb 29.
+
+    A dependent born on 2000-02-29 turning 26 in 2026 would otherwise
+    raise because 2026 is not a leap year. Fall back to Mar 1 for
+    age-out purposes; IRS common practice.
+    """
+    try:
+        return date(year, dob.month, dob.day)
+    except ValueError:
+        # Only Feb 29 triggers ValueError here.
+        return date(year, 3, 1)

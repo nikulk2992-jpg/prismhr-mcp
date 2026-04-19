@@ -558,9 +558,10 @@ class PrismHRW2Source:
             or contact.get("personalEmail")
             or person.get("personalEmail")
             or "",
-            "consentsElectronic": bool(
-                person.get("w2ElecForm") or person.get("electronic1095CFlag")
-            ),
+            # W-2 electronic-delivery consent is a separate legal flag
+            # from 1095-C e-consent. Only w2ElecForm governs W-2 email
+            # delivery; 1095-C consent cannot be reused here.
+            "consentsElectronic": bool(person.get("w2ElecForm")),
         }
 
 

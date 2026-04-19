@@ -71,6 +71,96 @@ See `.planning/architecture.md` for the full roadmap and
 
 ---
 
+## What this unlocks for PEOs
+
+Once wired into your PrismHR tenant, an AI agent (Claude, ChatGPT,
+Cursor) can run any of these workflows against live data — read-only
+by default, write actions opt-in and scoped.
+
+### Daily ops
+
+- **New Hire Onboarding Audit** — every new hire checked for missing
+  SSN, address, E-Verify clearance, required deductions, garnishment
+  setup. Flags problems before first paycheck.
+- **Payroll Batch Health Check** — real-time status of every open
+  batch; catches stale INIT, stuck approvals, pay-date-past without
+  post, negative net, missing vouchers.
+- **Terminated Employee Cleanup** — post-termination checklist: final
+  check issued, deductions stopped, benefits ended, COBRA record
+  created, PTO paid out, ACH retired.
+- **Manual Check Audit** — flags off-cycle checks without reason
+  codes, excessive amounts, duplicates within a window, repeat-monthly
+  patterns.
+
+### Compliance
+
+- **ACA Configuration Integrity** — catches the setup errors PrismHR
+  itself flags as the #1 cause of 1094-C/1095-C penalty exposure.
+- **1095-C Value Consistency Audit** — post-generation audit of every
+  1095-C form; flags code 1H posted while employee was enrolled,
+  safe-harbor conflicts, status-type-change-driven code drift,
+  waiting-period miscoding, ICHRA codes used for pre-2020 years.
+- **Dependent Coverage Age-Out** — dependents past the ACA age
+  threshold, or nearing it in the next 30/60/90 days.
+- **COBRA Eligibility Sweep** — qualifying events, notice-window
+  countdown, election-deadline warnings.
+- **Garnishment Payment History** — active garnishments with no
+  payments, overdue remittances, multi-garnishment priority checks.
+- **W-2 Readiness Check** — pre-flight for January: SSN present +
+  correct format, federal withholding configured, YTD sanity.
+
+### Reconciliation
+
+- **YTD Payroll Reconciliation** — bulk year-to-date totals vs sum of
+  voucher history; finds silent drift before W-2 season.
+- **941 Quarterly Reconciliation** — federal tax return tie-out per
+  quarter; wages, FIT, Social Security, Medicare, Additional Medicare.
+- **Benefits-Deduction Audit** — enrolled-but-not-deducted and
+  deducted-but-not-enrolled mismatches; the silent premium leaks.
+- **Billing-vs-Payroll Wash Audit** — per-employee plan-level check.
+- **Billing-vs-Payroll Reconciliation (client level)** — monthly
+  controller tie-out.
+- **401(k) Match Rule Compliance** — employer match vs plan formula,
+  402(g) limit watch, catch-up eligibility for 50+.
+- **401(k) True-Up Calculation** — year-end match owed for employees
+  who hit deferral limit early and lost proportional match.
+
+### Benefits + AR
+
+- **FSA/HSA Contribution Limit Tracker** — IRS 2026 limits watched
+  with over-limit, approaching-limit, and projected-overage findings.
+- **Retirement Loan Status** — default risk + past-term loans +
+  deemed-distribution exposure.
+- **Workers Comp Exposure** — estimated premium per class code per
+  state using current wages × rate × experience modifier.
+- **Outstanding Invoice Aging** — AR bucketing + at-risk-client flag.
+- **PTO Balance Reconciliation** — negative balances, over-cap, stale
+  accrual, missing class assignment.
+- **Doc Expiration Sweep** — I-9 + identity documents expiring in the
+  next 30/60/90 days.
+- **Client Go-Live Readiness** — pre-payroll checklist + readiness
+  score for new PEO clients.
+
+### Carrier + distribution
+
+- **Carrier Enrollment (834 5010)** — generic writer + per-carrier
+  companion-guide configs. Guardian model live; BCBS Michigan, Sun
+  Life EDX, Voya PDI, Empower PDI on the pilot roadmap.
+- **W-2 Distribution Assistant** — bulk download, certified-mail
+  shipping, electronic delivery with consent check, SharePoint
+  archive — all composable.
+
+Every workflow returns structured findings with severity and
+remediation hints, so an AI agent can chain them into higher-order
+reports (month-end close pack, year-end filing pack, new-client
+go-live pack, etc.).
+
+**Tiering:** the OSS core is free. The workflows above ship in the
+paid `prismhr-mcp-simploy` tier — source-available, per-PEO license.
+Contact `nihar@simploy.com`.
+
+---
+
 ## Editions
 
 `prismhr-mcp` ships in three tiers. Core is free forever. Paid tiers layer

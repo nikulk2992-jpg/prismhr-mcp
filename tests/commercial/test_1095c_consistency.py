@@ -74,7 +74,9 @@ async def test_line15_populated_on_1h_critical() -> None:
 
 
 @pytest.mark.asyncio
-async def test_safe_harbor_missing_on_1a() -> None:
+async def test_safe_harbor_missing_on_1a_is_warning() -> None:
+    # Blank Line 16 on an offer is legal-but-unprotected, not a
+    # submission-blocking error. Should be warning severity.
     r = FakeReader(
         roster=[{"employeeId": "E4"}],
         monthly={"E4": {"line14": {"1": "1A"}}},
@@ -82,8 +84,9 @@ async def test_safe_harbor_missing_on_1a() -> None:
         events={},
     )
     rep = await run_1095c_consistency_audit(r, client_id="T", year=2025)
-    codes = {f.code for f in rep.employees[0].findings}
-    assert "LINE16_BLANK_ON_OFFER" in codes
+    matching = [f for f in rep.employees[0].findings if f.code == "LINE16_BLANK_ON_OFFER"]
+    assert matching, "should still surface finding"
+    assert all(f.severity == "warning" for f in matching)
 
 
 @pytest.mark.asyncio

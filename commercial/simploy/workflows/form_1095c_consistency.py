@@ -223,13 +223,20 @@ async def run_1095c_consistency_audit(
                         )
                     )
 
-            # Safe harbor required but missing
+            # Line 16 blank on an offer is LEGAL (employee waived + no
+            # safe harbor claimed), but it disables 4980H(b) penalty
+            # protection. Flag as warning for operator review — not
+            # critical, because the form is valid as-filed.
             if code in _HARBOR_REQUIRED and not harbor:
                 audit.findings.append(
                     Finding(
                         "LINE16_BLANK_ON_OFFER",
-                        "critical",
-                        f"Month {m}: Line 14 = {code} requires Line 16 safe harbor code.",
+                        "warning",
+                        (
+                            f"Month {m}: Line 14 = {code} with blank Line 16. "
+                            "Valid but no safe harbor claimed — 4980H(b) penalty "
+                            "protection disabled for this employee-month."
+                        ),
                     )
                 )
 

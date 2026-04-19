@@ -736,7 +736,7 @@ wheels = [
 
 [[package]]
 name = "prismhr-mcp"
-version = "0.1.0.dev31"
+version = "0.1.0.dev32"
 source = { editable = "." }
 dependencies = [
     { name = "aiosqlite" },
