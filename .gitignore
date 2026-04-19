@@ -43,6 +43,9 @@ cached-credentials.enc
 .planning/probe-summary.json
 # Audit files reference authorized-services list (tenant-specific).
 .planning/uat-coverage-audit.md
+# Internal business / strategy docs — Simploy-confidential, never public.
+.planning/CEO-BRIEFING.md
+.planning/*-INTERNAL.md
 
 # IDE / OS
 .idea/
