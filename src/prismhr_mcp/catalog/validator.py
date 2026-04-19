@@ -67,6 +67,30 @@ def validate_args(contract: MethodContract, args: dict[str, Any]) -> dict[str, A
             context={"method_id": contract.method_id, "missing": missing_required},
         )
 
+    # Enum validation from quirks overlay — catches single-letter gotchas
+    # like planType=H (not HSA), docTypes=I9 (not ALL), entityType=D (not DEPARTMENT)
+    for param_name, allowed_map in contract.param_enums.items():
+        provided = args.get(param_name)
+        if provided is None:
+            continue
+        accepted = {k for k in allowed_map.keys() if k != "note"}
+        if accepted and provided not in accepted:
+            note = allowed_map.get("note", "")
+            raise ValidationError(
+                code="INVALID_PARAM_ENUM",
+                message=(
+                    f"{contract.method_id} param '{param_name}' got {provided!r}; "
+                    f"expected one of: {sorted(accepted)}. "
+                    + (note if note else "")
+                ).strip(),
+                context={
+                    "method_id": contract.method_id,
+                    "param": param_name,
+                    "provided": provided,
+                    "accepted": sorted(accepted),
+                },
+            )
+
     # Request body validation — only if we have an inline schema
     if contract.request_body:
         body_required = set(contract.request_body.get("required_fields") or [])

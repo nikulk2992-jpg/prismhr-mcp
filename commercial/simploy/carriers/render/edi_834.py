@@ -36,9 +36,13 @@ SUB_SEP = ":"
 class Coverage:
     """One benefit enrollment for an enrollee."""
 
-    plan_code: str  # carrier's plan code (mapped by companion.py)
-    coverage_level: Literal["EMP", "ESP", "ECH", "FAM"]  # emp only / + spouse / + child / family
+    plan_code: str  # carrier's plan code (mapped by companion.py) — goes in HD04
+    coverage_level: Literal["EMP", "ESP", "ECH", "FAM"]  # emp only / + spouse / + child / family (HD05)
     effective_date: date
+    # Insurance line code (HD03) — HLT=health, DEN=dental, VIS=vision,
+    # HMO=HMO, PDG=prescription, LTD=long-term disability, STD=short-term,
+    # AD&D=acc death, LIFE=life. Required per X220A1 HD03.
+    insurance_line_code: str = "HLT"
     termination_date: date | None = None
     employer_contribution: Decimal | None = None
     employee_contribution: Decimal | None = None
@@ -65,7 +69,12 @@ class Enrollee:
     address_state: str = ""
     address_zip: str = ""
     hire_date: date | None = None
-    employment_status: Literal["FT", "PT", "TERM"] = "FT"
+    # Employment status goes in INS08 per X220A1, NOT INS05.
+    # AC=active, FT=full-time, PT=part-time, RT=retired, TE=terminated.
+    employment_status: Literal["AC", "FT", "PT", "RT", "TE"] = "FT"
+    # Benefit status code goes in INS05. A=active, C=COBRA, S=surviving,
+    # T=terminated.
+    benefit_status: Literal["A", "C", "S", "T"] = "A"
     coverages: list[Coverage] = field(default_factory=list)
     dependents: list["Enrollee"] = field(default_factory=list)
 
@@ -196,7 +205,17 @@ class Render834:
         segments: list[str] = []
         is_subscriber = subscriber is None
         coverage = enrollee.coverages[0] if enrollee.coverages else None
-        # INS segment
+        # INS segment — element positions per X220A1:
+        #   INS01 subscriber indicator (Y/N)
+        #   INS02 individual relationship (18=self, 01=spouse, 19=child)
+        #   INS03 maintenance type (021=add, 024=cancel)
+        #   INS04 maintenance reason (EC, 28, etc)
+        #   INS05 benefit status code (A=active, C=COBRA)
+        #   INS06 medicare plan code
+        #   INS07 COBRA qualifying event code
+        #   INS08 employment status code (AC/FT/PT/RT/TE)
+        #   INS09 student status code
+        #   INS10 death indicator (Y/N)
         segments.append(
             ELE_SEP.join([
                 "INS",
@@ -204,9 +223,12 @@ class Render834:
                 coverage.relationship if coverage else "18",
                 coverage.maintenance_type if coverage else "021",
                 coverage.maintenance_reason if coverage else "EC",
-                enrollee.employment_status,
-                "", "", "",
-                "N",  # death indicator
+                enrollee.benefit_status,    # INS05
+                "",                          # INS06 medicare
+                "",                          # INS07 COBRA event
+                enrollee.employment_status,  # INS08
+                "",                          # INS09 student status
+                "N",                         # INS10 death indicator
             ])
         )
         # REF*0F — subscriber identifier (member id / SSN)
@@ -266,8 +288,20 @@ class Render834:
 
     def _coverage_loop(self, cov: Coverage) -> list[str]:
         segments: list[str] = []
-        # HD*030 — health coverage
-        parts = ["HD", cov.maintenance_type, "", cov.plan_code, "", cov.coverage_level]
+        # HD segment — element positions per X220A1:
+        #   HD01 maintenance type (021=add, 024=cancel)
+        #   HD02 maintenance reason (usually empty)
+        #   HD03 insurance line code (HLT/DEN/VIS/etc) — required
+        #   HD04 plan coverage description / plan code
+        #   HD05 coverage level code (EMP/ESP/ECH/FAM)
+        parts = [
+            "HD",
+            cov.maintenance_type,
+            "",  # HD02 maintenance reason
+            cov.insurance_line_code,
+            cov.plan_code,
+            cov.coverage_level,
+        ]
         segments.append(ELE_SEP.join(parts))
         segments.append(
             ELE_SEP.join(["DTP", "348", "D8", cov.effective_date.strftime("%Y%m%d")])

@@ -103,6 +103,22 @@ class MethodDescribeResponse(BaseModel):
     verified_response_keys: list[str] = Field(default_factory=list)
     is_admin: bool
     remediation_if_admin: str | None = None
+    quirks: list[str] = Field(
+        default_factory=list,
+        description="PrismHR gotchas learned from live probing — status gates, undocumented enums, silent-fail footguns.",
+    )
+    param_enums: dict[str, dict[str, str]] = Field(
+        default_factory=dict,
+        description="Accepted enum values per parameter (often single-letter codes not obvious from the PrismHR docs).",
+    )
+    required_batch_status: list[str] = Field(
+        default_factory=list,
+        description="If set, the target payroll batch must be in one of these statuses for the call to succeed.",
+    )
+    rate_limited: bool = Field(
+        default=False,
+        description="This endpoint is aggressively throttled by PrismHR. Cache responses; back off on 429.",
+    )
 
 
 class PrismHRCallResponse(BaseModel):
@@ -268,6 +284,10 @@ def register(
             )
             if m.is_admin
             else None,
+            quirks=m.quirks,
+            param_enums=m.param_enums,
+            required_batch_status=m.required_batch_status,
+            rate_limited=m.rate_limited,
         )
 
     async def meta_find(

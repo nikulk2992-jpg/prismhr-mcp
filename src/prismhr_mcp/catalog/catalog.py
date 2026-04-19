@@ -54,6 +54,11 @@ class MethodContract:
     verified_response_keys: list[str] = field(default_factory=list)
     prismhr_error_code: str | None = None
     prismhr_error_message: str | None = None
+    # Hand-curated overlay from quirks.json — PrismHR gotchas we learned the hard way
+    quirks: list[str] = field(default_factory=list)
+    param_enums: dict[str, dict[str, str]] = field(default_factory=dict)
+    required_batch_status: list[str] = field(default_factory=list)
+    rate_limited: bool = False
 
     @property
     def is_admin(self) -> bool:
@@ -85,6 +90,8 @@ class MethodContract:
             "is_admin": self.is_admin,
             "required_params": [p["name"] for p in self.required_params],
             "required_body_fields": self.required_body_fields,
+            "has_quirks": bool(self.quirks),
+            "rate_limited": self.rate_limited,
         }
 
 
@@ -153,16 +160,30 @@ def _load_verification_file() -> dict[str, Any]:
     return json.loads(data_files.read_text(encoding="utf-8"))
 
 
+def _load_quirks_file() -> dict[str, Any]:
+    data_files = resources.files("prismhr_mcp").joinpath("data/quirks.json")
+    try:
+        return json.loads(data_files.read_text(encoding="utf-8"))
+    except FileNotFoundError:
+        return {}
+
+
 @lru_cache(maxsize=1)
 def load_catalog() -> Catalog:
     """Build the in-memory catalog, cached for the life of the process."""
     raw_methods = _load_methods_file()
     verification = _load_verification_file()
+    quirks_doc = _load_quirks_file()
 
     # Build path -> verification lookup
     verification_by_path: dict[str, dict[str, Any]] = {}
     for probe in verification.get("probes", []) or []:
         verification_by_path[probe["path"]] = probe
+
+    quirks_by_id = quirks_doc.get("quirks") or {}
+    enums_by_id = quirks_doc.get("param_enums") or {}
+    status_gated = quirks_doc.get("status_gated") or {}
+    rate_limited = set(quirks_doc.get("rate_limited") or [])
 
     contracts: dict[str, MethodContract] = {}
     for row in raw_methods:
@@ -184,5 +205,11 @@ def load_catalog() -> Catalog:
             verified_response_keys=list(probe.get("response_keys") or []),
             prismhr_error_code=probe.get("prismhr_error_code"),
             prismhr_error_message=probe.get("prismhr_error_message"),
+            quirks=list(quirks_by_id.get(mid) or []),
+            param_enums=dict(enums_by_id.get(mid) or {}),
+            required_batch_status=list(
+                (status_gated.get(mid) or {}).get("required_batch_status") or []
+            ),
+            rate_limited=mid in rate_limited,
         )
     return Catalog(contracts)

@@ -1,0 +1,82 @@
+{
+  "_comment": "Hand-curated overlay on top of methods.json. Captures PrismHR quirks, param enums, rate-limit flags, and status-gated preconditions learned from live UAT probing. Merged into the catalog at load time and surfaced via meta_describe.",
+  "quirks": {
+    "payroll.v1.getApprovalSummary.GET": [
+      "Only callable on batches in INIT status. Returns HTTP 400 on READY, POSTCOMP, or COMPLETE."
+    ],
+    "payroll.v1.getBatchStatus.GET": [
+      "batchIds is a comma-separated list, not a JSON array. Example: '20191,20192,20193'."
+    ],
+    "payroll.v1.getBatchListByDate.GET": [
+      "dateType must be exactly PAY, PERIOD, or POST. Any other value returns 400."
+    ],
+    "payroll.v1.payGroupScheduleReport.GET": [
+      "Aggressively rate-limited by PrismHR. Expect 429 under repeated calls."
+    ],
+    "generalLedger.v1.getClientGLData.GET": [
+      "Rate-limited under concurrent load. Back off on 429."
+    ],
+    "payroll.v1.getBulkYearToDateValues.GET": [
+      "Async download endpoint. First call returns buildStatus=INIT with a downloadId. Poll same endpoint with that downloadId until buildStatus=DONE, then fetch dataObject URL. On the first poll, status may already be DONE — handle immediately, do not sleep."
+    ],
+    "clientMaster.v1.getBenefitWorkflowGrid.GET": [
+      "Async download; same INIT -> BUILD -> DONE pattern as getBulkYearToDateValues."
+    ],
+    "benefits.v1.retirementCensusExport.GET": [
+      "Async download; same INIT -> BUILD -> DONE pattern. reportFormat is required but undocumented enum — only 'Census', 'Participants', 'Eligibility' are accepted."
+    ],
+    "login.v1.requestAPIPermissions.POST": [
+      "Body must wrap requested permissions in a `newPermissions` field; undocumented. This endpoint is admin-only and NEVER exposed through meta_call."
+    ]
+  },
+  "param_enums": {
+    "benefits.v1.getSection125Plans.GET": {
+      "planType": {
+        "H": "HSA (Health Savings Account)",
+        "F": "FSA (Flexible Spending Account)",
+        "S": "Section 125 Premium Only Plan",
+        "note": "Single-letter codes only. HSA / FSA / 125 are rejected with 400."
+      }
+    },
+    "clientMaster.v1.getDocExpirations.GET": {
+      "docTypes": {
+        "I9": "I-9 Employment Eligibility",
+        "note": "Use a specific doc-type code. 'ALL' returns 500."
+      }
+    },
+    "clientMaster.v1.getEmployeeListByEntity.GET": {
+      "entityType": {
+        "D": "Department",
+        "L": "Location",
+        "V": "Division",
+        "note": "Single-letter codes. Full words ('DEPARTMENT', 'ALL') return 404."
+      }
+    },
+    "payroll.v1.getBatchListByDate.GET": {
+      "dateType": {
+        "PAY": "Filter by pay date",
+        "PERIOD": "Filter by period-end date",
+        "POST": "Filter by post date"
+      }
+    }
+  },
+  "status_gated": {
+    "payroll.v1.getApprovalSummary.GET": {
+      "required_batch_status": ["INIT"]
+    },
+    "payroll.v1.setPayrollApproval.POST": {
+      "required_batch_status": ["AP.PEND"]
+    },
+    "payroll.v1.payrollFinalization.POST": {
+      "required_batch_status": ["AP.READY", "INITCOMP"]
+    }
+  },
+  "rate_limited": [
+    "payroll.v1.payGroupScheduleReport.GET",
+    "generalLedger.v1.getClientGLData.GET",
+    "clientMaster.v1.getBenefitWorkflowGrid.GET"
+  ],
+  "service_name_traps": {
+    "CodeFilesService": "Wrong. Use CodeFileService (singular). Grants filed under the plural name accept but never match the ACL — silent 403 forever."
+  }
+}

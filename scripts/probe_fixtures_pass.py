@@ -3,6 +3,12 @@ already-verified responses.
 
 Harvests: payGroupCode, retirementPlanId, ptoPlanId, benefitPlanId,
 stateCode, reportYear, locationId. Then probes methods needing those.
+
+PII hygiene: all response bodies are redacted via `_redact()` before
+being written to disk. Even though `.planning/verified-responses/` is
+gitignored, the redaction is a belt-and-suspenders guard against an
+accidental force-add or sanitize helper misfire. Only schema shape
+(field names) and non-sensitive enum values are preserved.
 """
 
 from __future__ import annotations
@@ -10,11 +16,42 @@ from __future__ import annotations
 import asyncio
 import json
 import os
+import re
 from pathlib import Path
+from typing import Any
 
 import httpx
 
 from prismhr_mcp.secure_env import load_into_environ
+
+# Keys whose values are sensitive regardless of surrounding context.
+# We keep the key (schema is useful) but replace the value with a marker.
+_REDACT_KEYS: frozenset[str] = frozenset({
+    "ssn", "socialSecurityNumber", "dob", "dateOfBirth", "birthDate",
+    "bankAccountNumber", "routingNumber", "accountNumber",
+    "driversLicenseNumber", "passportNumber",
+    "homePhone", "cellPhone", "workPhone", "mobilePhone", "emergencyPhone",
+    "email", "personalEmail", "workEmail",
+    "addressLine1", "addressLine2", "streetAddress", "street",
+    "password", "token", "sessionId", "apiKey",
+})
+
+# Regex used as a last line of defense on string values.
+_SSN_RE = re.compile(r"\b\d{3}-?\d{2}-?\d{4}\b")
+
+
+def _redact(value: Any) -> Any:
+    """Walk a JSON structure, masking sensitive values but preserving shape."""
+    if isinstance(value, dict):
+        return {
+            k: ("***REDACTED***" if k in _REDACT_KEYS else _redact(v))
+            for k, v in value.items()
+        }
+    if isinstance(value, list):
+        return [_redact(v) for v in value]
+    if isinstance(value, str) and _SSN_RE.search(value):
+        return _SSN_RE.sub("***REDACTED***", value)
+    return value
 
 CID = "TEST-CLIENT"
 CID_ALT = "TEST-CLIENT"
@@ -38,7 +75,9 @@ def harvest() -> dict[str, list[str]]:
         "reportYear": ["2024", "2025"],
         "stateCode": ["NE", "CA", "MI", "TX", "NY"],
         "daysOut": ["30", "60", "90"],
-        "planType": ["125", "HSA", "FSA"],
+        # planType uses single-letter codes per quirks overlay:
+        # H=HSA, F=FSA, S=Section 125. 125 / HSA / FSA all return 400.
+        "planType": ["H", "F", "S"],
         "deductionCode": [],
         "departmentCode": [],
         "positionCode": [],
@@ -165,7 +204,11 @@ async def main() -> int:
                             ok += 1
                             name = path.strip("/").replace("/", "_").replace("v1_", "").replace("v2_", "v2_") + ".json"
                             out = Path(".planning/verified-responses") / name
-                            out.write_text(json.dumps(body, indent=2, default=str)[:100000], encoding="utf-8")
+                            redacted = _redact(body)
+                            out.write_text(
+                                json.dumps(redacted, indent=2, default=str)[:100000],
+                                encoding="utf-8",
+                            )
                             print(f"[OK ] {path}  params={params}")
                         continue
                     per.setdefault(path, f"errorCode={ec} msg={(body.get('errorMessage') or '')[:60]}")

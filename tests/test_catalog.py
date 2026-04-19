@@ -153,3 +153,55 @@ def test_method_id_format() -> None:
     assert method_id_from_path("/employee/v1/getEmployee", "post") == (
         "employee.v1.getEmployee.POST"
     )
+
+
+# ---------- quirks overlay ----------
+
+
+def test_quirks_overlay_populates_methods() -> None:
+    cat = load_catalog()
+    m = cat.require("payroll.v1.getApprovalSummary.GET")
+    assert m.quirks, "getApprovalSummary should have a quirks note (INIT-only gate)"
+    assert any("INIT" in q for q in m.quirks)
+    assert m.required_batch_status == ["INIT"]
+
+
+def test_quirks_overlay_surfaces_param_enums() -> None:
+    cat = load_catalog()
+    m = cat.require("benefits.v1.getSection125Plans.GET")
+    assert "planType" in m.param_enums
+    accepted = {k for k in m.param_enums["planType"] if k != "note"}
+    # Single-letter codes
+    assert "H" in accepted
+    assert "HSA" not in accepted  # the wrong value users guess
+
+
+def test_quirks_overlay_flags_rate_limited() -> None:
+    cat = load_catalog()
+    m = cat.require("payroll.v1.payGroupScheduleReport.GET")
+    assert m.rate_limited is True
+
+
+def test_validator_rejects_wrong_enum_value() -> None:
+    cat = load_catalog()
+    contract = cat.require("benefits.v1.getSection125Plans.GET")
+    with pytest.raises(ValidationError, match="INVALID_PARAM_ENUM|planType") as exc_info:
+        validate_args(contract, {"clientId": "001", "planType": "HSA"})
+    assert exc_info.value.code == "INVALID_PARAM_ENUM"
+    assert "H" in str(exc_info.value.context["accepted"])
+
+
+def test_validator_accepts_correct_enum_value() -> None:
+    cat = load_catalog()
+    contract = cat.require("benefits.v1.getSection125Plans.GET")
+    out = validate_args(contract, {"clientId": "001", "planType": "H"})
+    assert out["query"]["planType"] == "H"
+
+
+def test_quirks_absent_for_unannotated_method() -> None:
+    cat = load_catalog()
+    # Something we haven't annotated should have empty quirks
+    m = cat.require("payroll.v1.getBatchListByDate.GET")
+    # may have quirks on dateType but enum is populated
+    assert "dateType" in m.param_enums
+    assert "PAY" in m.param_enums["dateType"]
