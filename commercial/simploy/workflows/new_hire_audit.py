@@ -127,11 +127,18 @@ async def run_new_hire_audit(
 
         ev = await reader.get_everify(client_id, eid)
         ev_status = (ev.get("everifyStatus") or "").upper()
-        if ev_status not in {"AUTHORIZED", "EMPLOYMENT_AUTHORIZED"}:
+        # PrismHR returns varied strings: "EMPLOYMENT AUTHORIZED",
+        # "CASECLOSED VERIFICATION COMPLETE - EMPLOYMENT AUTHORIZED ...",
+        # "N" (no case open), "" (never initiated), "TNC", "FNC".
+        # Treat anything containing AUTHORIZ as cleared.
+        cleared = "AUTHORIZ" in ev_status
+        unset_or_pending = ev_status in {"", "N", "UNSET"}
+        tnc_fnc = any(code in ev_status for code in ("TNC", "FNC"))
+        if not cleared:
             audit.findings.append(
                 Finding(
                     "EVERIFY_NOT_CLEARED",
-                    "critical" if ev_status in {"", "TNC", "FNC"} else "warning",
+                    "critical" if tnc_fnc else ("warning" if unset_or_pending else "info"),
                     f"E-Verify status is {ev_status or 'UNSET'}.",
                 )
             )

@@ -90,7 +90,10 @@ class PrismHRClientReader:
         return results
 
     async def get_employee(self, client_id: str, employee_id: str) -> dict:
-        body = await self._c.get(
+        # Pull Person + SSN list. Person's ssn field is absent from our UAT
+        # surface; use getEmployeeSSNList for SSN presence detection. Value
+        # may be masked (e.g. "***-**-****"); "present" is non-empty string.
+        detail = await self._c.get(
             "/employee/v1/getEmployee",
             params=[
                 ("clientId", client_id),
@@ -98,35 +101,39 @@ class PrismHRClientReader:
                 ("employeeId", employee_id),
             ],
         )
-        row = _first(body, "employee") or {}
-        person = row.get("person") or {}
+        row = _first(detail, "employee") or {}
+        ssn_body = await self._c.get(
+            "/employee/v1/getEmployeeSSNList",
+            params={"clientId": client_id},
+        )
+        ssn_map = {
+            r.get("employeeId"): r.get("ssn")
+            for r in _rows(ssn_body, "employeeSSNList")
+            if isinstance(r, dict)
+        }
         return {
             "employeeId": row.get("id") or row.get("employeeId") or employee_id,
-            "ssn": person.get("ssn") or "",
+            "ssn": ssn_map.get(employee_id, "") or "",
         }
 
     async def get_address(self, client_id: str, employee_id: str) -> dict:
-        # Address lives on the Person option under contactInformation, not a
-        # separate endpoint on our verified surface.
+        # ContactInformation option returns {addressLine1, city, state, zipcode}
+        # at the top level of contactInformation (not nested under homeAddress).
         body = await self._c.get(
             "/employee/v1/getEmployee",
             params=[
                 ("clientId", client_id),
-                ("options", "Person"),
+                ("options", "ContactInformation"),
                 ("employeeId", employee_id),
             ],
         )
         row = _first(body, "employee") or {}
         contact = row.get("contactInformation") or {}
-        home = contact.get("homeAddress") or contact.get("primaryAddress") or {}
         return {
-            "line1": home.get("addressLine1")
-            or home.get("line1")
-            or home.get("street")
-            or "",
-            "city": home.get("city", ""),
-            "state": home.get("state", ""),
-            "zip": home.get("postalCode") or home.get("zip") or "",
+            "line1": contact.get("addressLine1") or contact.get("line1") or "",
+            "city": contact.get("city", ""),
+            "state": contact.get("state", ""),
+            "zip": contact.get("zipcode") or contact.get("postalCode") or "",
         }
 
     async def get_everify(self, client_id: str, employee_id: str) -> dict:
@@ -134,8 +141,13 @@ class PrismHRClientReader:
             "/employee/v1/getEverifyStatus",
             params={"clientId": client_id, "employeeId": employee_id},
         )
-        row = _first(body, "everifyStatus") or body or {}
-        return {"everifyStatus": row.get("everifyStatus") or row.get("status") or ""}
+        # Real shape: {everifyStatus: {everifyFlag, everifyCaseNo, everifyCaseStatus}}
+        ev = (body or {}).get("everifyStatus") or {}
+        if isinstance(ev, list):
+            ev = ev[0] if ev else {}
+        return {
+            "everifyStatus": ev.get("everifyCaseStatus") or ev.get("everifyFlag") or "",
+        }
 
     async def get_scheduled_deductions(self, client_id: str, employee_id: str) -> dict:
         body = await self._c.get(
@@ -222,8 +234,12 @@ class PayrollBatchHealthReader:
             "/payroll/v1/getBatchStatus",
             params={"clientId": client_id, "batchIds": batch_id},
         )
+        # Real field name is batchStatuses (plural); rows contain
+        # {batchId, status}. Old field names kept as fallback for future
+        # schema variations.
         rows = (
-            _rows(body, "batchStatus")
+            _rows(body, "batchStatuses")
+            or _rows(body, "batchStatus")
             or _rows(body, "batchStatusCodes")
             or _rows(body, "batches")
             or []
@@ -252,7 +268,13 @@ class PayrollBatchHealthReader:
             "/payroll/v1/getPayrollVoucherForBatch",
             params={"clientId": client_id, "batchId": batch_id},
         )
-        return _rows(body, "voucher") or _rows(body, "vouchers") or []
+        # Real field is payrollVoucher (singular); older alternates kept.
+        return (
+            _rows(body, "payrollVoucher")
+            or _rows(body, "voucher")
+            or _rows(body, "vouchers")
+            or []
+        )
 
     async def get_approval_summary(self, client_id: str, batch_id: str) -> dict:
         try:
