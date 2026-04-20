@@ -1,0 +1,39 @@
+name: pii-scan
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  working-tree-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0  # needed for commit-message scan
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Scan working tree
+        run: python scripts/scan_pii.py
+
+      - name: Scan commit-message history on this branch
+        # Block commits that slipped past local hooks by scanning every
+        # commit message reachable from HEAD on main + PR branches.
+        # Non-zero exit -> CI fails -> GitHub blocks the PR.
+        run: |
+          # For push events, scan every reachable commit (detects pushes
+          # that bypass the web UI). For PR events, scan just the PR
+          # commits against the base.
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            BASE="${{ github.event.pull_request.base.sha }}"
+            HEAD="${{ github.event.pull_request.head.sha }}"
+            python scripts/scan_pii.py --history "${BASE}..${HEAD}"
+          else
+            python scripts/scan_pii.py --history
+          fi
