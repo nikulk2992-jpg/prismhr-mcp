@@ -41,6 +41,12 @@ cached-credentials.enc
 .planning/probe-responses/
 .planning/verification-matrix.json
 .planning/probe-summary.json
+.planning/sweep-*.txt
+.planning/sweep-*.json
+.planning/sweep-*/
+.planning/dogfood-*.txt
+.planning/dogfood-*.json
+.gitignore.local
 # Audit files reference authorized-services list (tenant-specific).
 .planning/uat-coverage-audit.md
 # Internal business / strategy docs — Simploy-confidential, never public.
@@ -71,3 +77,4 @@ mcp-publisher.exe
 mcp-publisher.tar.gz
 tmp/
 *.pdf
+.planning/drafts/
