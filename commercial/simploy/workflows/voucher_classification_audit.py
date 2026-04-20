@@ -394,12 +394,17 @@ async def run_voucher_classification_audit(
 
             # Zero tax on a taxable code (sanity). Only flag lines with
             # amount > 0 on a FICA-subject code if the voucher-level FICA
-            # finding didn't already cover it.
+            # finding didn't already cover it. Requires EXPLICIT
+            # ficaSubject=True (not a missing-equals-default) so we don't
+            # flag every line when pay-code metadata is absent.
+            pc_fica_explicit = pc.get("ficaSubject") is True
             if (
-                pc.get("ficaSubject")
+                pc_fica_explicit
                 and amount > tol
                 and ss_tax <= tol
                 and medicare_tax <= tol
+                and not has_ss_row
+                and not has_med_row
                 and not fica_exempt
                 and "FICA_NONEXEMPT_NOT_WITHHELD" not in {f.code for f in audit.findings}
             ):
@@ -407,7 +412,8 @@ async def run_voucher_classification_audit(
                     Finding(
                         "ZERO_TAX_TAXABLE_CODE",
                         "warning",
-                        f"Pay code {code} is FICA-subject; voucher has $0 FICA.",
+                        f"Pay code {code} is FICA-subject; voucher has no "
+                        f"FICA rows + $0 FICA withheld.",
                     )
                 )
 
@@ -448,8 +454,20 @@ async def run_voucher_classification_audit(
                     )
 
         # ---- voucher-level: SUTA state mismatch ----
+        # Multi-state employees legitimately have home-state stateTax
+        # that differs from voucher wcState (which reflects the location
+        # they physically worked). Only flag when we have strong
+        # confidence the profile asserts a single work state AND the
+        # voucher's SUTA state differs.
         v_suta_state = str(v.get("sutaState") or v.get("wcState") or "").upper()
-        if work_state and v_suta_state and work_state != v_suta_state:
+        profile_states = profile.get("allWorkStates")
+        if (
+            work_state
+            and v_suta_state
+            and work_state != v_suta_state
+            and isinstance(profile_states, list)
+            and len(profile_states) == 1  # only flag single-state employees
+        ):
             audit.findings.append(
                 Finding(
                     "STATE_SUTA_MISMATCH",

@@ -1208,15 +1208,21 @@ class VoucherClassificationReader:
 
         # Work state: state with filingStatus populated wins; fall back
         # to first state in stateTax; fall back to home state.
+        # Also expose all state codes so multi-state employees get
+        # more permissive SUTA-state-mismatch checks.
         work_state = ""
+        all_states: list[str] = []
         state_tax = comp.get("stateTax") or []
         if isinstance(state_tax, list):
             for s in state_tax:
-                if isinstance(s, dict) and s.get("filingStatus"):
-                    work_state = str(s.get("stateCode") or "").upper()
-                    break
-            if not work_state and state_tax and isinstance(state_tax[0], dict):
-                work_state = str(state_tax[0].get("stateCode") or "").upper()
+                if isinstance(s, dict):
+                    code = str(s.get("stateCode") or "").upper()
+                    if code:
+                        all_states.append(code)
+                    if not work_state and s.get("filingStatus"):
+                        work_state = code
+            if not work_state and all_states:
+                work_state = all_states[0]
 
         # YTD wage data for additional-Medicare threshold check
         ytd_medicare = Decimal("0")
@@ -1255,6 +1261,7 @@ class VoucherClassificationReader:
             "futaExempt": False,
             "sutaExempt": False,
             "workState": work_state,
+            "allWorkStates": all_states,
             "unionId": client_cls.get("unionCode") or None,
             "ytdSocialSecurityWages": ytd_ss,
             "ytdMedicareWages": ytd_medicare,
@@ -1276,19 +1283,20 @@ class VoucherClassificationReader:
         entry = _first(body, "paycode") or _first(body, "payCode") or body or {}
         if not isinstance(entry, dict):
             return {}
-        # PrismHR paycode metadata: fields vary; treat missing flags as
-        # FICA-subject by default (standard W-2 earning).
+        # Preserve missing metadata as None rather than defaulting to
+        # True. ZERO_TAX_TAXABLE_CODE check requires ficaSubject is
+        # explicitly True — missing metadata should NOT trigger.
         return {
             "payCode": entry.get("payCode") or entry.get("code") or pay_code,
             "description": entry.get("description") or entry.get("desc") or "",
             "isContractor": bool(entry.get("isContractor") or entry.get("contractor")),
             "isUnion": bool(entry.get("isUnion") or entry.get("union")),
             "unionId": entry.get("unionId") or entry.get("unionCode"),
-            "ficaSubject": entry.get("ficaSubject", True),
-            "medicareSubject": entry.get("medicareSubject", True),
-            "futaSubject": entry.get("futaSubject", True),
-            "sutaSubject": entry.get("sutaSubject", True),
-            "stateSubject": entry.get("stateSubject", True),
+            "ficaSubject": entry.get("ficaSubject"),
+            "medicareSubject": entry.get("medicareSubject"),
+            "futaSubject": entry.get("futaSubject"),
+            "sutaSubject": entry.get("sutaSubject"),
+            "stateSubject": entry.get("stateSubject"),
         }
 
     async def list_union_members(
@@ -1310,3 +1318,182 @@ class VoucherClassificationReader:
         if isinstance(members, list):
             return [str(m) for m in members if m]
         return []
+
+
+# =============================================================================
+# Shared helper: SystemService.getData async download pattern
+# =============================================================================
+
+
+async def _system_get_data(
+    client: PrismHRClient,
+    *,
+    schema: str,
+    class_name: str,
+    client_id: str | None = None,
+    employee_id: str | None = None,
+    start_date: date | None = None,
+    end_date: date | None = None,
+    max_polls: int = 30,
+    poll_delay_seconds: float = 2.0,
+) -> Any:
+    """Execute SystemService.getData INIT -> BUILD -> DONE, return the
+    parsed dataObject JSON (list or dict). Empty list on error.
+
+    Filters are pushed server-side where possible (cheaper than client-
+    side filter on multi-MB payloads):
+      * clientId, employeeId — per docs, per Schema|Class
+      * startDate/endDate — accepted by all date-filterable classes
+        (Compensation/Person/Client/History/Enrollment/AbsenceJournal/
+         RetirementLoan/Garnishment/ScheduledDeductions etc.). Probed
+        empirically via scripts/probe_getdata_dimensions.py.
+    """
+    params: dict[str, str] = {"schemaName": schema, "className": class_name}
+    if client_id:
+        params["clientId"] = client_id
+    if employee_id:
+        params["employeeId"] = employee_id
+    if start_date:
+        params["startDate"] = start_date.isoformat()
+    if end_date:
+        params["endDate"] = end_date.isoformat()
+    try:
+        body = await client.get("/system/v1/getData", params=params)
+    except Exception:  # noqa: BLE001
+        return []
+    status = body.get("buildStatus") if isinstance(body, dict) else None
+    did = body.get("downloadId") if isinstance(body, dict) else None
+    for _ in range(max_polls):
+        if status == "DONE":
+            break
+        if status == "ERROR":
+            return []
+        if not did:
+            break
+        await asyncio.sleep(poll_delay_seconds)
+        params["downloadId"] = did
+        try:
+            body = await client.get("/system/v1/getData", params=params)
+        except Exception:  # noqa: BLE001
+            return []
+        status = body.get("buildStatus") if isinstance(body, dict) else None
+        did = body.get("downloadId") if isinstance(body, dict) else did
+    url = body.get("dataObject") if isinstance(body, dict) else None
+    if not url:
+        return body if isinstance(body, (list, dict)) else []
+    # Fetch dataObject separately. Use a separate request; may return
+    # latin-1 bodies for non-ASCII names.
+    try:
+        import httpx as _httpx
+        async with _httpx.AsyncClient(timeout=60) as c:
+            r = await c.get(url)
+            try:
+                return r.json()
+            except Exception:  # noqa: BLE001
+                import json as _json
+                return _json.loads(r.content.decode("latin-1", errors="replace"))
+    except Exception:  # noqa: BLE001
+        return []
+
+
+# =============================================================================
+# Garnishment workflow live reader
+# =============================================================================
+
+
+class GarnishmentHistoryReader:
+    """Live implementation of garnishment_history.PrismHRReader using
+    SystemService.getData#Deduction|Garnishment as the primary bulk
+    source (59 fields per record, verified against UAT)."""
+
+    def __init__(self, client: PrismHRClient) -> None:
+        self._c = client
+
+    async def list_garnishment_holders(self, client_id: str) -> list[dict]:
+        data = await _system_get_data(
+            self._c,
+            schema="Deduction",
+            class_name="Garnishment",
+            client_id=client_id,
+        )
+        rows = _coerce_rows(data)
+        out: dict[str, dict] = {}
+        for r in rows:
+            eid = str(r.get("employeeId") or "")
+            if not eid:
+                # id like "CLIENT.EMPLOYEE.DED" — parse out employee
+                composite = str(r.get("id") or "")
+                parts = composite.split(".")
+                if len(parts) >= 2:
+                    eid = parts[1]
+            if eid and eid not in out:
+                out[eid] = {"employeeId": eid}
+        return list(out.values())
+
+    async def get_garnishment_details(
+        self, client_id: str, employee_id: str
+    ) -> list[dict]:
+        try:
+            body = await self._c.get(
+                "/deduction/v1/getGarnishmentDetails",
+                params={"clientId": client_id, "employeeId": employee_id},
+            )
+        except Exception:  # noqa: BLE001
+            return []
+        return _coerce_rows(body, preferred_key="garnishmentDetails")
+
+    async def get_garnishment_payments(
+        self, client_id: str, employee_id: str
+    ) -> list[dict]:
+        try:
+            body = await self._c.get(
+                "/deduction/v1/getGarnishmentPaymentHistory",
+                params={"clientId": client_id, "employeeId": employee_id},
+            )
+        except Exception:  # noqa: BLE001
+            return []
+        return _coerce_rows(body, preferred_key="paymentHistory")
+
+
+# =============================================================================
+# Absence journal workflow live reader
+# =============================================================================
+
+
+class AbsenceJournalReader:
+    """Live implementation of absence_journal_audit.PrismHRReader via
+    SystemService.getData#Benefit|AbsenceJournal."""
+
+    def __init__(self, client: PrismHRClient) -> None:
+        self._c = client
+
+    async def list_absence_journal(
+        self, client_id: str, start: date, end: date
+    ) -> list[dict]:
+        # Push date filter server-side — AbsenceJournal is a 22MB
+        # payload un-filtered.
+        data = await _system_get_data(
+            self._c,
+            schema="Benefit",
+            class_name="AbsenceJournal",
+            client_id=client_id,
+            start_date=start,
+            end_date=end,
+        )
+        return _coerce_rows(data)
+
+
+def _coerce_rows(body: Any, *, preferred_key: str | None = None) -> list[dict]:
+    """Normalize getData-style responses: outer wrapper has a `data`
+    list of rows. Also handles direct lists and other shape variants."""
+    if isinstance(body, list):
+        return [r for r in body if isinstance(r, dict)]
+    if not isinstance(body, dict):
+        return []
+    for key in (preferred_key, "data", "records", "rows"):
+        if not key:
+            continue
+        val = body.get(key)
+        if isinstance(val, list):
+            return [r for r in val if isinstance(r, dict)]
+    return []

@@ -206,6 +206,7 @@ async def test_union_dues_missing_is_warning() -> None:
 
 @pytest.mark.asyncio
 async def test_state_suta_mismatch_is_warning() -> None:
+    """Only flags single-state employees. Multi-state expected to differ."""
     reader = FakeReader(
         vouchers=[{
             "voucherId": "V8", "employeeId": "E8", "totalEarnings": "1000",
@@ -214,12 +215,38 @@ async def test_state_suta_mismatch_is_warning() -> None:
             "employeeTax": _fica_taxes(),
             "earning": [{"payCode": "REG", "payAmount": "1000"}],
         }],
-        employees={"E8": {"employeeType": "W2", "ficaExempt": False, "workState": "TX"}},
+        employees={"E8": {
+            "employeeType": "W2", "ficaExempt": False,
+            "workState": "TX", "allWorkStates": ["TX"],  # single-state
+        }},
         pay_codes={"REG": {"ficaSubject": True}},
     )
     r = await _run(reader)
     codes = {f.code for f in r.vouchers[0].findings}
     assert "STATE_SUTA_MISMATCH" in codes
+
+
+@pytest.mark.asyncio
+async def test_multi_state_employee_does_not_flag_suta_mismatch() -> None:
+    """Multi-state employee legitimately has voucher wcState != profile
+    workState. Must NOT flag."""
+    reader = FakeReader(
+        vouchers=[{
+            "voucherId": "V1", "employeeId": "E1", "totalEarnings": "1000",
+            "type": "R",
+            "wcState": "CA",
+            "employeeTax": _fica_taxes(),
+            "earning": [{"payCode": "REG", "payAmount": "1000"}],
+        }],
+        employees={"E1": {
+            "employeeType": "W2", "ficaExempt": False,
+            "workState": "TX", "allWorkStates": ["TX", "CA", "NV"],
+        }},
+        pay_codes={"REG": {"ficaSubject": True}},
+    )
+    r = await _run(reader)
+    codes = {f.code for f in r.vouchers[0].findings}
+    assert "STATE_SUTA_MISMATCH" not in codes
 
 
 @pytest.mark.asyncio

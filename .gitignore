@@ -54,6 +54,7 @@ cached-credentials.enc
 .planning/scan-*.txt
 .planning/probe-*.txt
 .planning/Simploy-*.pdf
+.planning/multi-client-*.txt
 .gitignore.local
 # Audit files reference authorized-services list (tenant-specific).
 .planning/uat-coverage-audit.md
