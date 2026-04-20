@@ -2489,6 +2489,43 @@ class StateFilingsOrchestratorReader:
 # =============================================================================
 
 
+async def _fetch_client_location_state_map(
+    client: PrismHRClient, client_id: str
+) -> dict[str, str]:
+    """Build {locationName -> stateAbbrev} for a client by pulling
+    Client|Location via SystemService.getData. Cached per-call; callers
+    should cache across multiple vouchers.
+
+    Maps both the locationName (short code used in earning[].location)
+    and the id-suffix form (e.g. 'CCCCCC.IL' -> 'IL') for robustness.
+    """
+    try:
+        data = await _system_get_data(
+            client, schema="Client", class_name="Location",
+            client_id=client_id,
+        )
+    except Exception:  # noqa: BLE001
+        return {}
+    rows = _coerce_rows(data)
+    out: dict[str, str] = {}
+    for r in rows:
+        state = str(r.get("state") or r.get("workCompState") or "").upper()
+        if not state:
+            continue
+        name = str(r.get("locationName") or "").strip()
+        if name:
+            out[name] = state
+            out[name.upper()] = state
+        # id is "CLIENT.LOCATION" — capture the location half too
+        composite = str(r.get("id") or "")
+        if "." in composite:
+            loc = composite.split(".", 1)[1].strip()
+            if loc:
+                out[loc] = state
+                out[loc.upper()] = state
+    return out
+
+
 class TaxEngineDiffReader:
     """Live impl for tax_engine_diff.PrismHRReader. Reuses the payroll
     vouchers endpoint + getEmployee?options=Compensation for home state
@@ -2496,6 +2533,17 @@ class TaxEngineDiffReader:
 
     def __init__(self, client: PrismHRClient) -> None:
         self._c = client
+        # Lazy WSL cache per (client_id)
+        self._location_state_maps: dict[str, dict[str, str]] = {}
+
+    async def get_location_state_map(
+        self, client_id: str
+    ) -> dict[str, str]:
+        if client_id not in self._location_state_maps:
+            self._location_state_maps[client_id] = (
+                await _fetch_client_location_state_map(self._c, client_id)
+            )
+        return self._location_state_maps[client_id]
 
     async def list_vouchers_for_period(
         self, client_id: str, start: date, end: date

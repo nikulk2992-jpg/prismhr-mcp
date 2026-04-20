@@ -297,3 +297,86 @@ def test_voucher_clean_nonreciprocal_single_state() -> None:
     crit_codes = {f.code for f in audit.findings if f.severity == "critical"}
     assert "WRONG_STATE_WITHHELD" not in crit_codes
     assert "DOUBLE_WITHHELD_NON_RECIPROCAL" not in crit_codes
+
+
+# ---------- Per-line state via WSL lookup ----------
+
+
+def test_per_line_state_no_wsl_map_is_noop() -> None:
+    """Without a WSL map, validator falls back to voucher-level state only."""
+    voucher = {
+        "voucherId": "V1", "employeeId": "E1",
+        "wcState": "MO",
+        "employeeTax": [
+            {"empTaxDeductCode": "29-20",
+             "empTaxDeductCodeDesc": "MO INCOME TAX",
+             "empTaxAmount": "50.00"},
+        ],
+        "earning": [
+            {"payCode": "REG", "location": "MO-CORP", "payAmount": "800"},
+            {"payCode": "REG", "location": "IL-BRANCH", "payAmount": "200"},
+        ],
+    }
+    audit = analyze_voucher(voucher, home_state="MO")
+    codes = {f.code for f in audit.findings}
+    # Without location_state_map, the per-line check doesn't fire
+    assert "PER_LINE_STATE_WAGES_NO_WITHHOLDING" not in codes
+
+
+def test_per_line_state_with_wsl_map_flags_missing_withholding() -> None:
+    """Voucher has earning lines in MO + IL, but only MO withheld.
+    WSL map resolves locations to states, validator flags the gap."""
+    voucher = {
+        "voucherId": "V1", "employeeId": "E1",
+        "wcState": "MO",
+        "employeeTax": [
+            {"empTaxDeductCode": "29-20",
+             "empTaxDeductCodeDesc": "MO INCOME TAX",
+             "empTaxAmount": "50.00"},
+        ],
+        "earning": [
+            {"payCode": "REG", "location": "MO-CORP", "payAmount": "800"},
+            {"payCode": "REG", "location": "IL-BRANCH", "payAmount": "200"},
+        ],
+    }
+    audit = analyze_voucher(
+        voucher, home_state="MO",
+        location_state_map={
+            "MO-CORP": "MO",
+            "IL-BRANCH": "IL",
+        },
+    )
+    codes = {f.code for f in audit.findings}
+    assert "PER_LINE_STATE_WAGES_NO_WITHHOLDING" in codes
+    assert audit.wages_by_work_state["MO"] == Decimal("800")
+    assert audit.wages_by_work_state["IL"] == Decimal("200")
+
+
+def test_per_line_state_matches_withholding_no_flag() -> None:
+    """Voucher has earning lines in MO + IL and withheld for both.
+    No flag — system correctly allocated."""
+    voucher = {
+        "voucherId": "V1", "employeeId": "E1",
+        "wcState": "MO",
+        "employeeTax": [
+            {"empTaxDeductCode": "29-20",
+             "empTaxDeductCodeDesc": "MO INCOME TAX",
+             "empTaxAmount": "40.00"},
+            {"empTaxDeductCode": "17-20",
+             "empTaxDeductCodeDesc": "IL INCOME TAX",
+             "empTaxAmount": "10.00"},
+        ],
+        "earning": [
+            {"payCode": "REG", "location": "MO-CORP", "payAmount": "800"},
+            {"payCode": "REG", "location": "IL-BRANCH", "payAmount": "200"},
+        ],
+    }
+    audit = analyze_voucher(
+        voucher, home_state="MO",
+        location_state_map={
+            "MO-CORP": "MO",
+            "IL-BRANCH": "IL",
+        },
+    )
+    codes = {f.code for f in audit.findings}
+    assert "PER_LINE_STATE_WAGES_NO_WITHHOLDING" not in codes

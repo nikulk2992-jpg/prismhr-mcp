@@ -77,6 +77,14 @@ class PrismHRReader(Protocol):
              basicAllowances, additionalAllowances }"""
         ...
 
+    async def get_location_state_map(
+        self, client_id: str
+    ) -> dict[str, str]:
+        """Return { locationName -> stateAbbrev } for all WSL of a
+        client. Enables per-line state allocation. Implementations
+        may return {} if unavailable; the validator degrades gracefully."""
+        ...
+
 
 def _dec(raw) -> Decimal:
     if raw in (None, ""):
@@ -124,6 +132,12 @@ async def run_tax_engine_diff(
     vouchers = await reader.list_vouchers_for_period(
         client_id, period_start, period_end
     )
+
+    # Pull the WSL location -> state map once per client
+    try:
+        location_state_map = await reader.get_location_state_map(client_id)
+    except Exception:  # noqa: BLE001
+        location_state_map = {}
 
     profile_cache: dict[str, dict] = {}
 
@@ -196,11 +210,14 @@ async def run_tax_engine_diff(
                 f"${actuals['medicare']}.",
             ))
 
-        # Multi-state voucher validation — the HIGH value check
+        # Multi-state voucher validation — the HIGH value check.
+        # Passes in the WSL location -> state map so per-line work
+        # allocation is checked against tax-withholding distribution.
         if home_state:
             ms = analyze_multi_state(
                 v, home_state=home_state,
                 has_nr_cert=bool(prof.get("hasNRCert")),
+                location_state_map=location_state_map,
             )
             for f in ms.findings:
                 d.findings.append(Finding(f.code, f.severity, f.message))

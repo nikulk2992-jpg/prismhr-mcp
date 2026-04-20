@@ -145,7 +145,26 @@ class MultiStateVoucherAudit:
     work_state: str
     states_with_tax: list[str]
     total_state_withheld: Decimal
+    # Per earning-line state allocation (derived from WSL lookup).
+    # Keys are state abbrevs, values are total wages earned on this
+    # voucher under that worksite state.
+    wages_by_work_state: dict[str, Decimal] = field(default_factory=dict)
     findings: list[Finding] = field(default_factory=list)
+
+
+def _resolve_line_state(
+    line: dict, location_state_map: dict[str, str] | None
+) -> str | None:
+    """Map an earning[].location value to its WSL state via the cached
+    Client|Location map. Falls back to None if no match."""
+    if not location_state_map:
+        return None
+    loc = str(line.get("location") or "").strip()
+    if not loc:
+        return None
+    # Try exact, then uppercase — PrismHR location codes are case-sensitive
+    # but WSL names vary in casing.
+    return location_state_map.get(loc) or location_state_map.get(loc.upper())
 
 
 def analyze_voucher(
@@ -153,9 +172,17 @@ def analyze_voucher(
     *,
     home_state: str,
     has_nr_cert: bool = False,
+    location_state_map: dict[str, str] | None = None,
 ) -> MultiStateVoucherAudit:
-    """Parse a single voucher's employeeTax[] for state-income-tax codes
-    and validate against the home/work state pair."""
+    """Parse a single voucher's employeeTax[] for state-income-tax codes,
+    earning[] for per-line work-site-location allocation, and validate
+    against the home/work state pair.
+
+    `location_state_map`: { locationName -> state_abbrev } built from
+    Client|Location (getData#Client|Location). If provided, the validator
+    computes per-line wages-by-state and flags when the voucher's tax
+    allocation doesn't match the actual work-location distribution.
+    """
     vid = str(voucher.get("voucherId") or "")
     eid = str(voucher.get("employeeId") or "")
     work_state = str(voucher.get("wcState") or "").upper()
@@ -176,6 +203,21 @@ def analyze_voucher(
         states_seen[state] += amt
 
     total_withheld = sum(states_seen.values(), Decimal("0"))
+
+    # Per-line state allocation from WSL lookup
+    wages_by_work_state: dict[str, Decimal] = {}
+    if location_state_map:
+        for line in (voucher.get("earning") or []):
+            amt = Decimal(str(line.get("payAmount") or "0"))
+            if amt == 0:
+                continue
+            line_state = _resolve_line_state(line, location_state_map)
+            if not line_state:
+                # Unknown location — don't break the map; skip
+                continue
+            wages_by_work_state.setdefault(line_state, Decimal("0"))
+            wages_by_work_state[line_state] += amt
+
     audit = MultiStateVoucherAudit(
         voucher_id=vid,
         employee_id=eid,
@@ -183,7 +225,26 @@ def analyze_voucher(
         work_state=work_state,
         states_with_tax=sorted(states_seen.keys()),
         total_state_withheld=total_withheld,
+        wages_by_work_state=wages_by_work_state,
     )
+
+    # Cross-check: if earning lines show multiple states but voucher
+    # only withheld for one, that's a real bug.
+    if len(wages_by_work_state) >= 2:
+        work_states_with_wages = set(wages_by_work_state.keys())
+        states_with_withholding = set(states_seen.keys())
+        missing_withholding = work_states_with_wages - states_with_withholding
+        if missing_withholding:
+            audit.findings.append(
+                Finding(
+                    "PER_LINE_STATE_WAGES_NO_WITHHOLDING",
+                    "critical",
+                    f"Voucher has wages earned in {sorted(work_states_with_wages)} "
+                    f"(per earning[].location -> WSL lookup) but state "
+                    f"withholding only for {sorted(states_with_withholding)}. "
+                    f"Missing: {sorted(missing_withholding)}.",
+                )
+            )
 
     if not home_state or not work_state:
         return audit
