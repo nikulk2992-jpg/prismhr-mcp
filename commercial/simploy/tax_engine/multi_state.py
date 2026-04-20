@@ -42,26 +42,68 @@ class Finding:
 
 
 # Reciprocity table (bidirectional). Source: Vertex Calculation Guide
-# per-state reciprocity sections. MO is NOT in any reciprocity pair.
+# March 2026 — per-state reciprocity sections. MO has NO reciprocity
+# (per Vertex MO summary p565).
+#
+# Each pair listed once; normalized alphabetically.
 RECIPROCITY_PAIRS: frozenset[tuple[str, str]] = frozenset(
     tuple(sorted(p))
     for p in [
-        # IL reciprocals (from Vertex IL section)
+        # IL reciprocals (Vertex IL p331): IA, KY, MI, WI
         ("IL", "IA"), ("IL", "KY"), ("IL", "MI"), ("IL", "WI"),
-        # Common Midwestern
+
+        # IN reciprocals (Vertex IN — inferred from neighbor sections):
+        # IN has reciprocity with KY, MI, OH, PA, WI
         ("IN", "KY"), ("IN", "MI"), ("IN", "OH"), ("IN", "PA"), ("IN", "WI"),
+
+        # KY reciprocals: IL, IN, MI, OH, VA, WV, WI
         ("KY", "MI"), ("KY", "OH"), ("KY", "VA"), ("KY", "WV"), ("KY", "WI"),
-        ("MI", "WI"), ("MI", "OH"),
-        ("OH", "PA"), ("OH", "WV"),
-        # Mid-Atlantic
+
+        # OH reciprocals (Vertex OH p782): IN, KY, MI, PA, WV
+        ("MI", "OH"), ("OH", "PA"), ("OH", "WV"),
+
+        # MI / WI
+        ("MI", "WI"),
+
+        # MD reciprocals (Vertex MD): DC, PA, VA, WV
         ("MD", "DC"), ("MD", "PA"), ("MD", "VA"), ("MD", "WV"),
-        ("PA", "NJ"), ("PA", "VA"), ("PA", "WV"),
+
+        # PA reciprocals (Vertex PA p1001): IN, MD, NJ, OH, VA, WV
+        ("NJ", "PA"), ("PA", "VA"), ("PA", "WV"),
+
+        # VA reciprocals: DC, KY, MD, PA, WV
         ("VA", "DC"), ("VA", "WV"),
-        # Other
+
+        # MN / ND
         ("MN", "ND"),
         ("ND", "MT"),
+
+        # DC reciprocals: all states (technically DC is like a reciprocal
+        # with any state since DC only taxes DC residents). Handled by
+        # Vertex DC section; not all pairs listed here.
     ]
 )
+
+
+# Jurisdiction Interaction Treatment codes per Vertex guide:
+#   1 = ignore work tax
+#   2 = credit the resident by work tax withheld
+#   3 = eliminate the resident tax if work > 0
+#   4 = credit work tax up to resident tax
+#   5 = eliminate resident tax if work > 0, accumulate only if withheld
+#   6 = eliminate resident tax if work tax on non-residents > 0, always accumulate
+#   7 = eliminate resident tax if work tax on non-residents > 0,
+#       accumulate only if withheld
+JURISDICTION_INTERACTION_TREATMENT = {
+    "MO": 7,
+    "IL": 7,
+    "OH": 6,
+    "PA": 5,
+    "CA": 2,
+    "NY": 1,   # NY always withholds; credit claimed at filing
+    "MA": 1,
+    "NJ": 7,
+}
 
 
 def is_reciprocal(state_a: str, state_b: str) -> bool:

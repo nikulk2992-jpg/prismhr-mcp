@@ -19,10 +19,9 @@ from datetime import date
 from decimal import Decimal
 from typing import Protocol
 
+from simploy.tax_engine.engine import StateCalcInput, compute_state
 from simploy.tax_engine.federal import FederalCalcInput, compute_federal
 from simploy.tax_engine.multi_state import analyze_voucher as analyze_multi_state
-from simploy.tax_engine.states.il import ILCalcInput, compute_il
-from simploy.tax_engine.states.mo import MOCalcInput, compute_mo
 
 
 Severity = str
@@ -47,6 +46,9 @@ class VoucherDiff:
     actual_ss: Decimal
     reference_medicare: Decimal
     actual_medicare: Decimal
+    reference_state_tax: Decimal = Decimal("0")
+    actual_state_tax: Decimal = Decimal("0")
+    state_engine_confidence: str = "NONE"
     findings: list[Finding] = field(default_factory=list)
 
 
@@ -202,6 +204,48 @@ async def run_tax_engine_diff(
             )
             for f in ms.findings:
                 d.findings.append(Finding(f.code, f.severity, f.message))
+
+        # State-engine diff (per-state reference calc vs actual)
+        if work_state:
+            # Actual state tax pulled from voucher: first -20 line whose
+            # desc contains the work-state abbrev
+            actual_state = Decimal("0")
+            for t in (v.get("employeeTax") or []):
+                code = str(t.get("empTaxDeductCode") or "")
+                desc = str(t.get("empTaxDeductCodeDesc") or "").upper()
+                if "-20" in code and work_state in desc:
+                    actual_state += _dec(t.get("empTaxAmount"))
+            d.actual_state_tax = actual_state
+
+            state_inp = StateCalcInput(
+                work_state=work_state,
+                home_state=home_state or work_state,
+                gross_wages_period=wages,
+                pay_periods_per_year=periods,
+                filing_status=prof.get("filingStatus") or "S",
+                allowances=int(prof.get("stateAllowances") or 0),
+                has_nr_cert=bool(prof.get("hasNRCert")),
+                work_state_withholding_period=actual_state,
+            )
+            try:
+                state_out = compute_state(state_inp)
+            except Exception:  # noqa: BLE001
+                state_out = None
+            if state_out is not None:
+                d.reference_state_tax = state_out.expected_withholding_period
+                d.state_engine_confidence = state_out.confidence
+                # Only flag HIGH-confidence states to avoid false positives
+                # from CA/NY approximations.
+                if state_out.confidence == "HIGH":
+                    delta = (state_out.expected_withholding_period - actual_state)
+                    if delta.copy_abs() > Decimal("1.00"):
+                        d.findings.append(Finding(
+                            "STATE_TAX_DELTA",
+                            "warning",
+                            f"{work_state} reference ${state_out.expected_withholding_period} "
+                            f"vs actual ${actual_state} (delta ${delta}). "
+                            f"Confidence HIGH.",
+                        ))
 
         diffs.append(d)
 

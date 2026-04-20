@@ -58,6 +58,7 @@ cached-credentials.enc
 .planning/corpus-*.json
 .planning/corpus-summary-*.md
 .planning/dogfood-all-readers.txt
+.planning/tax-engine-*.md
 .gitignore.local
 # Audit files reference authorized-services list (tenant-specific).
 .planning/uat-coverage-audit.md
