@@ -1105,3 +1105,207 @@ def _first(body: Any, key: str) -> dict | None:
     if isinstance(val, dict):
         return val
     return None
+
+
+class VoucherClassificationReader:
+    """Live PrismHR adapter for voucher_classification_audit.PrismHRReader.
+
+    Data sources:
+      * list_vouchers_for_period -> payroll.v1.getPayrollVouchers (date range)
+      * get_employee_tax_profile -> employee.v1.getEmployee
+            with options=Compensation + options=Client in two calls, merged.
+            Compensation has ficaExempt, nonResAlien, form4029Filed, etc.
+            Client has employee1099, status, jobCode, officer, scorpOwner,
+            businessOwner flags — critical for telling true misflags apart
+            from legitimate 1099 contractors and corporate officers.
+            Plus YTD context via payroll.v1.getEmployeePayrollSummary for
+            Medicare additional-tax check.
+      * get_pay_code_definition -> codeFiles.v1.getPaycodeDetails
+      * list_union_members -> clientMaster.v1.getLaborUnionDetails
+
+    The workflow caches per-employee lookups, so 20-emp chunks + two
+    getEmployee calls per chunk is the expected load shape.
+    """
+
+    def __init__(self, client: PrismHRClient) -> None:
+        self._c = client
+
+    async def list_vouchers_for_period(
+        self, client_id: str, period_start: date, period_end: date
+    ) -> list[dict]:
+        try:
+            body = await self._c.get(
+                "/payroll/v1/getPayrollVouchers",
+                params={
+                    "clientId": client_id,
+                    "startDate": period_start.isoformat(),
+                    "endDate": period_end.isoformat(),
+                    "dateType": "PAY",
+                },
+            )
+        except Exception:  # noqa: BLE001
+            return []
+        if isinstance(body, list):
+            return body
+        if isinstance(body, dict):
+            return (
+                _rows(body, "payrollVoucher")
+                or _rows(body, "vouchers")
+                or _rows(body, "voucher")
+            )
+        return []
+
+    async def get_employee_tax_profile(
+        self, client_id: str, employee_id: str
+    ) -> dict:
+        comp_task = self._c.get(
+            "/employee/v1/getEmployee",
+            params={
+                "clientId": client_id,
+                "employeeId": employee_id,
+                "options": "Compensation",
+            },
+        )
+        client_task = self._c.get(
+            "/employee/v1/getEmployee",
+            params={
+                "clientId": client_id,
+                "employeeId": employee_id,
+                "options": "Client",
+            },
+        )
+        ytd_task = self._c.get(
+            "/payroll/v1/getEmployeePayrollSummary",
+            params={"clientId": client_id, "employeeId": employee_id},
+        )
+        try:
+            comp_body, client_body, ytd_body = await asyncio.gather(
+                comp_task, client_task, ytd_task, return_exceptions=True
+            )
+        except Exception:  # noqa: BLE001
+            comp_body = client_body = ytd_body = {}
+
+        comp = {}
+        if isinstance(comp_body, dict):
+            first = _first(comp_body, "employee") or {}
+            comp = first.get("compensation") or {}
+
+        client_cls = {}
+        if isinstance(client_body, dict):
+            first = _first(client_body, "employee") or {}
+            client_cls = first.get("client") or {}
+
+        status = str(client_cls.get("employeeStatus") or "A").upper()
+        if status == "A":
+            status_out = "ACTIVE"
+        elif status == "T":
+            status_out = "TERMINATED"
+        elif status == "L":
+            status_out = "LEAVE"
+        else:
+            status_out = status
+
+        # Work state: state with filingStatus populated wins; fall back
+        # to first state in stateTax; fall back to home state.
+        work_state = ""
+        state_tax = comp.get("stateTax") or []
+        if isinstance(state_tax, list):
+            for s in state_tax:
+                if isinstance(s, dict) and s.get("filingStatus"):
+                    work_state = str(s.get("stateCode") or "").upper()
+                    break
+            if not work_state and state_tax and isinstance(state_tax[0], dict):
+                work_state = str(state_tax[0].get("stateCode") or "").upper()
+
+        # YTD wage data for additional-Medicare threshold check
+        ytd_medicare = Decimal("0")
+        ytd_ss = Decimal("0")
+        ytd_addl_medicare = Decimal("0")
+        if isinstance(ytd_body, dict):
+            data_rows = _rows(ytd_body, "data") or _rows(ytd_body, "employeePayrollSummary")
+            for r in data_rows:
+                ytd_block = r.get("YTD") if isinstance(r, dict) else None
+                if not isinstance(ytd_block, dict):
+                    continue
+                tw = ytd_block.get("taxWithholding") or {}
+                ytd_medicare += _dec(tw.get("medicare"))
+                ytd_ss += _dec(tw.get("socialSecurity"))
+
+        # Employee type: use employee1099 flag first, fall back to pattern.
+        if client_cls.get("employee1099") is True:
+            emp_type = "1099"
+        else:
+            emp_type = "W2"
+
+        # Treat any of these owner/officer flags as "exempt-legit" by
+        # collapsing them into the position string the workflow reads.
+        position = str(client_cls.get("jobCode") or "")
+        if client_cls.get("officer") is True:
+            position = (position or "OFFICER")
+        if client_cls.get("scorpOwner") is True:
+            position = position or "S-CORP-OWNER"
+        if client_cls.get("businessOwner") is True:
+            position = position or "BUSINESS-OWNER"
+
+        return {
+            "employeeType": emp_type,
+            "ficaExempt": bool(comp.get("ficaExempt")),
+            "medicareExempt": False,  # PrismHR has only one FICA exempt flag
+            "futaExempt": False,
+            "sutaExempt": False,
+            "workState": work_state,
+            "unionId": client_cls.get("unionCode") or None,
+            "ytdSocialSecurityWages": ytd_ss,
+            "ytdMedicareWages": ytd_medicare,
+            "ytdAdditionalMedicareWithheld": ytd_addl_medicare,
+            "status": status_out,
+            "position": position,
+        }
+
+    async def get_pay_code_definition(
+        self, client_id: str, pay_code: str
+    ) -> dict:
+        try:
+            body = await self._c.get(
+                "/codeFiles/v1/getPaycodeDetails",
+                params={"clientId": client_id, "payCode": pay_code},
+            )
+        except Exception:  # noqa: BLE001
+            return {}
+        entry = _first(body, "paycode") or _first(body, "payCode") or body or {}
+        if not isinstance(entry, dict):
+            return {}
+        # PrismHR paycode metadata: fields vary; treat missing flags as
+        # FICA-subject by default (standard W-2 earning).
+        return {
+            "payCode": entry.get("payCode") or entry.get("code") or pay_code,
+            "description": entry.get("description") or entry.get("desc") or "",
+            "isContractor": bool(entry.get("isContractor") or entry.get("contractor")),
+            "isUnion": bool(entry.get("isUnion") or entry.get("union")),
+            "unionId": entry.get("unionId") or entry.get("unionCode"),
+            "ficaSubject": entry.get("ficaSubject", True),
+            "medicareSubject": entry.get("medicareSubject", True),
+            "futaSubject": entry.get("futaSubject", True),
+            "sutaSubject": entry.get("sutaSubject", True),
+            "stateSubject": entry.get("stateSubject", True),
+        }
+
+    async def list_union_members(
+        self, client_id: str, union_id: str
+    ) -> list[str]:
+        try:
+            body = await self._c.get(
+                "/clientMaster/v1/getLaborUnionDetails",
+                params={"clientId": client_id, "unionCode": union_id},
+            )
+        except Exception:  # noqa: BLE001
+            return []
+        members = (
+            (body or {}).get("members")
+            or (body or {}).get("memberList")
+            or (body or {}).get("employeeList", {}).get("employeeId")
+            or []
+        )
+        if isinstance(members, list):
+            return [str(m) for m in members if m]
+        return []
