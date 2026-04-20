@@ -1,14 +1,16 @@
-"""Payroll domain models.
+"""Payroll domain models (OSS basic reads).
 
 camelCase from PrismHR is mapped via `validation_alias=AliasChoices(...)` so
 tool outputs stay snake_case regardless of FastMCP's `by_alias` default.
+
+Commercial-tier models (DeductionConflict, OvertimeAnomaly,
+RegisterReconciliation, WorkflowDeferred) live in
+`simploy.models.payroll_compliance`.
 """
 
 from __future__ import annotations
 
-from datetime import date
 from decimal import Decimal
-from typing import Literal
 
 from pydantic import AliasChoices, BaseModel, ConfigDict, Field
 
@@ -59,7 +61,10 @@ class BatchStatusResponse(BaseModel):
 
 
 class PayVoucher(BaseModel):
-    """One paycheck / pay voucher (`getPayrollVouchersForEmployee`)."""
+    """One paycheck / pay voucher (`getPayrollVouchersForEmployee`).
+
+    Shared data contract — used by both OSS pay_history reader and
+    commercial overtime-anomaly detector."""
 
     model_config = ConfigDict(extra="allow", populate_by_name=True)
 
@@ -151,53 +156,11 @@ class PayGroupAssignment(BaseModel):
     warning: str | None = None
 
 
-# ----- Deduction conflict detection -----
-
-
-ConflictKind = Literal["priority_clash", "same_code_duplicate", "expired_active", "no_goal_set"]
-
-
-class DeductionConflict(BaseModel):
-    kind: ConflictKind
-    deduction_codes: list[str]
-    severity: Literal["low", "medium", "high"]
-    message: str
-    scheduled_for: str | None = None
-
-
-class DeductionConflictsResponse(BaseModel):
-    client_id: str
-    employee_id: str
-    scanned_count: int
-    conflicts: list[DeductionConflict]
-
-
-# ----- Overtime anomaly detection -----
-
-
-class OvertimeAnomaly(BaseModel):
-    voucher_id: str | None
-    employee_id: str | None
-    pay_date: str | None
-    kind: Literal["excessive_overtime", "negative_regular", "ot_without_regular", "rate_mismatch"]
-    severity: Literal["low", "medium", "high"]
-    message: str
-    regular_hours: Decimal | None = None
-    overtime_hours: Decimal | None = None
-
-
-class OvertimeAnomaliesResponse(BaseModel):
-    client_id: str
-    batch_id: str | None
-    scanned_vouchers: int
-    anomalies: list[OvertimeAnomaly]
-
-
 # ----- SuperBatch status -----
 
 
 class SuperBatchSummary(BaseModel):
-    """Aggregated view across a date range — mirrors what PrismHR's SuperBatch UI shows."""
+    """Aggregated view across a date range — mirrors PrismHR's SuperBatch UI."""
 
     client_id: str
     start_date: str
@@ -210,30 +173,3 @@ class SuperBatchSummary(BaseModel):
     posted_batch_count: int
     voided_batch_count: int
     batches: list[BatchEntry]
-
-
-# ----- Register reconciliation -----
-
-
-class RegisterReconciliation(BaseModel):
-    client_id: str
-    batch_id: str
-    voucher_gross_total: Decimal
-    billing_code_total: Decimal
-    delta: Decimal
-    delta_pct: float
-    reconciled: bool
-    threshold_pct: float
-    message: str
-
-
-# ----- Write-path stubs (Phase 6) -----
-
-
-class WorkflowDeferred(BaseModel):
-    """Placeholder for tools that mutate live PrismHR data — wired in Phase 6."""
-
-    code: str = "NOT_YET_IMPLEMENTED"
-    message: str
-    tracking_issue: str = "https://github.com/nikulk2992-jpg/prismhr-mcp/issues"
-    planned_for: str = "Phase 6 (preview → confirm two-step)"

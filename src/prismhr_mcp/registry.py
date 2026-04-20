@@ -28,6 +28,7 @@ TOOL_GROUPS: frozenset[str] = frozenset(
         "billing",     # Group 5
         "report",      # Group 6 (branded reporting)
         "m365",        # Group 7 (Microsoft 365 connectors)
+        "commercial",  # Paid tier (simploy.* modules) — separate namespace
     }
 )
 

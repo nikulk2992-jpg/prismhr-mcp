@@ -1,7 +1,9 @@
 """Payroll heuristics — deduction conflict detection + overtime anomaly detection.
 
-Heuristics only. Designed so real UAT data can tighten thresholds without
-reshaping the tool interfaces. All pure functions — no PrismHR calls.
+Moved from prismhr_mcp.normalizers.payroll (OSS) because the heuristics
+are the core of commercial-tier compliance workflows. PayVoucher stays
+in the OSS models (shared data contract); only the detection logic
+moved to paid tier.
 """
 
 from __future__ import annotations
@@ -10,31 +12,25 @@ from collections import defaultdict
 from decimal import Decimal
 from typing import Any
 
-from ..models.payroll import (
+from prismhr_mcp.models.payroll import PayVoucher  # shared data contract
+
+from simploy.models.payroll_compliance import (
     DeductionConflict,
     OvertimeAnomaly,
-    PayVoucher,
 )
+
 
 # Overtime thresholds — revisit with UAT data.
 OT_EXCESSIVE_WEEKLY_HOURS = Decimal("30")  # OT beyond this is unusual
 NEGATIVE_REGULAR_TOLERANCE = Decimal("-0.01")
-RATE_MISMATCH_TOLERANCE_PCT = 5.0  # overtime pay/hour should be ~1.5x regular pay/hour
+RATE_MISMATCH_TOLERANCE_PCT = 5.0  # OT pay/hour should be ~1.5x regular
 
 
 def detect_deduction_conflicts(
     scheduled_deductions: list[dict[str, Any]],
     today: str | None = None,
 ) -> list[DeductionConflict]:
-    """Scan a list of scheduled deductions and emit structured conflict findings.
-
-    Detected patterns:
-      * `priority_clash` — two active deductions sharing the same priority.
-      * `same_code_duplicate` — two deductions with the same code both active.
-      * `expired_active` — status=active but endDate in the past.
-      * `no_goal_set` — goal-based deduction (loan, 401k catch-up) with
-        goalAmount missing or zero.
-    """
+    """Scan scheduled deductions for structural conflicts."""
     conflicts: list[DeductionConflict] = []
     by_priority: dict[int, list[dict[str, Any]]] = defaultdict(list)
     by_code: dict[str, list[dict[str, Any]]] = defaultdict(list)
@@ -166,7 +162,6 @@ def detect_overtime_anomalies(
             overtime_rate = ot_pay / ot
             if regular_rate > 0:
                 ratio = float(overtime_rate / regular_rate)
-                # Expect ~1.5x. Flag if off by more than RATE_MISMATCH_TOLERANCE_PCT.
                 lower = 1.5 * (1 - RATE_MISMATCH_TOLERANCE_PCT / 100)
                 upper = 1.5 * (1 + RATE_MISMATCH_TOLERANCE_PCT / 100)
                 if ratio < lower or ratio > upper:
@@ -191,7 +186,7 @@ def _anomaly(
 ) -> OvertimeAnomaly:
     return OvertimeAnomaly(
         voucher_id=v.voucher_id,
-        employee_id=None,  # caller can enrich
+        employee_id=None,
         pay_date=v.pay_date,
         kind=kind,  # type: ignore[arg-type]
         severity=severity,  # type: ignore[arg-type]

@@ -1,11 +1,16 @@
-"""Pure-function tests for payroll normalizers."""
+"""Pure-function tests for commercial payroll normalizers."""
 
 from __future__ import annotations
 
+import sys
 from decimal import Decimal
+from pathlib import Path
 
-from prismhr_mcp.models.payroll import PayVoucher
-from prismhr_mcp.normalizers.payroll import (
+REPO_ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(REPO_ROOT / "commercial"))
+
+from prismhr_mcp.models.payroll import PayVoucher  # noqa: E402
+from simploy.normalizers.payroll_compliance import (  # noqa: E402
     detect_deduction_conflicts,
     detect_overtime_anomalies,
 )

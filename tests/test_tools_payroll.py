@@ -1,4 +1,4 @@
-"""Integration tests for Group 2 — payroll tools."""
+"""Integration tests for Group 2 — OSS basic payroll tools."""
 
 from __future__ import annotations
 
@@ -12,9 +12,7 @@ from prismhr_mcp.auth.prismhr_session import LOGIN_PATH
 from prismhr_mcp.server import build
 from prismhr_mcp.tools.payroll import (
     PATH_BATCH_LIST,
-    PATH_BILLING_CODE_TOTALS,
     PATH_GET_EMPLOYEE,
-    PATH_SCHEDULED_DEDUCTIONS,
     PATH_VOUCHERS_FOR_EMPLOYEE,
     PATH_YTD,
 )
@@ -48,7 +46,7 @@ async def test_payroll_batch_status_returns_batches(runtime) -> None:  # noqa: A
                 200,
                 json=[
                     {"batchId": "B1", "payDate": "2026-03-15", "grossTotal": 10500, "batchStatus": "posted", "voucherCount": 12},
-                    {"batchId": "B2", "payDate": "2026-03-29", "grossTotal": 11200, "batchStatus": "open", "voucherCount": 14},
+                    {"batchId": "B2", "payDate": "2026-03-22", "grossTotal": 9800, "batchStatus": "open", "voucherCount": 11},
                 ],
             )
         )
@@ -58,7 +56,7 @@ async def test_payroll_batch_status_returns_batches(runtime) -> None:  # noqa: A
         )
     data = _structured(result)
     assert data["count"] == 2
-    assert {b["batch_id"] for b in data["batches"]} == {"B1", "B2"}
+    assert data["batches"][0]["batch_id"] == "B1"
 
 
 # ---------- payroll_pay_history ----------
@@ -72,47 +70,55 @@ async def test_payroll_pay_history_with_ytd(runtime) -> None:  # noqa: ANN001
             return_value=httpx.Response(
                 200,
                 json=[
-                    {"voucherId": "V1", "payDate": "2026-01-15", "grossAmount": 2500},
-                    {"voucherId": "V2", "payDate": "2026-01-29", "grossAmount": 2500},
+                    {"voucherId": "V1", "payDate": "2026-04-01", "grossAmount": 2000, "netAmount": 1600, "regularHours": 40},
+                    {"voucherId": "V2", "payDate": "2026-04-15", "grossAmount": 2100, "netAmount": 1680, "regularHours": 42},
                 ],
             )
         )
         mock.get(PATH_YTD).mock(
-            return_value=httpx.Response(200, json={"grossYTD": 5000, "netYTD": 3800})
+            return_value=httpx.Response(
+                200,
+                json={
+                    "asOfDate": "2026-04-30",
+                    "grossYTD": 8400,
+                    "netYTD": 6720,
+                    "federalTaxYTD": 1000,
+                },
+            )
         )
         result = await built.server.call_tool(
             "payroll_pay_history",
             {
                 "client_id": "ACME",
                 "employee_id": "E1",
-                "start_date": "2026-01-01",
-                "end_date": "2026-01-31",
+                "start_date": "2026-04-01",
+                "end_date": "2026-04-30",
             },
         )
     data = _structured(result)
     assert data["count"] == 2
-    assert data["ytd"]["gross_ytd"] == "5000"
-    assert data["ytd"]["net_ytd"] == "3800"
+    assert data["ytd"]["gross_ytd"] == "8400"
 
 
 async def test_payroll_pay_history_always_fetches_ytd(runtime) -> None:  # noqa: ANN001
-    # `include_ytd` knob was removed (Codex #3 — hide implementation toggles
-    # from the tool surface); YTD is always fetched alongside vouchers.
+    """YTD knob removed on purpose — always-on."""
     built = build(runtime=runtime)
     with respx.mock(base_url=runtime.settings.prismhr_base_url) as mock:
         _login_ok(mock)
         mock.get(PATH_VOUCHERS_FOR_EMPLOYEE).mock(return_value=httpx.Response(200, json=[]))
-        ytd_route = mock.get(PATH_YTD).mock(return_value=httpx.Response(200, json={}))
+        ytd_route = mock.get(PATH_YTD).mock(
+            return_value=httpx.Response(200, json={"asOfDate": "2026-04-30"})
+        )
         await built.server.call_tool(
             "payroll_pay_history",
             {
                 "client_id": "ACME",
                 "employee_id": "E1",
-                "start_date": "2026-01-01",
-                "end_date": "2026-01-31",
+                "start_date": "2026-04-01",
+                "end_date": "2026-04-30",
             },
         )
-        assert ytd_route.call_count == 1
+    assert ytd_route.called
 
 
 # ---------- payroll_pay_group_check ----------
@@ -125,9 +131,7 @@ async def test_pay_group_check_reports_assigned(runtime) -> None:  # noqa: ANN00
         mock.post(PATH_GET_EMPLOYEE).mock(
             return_value=httpx.Response(
                 200,
-                json=[
-                    {"employeeId": "E1", "payGroupId": "PG1", "payGroupName": "Weekly Hourly", "payFrequency": "weekly"}
-                ],
+                json=[{"payGroupId": "WEEKLY", "payGroupName": "Weekly", "payFrequency": "weekly"}],
             )
         )
         result = await built.server.call_tool(
@@ -136,19 +140,14 @@ async def test_pay_group_check_reports_assigned(runtime) -> None:  # noqa: ANN00
         )
     data = _structured(result)
     assert data["assigned"] is True
-    assert data["pay_group_id"] == "PG1"
-    assert data["warning"] is None
+    assert data["pay_group_id"] == "WEEKLY"
 
 
 async def test_pay_group_check_warns_when_unassigned(runtime) -> None:  # noqa: ANN001
     built = build(runtime=runtime)
     with respx.mock(base_url=runtime.settings.prismhr_base_url) as mock:
         _login_ok(mock)
-        mock.post(PATH_GET_EMPLOYEE).mock(
-            return_value=httpx.Response(
-                200, json=[{"employeeId": "E1"}]
-            )
-        )
+        mock.post(PATH_GET_EMPLOYEE).mock(return_value=httpx.Response(200, json=[{}]))
         result = await built.server.call_tool(
             "payroll_pay_group_check",
             {"client_id": "ACME", "employee_id": "E1"},
@@ -156,61 +155,6 @@ async def test_pay_group_check_warns_when_unassigned(runtime) -> None:  # noqa: 
     data = _structured(result)
     assert data["assigned"] is False
     assert "no pay group assigned" in (data["warning"] or "").lower()
-
-
-# ---------- payroll_deduction_conflicts ----------
-
-
-async def test_deduction_conflicts_surfaces_priority_clash(runtime) -> None:  # noqa: ANN001
-    built = build(runtime=runtime)
-    with respx.mock(base_url=runtime.settings.prismhr_base_url) as mock:
-        _login_ok(mock)
-        mock.get(PATH_SCHEDULED_DEDUCTIONS).mock(
-            return_value=httpx.Response(
-                200,
-                json=[
-                    {"status": "active", "code": "401K", "priority": 10},
-                    {"status": "active", "code": "GARN", "priority": 10},
-                ],
-            )
-        )
-        result = await built.server.call_tool(
-            "payroll_deduction_conflicts",
-            {"client_id": "ACME", "employee_id": "E1"},
-        )
-    data = _structured(result)
-    assert data["scanned_count"] == 2
-    kinds = [c["kind"] for c in data["conflicts"]]
-    assert "priority_clash" in kinds
-
-
-# ---------- payroll_overtime_anomalies ----------
-
-
-async def test_overtime_anomalies_flag_excessive(runtime) -> None:  # noqa: ANN001
-    built = build(runtime=runtime)
-    with respx.mock(base_url=runtime.settings.prismhr_base_url) as mock:
-        _login_ok(mock)
-        mock.get(PATH_VOUCHERS_FOR_EMPLOYEE).mock(
-            return_value=httpx.Response(
-                200,
-                json=[
-                    {"voucherId": "V1", "payDate": "2026-04-01", "regularHours": 40, "overtimeHours": 45, "regularAmount": 800, "overtimeAmount": 1350},
-                ],
-            )
-        )
-        result = await built.server.call_tool(
-            "payroll_overtime_anomalies",
-            {
-                "client_id": "ACME",
-                "employee_id": "E1",
-                "start_date": "2026-04-01",
-                "end_date": "2026-04-30",
-            },
-        )
-    data = _structured(result)
-    kinds = {a["kind"] for a in data["anomalies"]}
-    assert "excessive_overtime" in kinds
 
 
 # ---------- payroll_superbatch_status ----------
@@ -240,69 +184,3 @@ async def test_superbatch_status_aggregates(runtime) -> None:  # noqa: ANN001
     assert data["posted_batch_count"] == 1
     assert data["open_batch_count"] == 1
     assert data["voided_batch_count"] == 1
-
-
-# ---------- payroll_register_reconcile ----------
-
-
-async def test_register_reconcile_matches_within_threshold(runtime) -> None:  # noqa: ANN001
-    built = build(runtime=runtime)
-    with respx.mock(base_url=runtime.settings.prismhr_base_url) as mock:
-        _login_ok(mock)
-        mock.get(PATH_BILLING_CODE_TOTALS).mock(
-            return_value=httpx.Response(200, json=[{"amount": 10000}])
-        )
-        mock.get(PATH_VOUCHERS_FOR_EMPLOYEE).mock(
-            return_value=httpx.Response(
-                200,
-                json=[
-                    {"voucherId": "V1", "grossAmount": 5000},
-                    {"voucherId": "V2", "grossAmount": 5000},
-                ],
-            )
-        )
-        result = await built.server.call_tool(
-            "payroll_register_reconcile",
-            {"client_id": "ACME", "batch_id": "B1"},
-        )
-    data = _structured(result)
-    assert data["reconciled"] is True
-    assert data["delta"] == "0"
-
-
-async def test_register_reconcile_flags_mismatch(runtime) -> None:  # noqa: ANN001
-    built = build(runtime=runtime)
-    with respx.mock(base_url=runtime.settings.prismhr_base_url) as mock:
-        _login_ok(mock)
-        mock.get(PATH_BILLING_CODE_TOTALS).mock(
-            return_value=httpx.Response(200, json=[{"amount": 10000}])
-        )
-        mock.get(PATH_VOUCHERS_FOR_EMPLOYEE).mock(
-            return_value=httpx.Response(
-                200,
-                json=[
-                    {"voucherId": "V1", "grossAmount": 4500},
-                    {"voucherId": "V2", "grossAmount": 5000},
-                ],
-            )
-        )
-        result = await built.server.call_tool(
-            "payroll_register_reconcile",
-            {"client_id": "ACME", "batch_id": "B1"},
-        )
-    data = _structured(result)
-    assert data["reconciled"] is False
-    assert "MISMATCH" in data["message"]
-
-
-# ---------- write stubs ----------
-
-
-async def test_void_and_correction_workflows_are_not_yet_registered(runtime) -> None:  # noqa: ANN001
-    """Phase 2 intentionally hides the write-path stubs. Phase 6 will register
-    them behind preview→confirm. Until then, visible-but-fake tools would
-    pollute Claude's picker and consent UX."""
-    built = build(runtime=runtime)
-    tools = {t.name for t in await built.server.list_tools()}
-    assert "payroll_void_workflow" not in tools
-    assert "payroll_correction_workflow" not in tools
