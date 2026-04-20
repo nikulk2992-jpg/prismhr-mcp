@@ -49,6 +49,11 @@ cached-credentials.enc
 .planning/workflow-audit.md
 .planning/field-index.json
 .planning/field-index-summary.md
+.planning/tax-filing-automation-*.md
+.planning/tax-jurisdictions.json
+.planning/scan-*.txt
+.planning/probe-*.txt
+.planning/Simploy-*.pdf
 .gitignore.local
 # Audit files reference authorized-services list (tenant-specific).
 .planning/uat-coverage-audit.md

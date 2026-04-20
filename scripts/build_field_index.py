@@ -88,13 +88,32 @@ def flatten(obj, prefix: str = ""):
             yield (prefix + "[]", first)
 
 
-def endpoint_from_filename(name: str) -> str:
-    """employee_getEmployeeList.json -> /employee/v1/getEmployeeList"""
+def endpoint_from_filename(name: str) -> tuple[str, dict]:
+    """Return (endpoint_path, extra_params).
+
+    Filenames:
+      employee_getEmployeeList.json   -> (/employee/v1/getEmployeeList, {})
+      employee_getEmployee_Compensation.json
+          -> (/employee/v1/getEmployee, {'options': 'Compensation'})
+      system_getData_Employee_Compensation.json
+          -> (/system/v1/getData, {'schemaName': 'Employee',
+                                   'className': 'Compensation'})
+    """
     base = name.replace(".json", "")
-    if "_" in base:
-        service, method = base.split("_", 1)
-        return f"/{service}/v1/{method}"
-    return f"/{base}"
+    if "_" not in base:
+        return f"/{base}", {}
+    parts = base.split("_")
+    service = parts[0]
+    # Multi-part filenames indicate class / options suffixes.
+    if service == "system" and len(parts) >= 4 and parts[1] == "getData":
+        return "/system/v1/getData", {
+            "schemaName": parts[2],
+            "className": "_".join(parts[3:]),
+        }
+    if len(parts) >= 3 and parts[1].startswith("get"):
+        # e.g. employee_getEmployee_Compensation = options variant
+        return f"/{service}/v1/{parts[1]}", {"options": "_".join(parts[2:])}
+    return f"/{service}/v1/{parts[1]}", {}
 
 
 def classify_cost(required_params: set[str]) -> str:
@@ -148,14 +167,20 @@ def main() -> int:
             body = json.loads(fp.read_text(encoding="utf-8"))
         except Exception:  # noqa: BLE001
             continue
-        endpoint = endpoint_from_filename(fp.name)
+        endpoint, extras = endpoint_from_filename(fp.name)
         bible_entry = bible.get(endpoint, {})
         required = set(bible_entry.get("required_params") or [])
         cost = classify_cost(required)
+        # Label with extras so two rows for the same endpoint with
+        # different options show up distinctly in the index.
+        label = endpoint
+        if extras:
+            params_str = "&".join(f"{k}={v}" for k, v in extras.items())
+            label = f"{endpoint}?{params_str}"
 
         # Field presence (even null) = schema coverage
         for path, val in flatten(body):
-            per_endpoint_fields[endpoint].add(path)
+            per_endpoint_fields[label].add(path)
             # Skip boilerplate envelope fields
             if path in {"errorCode", "errorMessage", "extension", "total",
                         "startpage", "count", "infoMessage", "updateMessage"}:
@@ -168,7 +193,7 @@ def main() -> int:
                     s = s[:21] + "..."
                 sample = s
             entry = {
-                "endpoint": endpoint,
+                "endpoint": label,
                 "required_params": sorted(required),
                 "verified": True,
                 "cost_hint": cost,
@@ -177,7 +202,7 @@ def main() -> int:
             }
             # Dedupe per field+endpoint; keep the "populated" winner
             existing = next(
-                (e for e in index[path] if e["endpoint"] == endpoint), None
+                (e for e in index[path] if e["endpoint"] == label), None
             )
             if existing is None:
                 index[path].append(entry)
