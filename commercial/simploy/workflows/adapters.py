@@ -1278,20 +1278,38 @@ class VoucherClassificationReader:
                 "/codeFiles/v1/getPaycodeDetails",
                 params={"clientId": client_id, "payCode": pay_code},
             )
+            entry = _first(body, "paycode") or _first(body, "payCode") or {}
         except Exception:  # noqa: BLE001
-            return {}
-        entry = _first(body, "paycode") or _first(body, "payCode") or body or {}
+            entry = {}
         if not isinstance(entry, dict):
-            return {}
-        # Preserve missing metadata as None rather than defaulting to
-        # True. ZERO_TAX_TAXABLE_CODE check requires ficaSubject is
-        # explicitly True — missing metadata should NOT trigger.
+            entry = {}
+
+        # UAT tenants return 404 "Invalid Pay Code" on every code. Without
+        # live metadata, derive contractor/union signals from the pay-code
+        # NAME itself. This matches how PrismHR operators actually classify
+        # codes (naming convention: CONTRACTOR / CONTACTOR / 1099 / UN-* /
+        # UNION-*). Cheap, reasonable, much better than "nothing."
+        name = (entry.get("payCode") or entry.get("code") or pay_code or "").upper()
+        name_is_contractor = any(
+            kw in name for kw in ("CONTRACTOR", "CONTACTOR", "1099")
+        )
+        name_is_union = any(
+            name.startswith(prefix) for prefix in ("UN-", "UNION-", "UN_", "UNION_")
+        )
+
         return {
             "payCode": entry.get("payCode") or entry.get("code") or pay_code,
             "description": entry.get("description") or entry.get("desc") or "",
-            "isContractor": bool(entry.get("isContractor") or entry.get("contractor")),
-            "isUnion": bool(entry.get("isUnion") or entry.get("union")),
+            "isContractor": bool(
+                entry.get("isContractor") or entry.get("contractor")
+                or name_is_contractor
+            ),
+            "isUnion": bool(
+                entry.get("isUnion") or entry.get("union") or name_is_union
+            ),
             "unionId": entry.get("unionId") or entry.get("unionCode"),
+            # Preserve metadata gaps as None — workflow requires explicit
+            # True for ZERO_TAX_TAXABLE_CODE to fire.
             "ficaSubject": entry.get("ficaSubject"),
             "medicareSubject": entry.get("medicareSubject"),
             "futaSubject": entry.get("futaSubject"),
@@ -1497,3 +1515,159 @@ def _coerce_rows(body: Any, *, preferred_key: str | None = None) -> list[dict]:
         if isinstance(val, list):
             return [r for r in val if isinstance(r, dict)]
     return []
+
+
+# =============================================================================
+# Dependent age-out
+# =============================================================================
+
+
+class DependentAgeOutReader:
+    """Live impl for dependent_age_out.PrismHRReader via
+    SystemService.getData#Benefit|Dependent."""
+
+    def __init__(self, client: PrismHRClient) -> None:
+        self._c = client
+
+    async def list_covered_dependents(self, client_id: str) -> list[dict]:
+        data = await _system_get_data(
+            self._c,
+            schema="Benefit",
+            class_name="Dependent",
+            client_id=client_id,
+        )
+        return _coerce_rows(data)
+
+
+# =============================================================================
+# COBRA eligibility sweep
+# =============================================================================
+
+
+class CobraEligibilityReader:
+    """Live impl for cobra_eligibility_sweep.PrismHRReader.
+
+    Terminations come from payroll.v1.getBatchListByDate filtered to
+    batches where vouchers carry terminated employees, cross-referenced
+    with employee.v1.getEmployee Client class.
+    COBRA enrollees via benefits.v1.getCobraEmployee.
+    """
+
+    def __init__(self, client: PrismHRClient) -> None:
+        self._c = client
+
+    async def get_terminations(
+        self, client_id: str, lookback_days: int
+    ) -> list[dict]:
+        # Pull Employee|Client via getData and filter for status T
+        # with termination date within lookback window.
+        from datetime import timedelta as _td
+        today = date.today()
+        start = today - _td(days=lookback_days)
+        data = await _system_get_data(
+            self._c,
+            schema="Employee",
+            class_name="Client",
+            client_id=client_id,
+            start_date=start,
+            end_date=today,
+        )
+        rows = _coerce_rows(data)
+        terms: list[dict] = []
+        for r in rows:
+            status = str(r.get("employeeStatus") or r.get("status") or "").upper()
+            if status in {"T", "TERMINATED"}:
+                term_date = _parse_iso_prefix(
+                    r.get("lastStatusChangeDate") or r.get("termDate")
+                )
+                if term_date and term_date >= start:
+                    terms.append({
+                        "employeeId": r.get("employeeId") or _eid_from_id(r.get("id")),
+                        "terminationDate": term_date.isoformat(),
+                        "termReasonCode": r.get("termReasonCode"),
+                    })
+        return terms
+
+    async def get_cobra_enrollees(self, client_id: str) -> list[dict]:
+        try:
+            body = await self._c.get(
+                "/benefits/v1/getCobraEmployee",
+                params={"clientId": client_id},
+            )
+        except Exception:  # noqa: BLE001
+            return []
+        return _coerce_rows(body, preferred_key="cobraEmployee")
+
+
+# =============================================================================
+# PTO reconciliation
+# =============================================================================
+
+
+class PTOReconciliationReader:
+    """Live impl for pto_reconciliation.PrismHRReader."""
+
+    def __init__(self, client: PrismHRClient) -> None:
+        self._c = client
+
+    async def get_pto_classes(self, client_id: str) -> list[dict]:
+        try:
+            body = await self._c.get(
+                "/benefits/v1/getPtoClasses",
+                params={"clientId": client_id},
+            )
+        except Exception:  # noqa: BLE001
+            return []
+        return _coerce_rows(body, preferred_key="ptoClasses")
+
+    async def get_pto_plans(self, client_id: str) -> list[dict]:
+        try:
+            body = await self._c.get(
+                "/benefits/v1/getPaidTimeOffPlans",
+                params={"clientId": client_id},
+            )
+        except Exception:  # noqa: BLE001
+            return []
+        return _coerce_rows(body, preferred_key="paidTimeOffPlans")
+
+    async def get_employee_pto_rows(self, client_id: str) -> list[dict]:
+        # SystemService.getData#Benefit|PaidTimeOff — per-employee PTO
+        # balances + YTD use + accrual. Verified 1.4MB payload in UAT.
+        data = await _system_get_data(
+            self._c,
+            schema="Benefit",
+            class_name="PaidTimeOff",
+            client_id=client_id,
+        )
+        return _coerce_rows(data)
+
+
+# =============================================================================
+# Retirement loan status
+# =============================================================================
+
+
+class RetirementLoanStatusReader:
+    """Live impl for retirement_loan_status.PrismHRReader."""
+
+    def __init__(self, client: PrismHRClient) -> None:
+        self._c = client
+
+    async def get_retirement_loans(self, client_id: str) -> list[dict]:
+        # SystemService.getData#Benefit|RetirementLoan gives the full
+        # loan roster with balance + payment schedule + default flags.
+        data = await _system_get_data(
+            self._c,
+            schema="Benefit",
+            class_name="RetirementLoan",
+            client_id=client_id,
+        )
+        return _coerce_rows(data)
+
+
+def _eid_from_id(composite: Any) -> str:
+    """Extract employeeId from getData composite id like CLIENT.EMP[.EXTRA]."""
+    if not composite:
+        return ""
+    parts = str(composite).split(".")
+    return parts[1] if len(parts) >= 2 else ""
