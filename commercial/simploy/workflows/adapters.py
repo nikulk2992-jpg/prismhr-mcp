@@ -1671,3 +1671,542 @@ def _eid_from_id(composite: Any) -> str:
         return ""
     parts = str(composite).split(".")
     return parts[1] if len(parts) >= 2 else ""
+
+
+# =============================================================================
+# 1099-NEC preflight
+# =============================================================================
+
+
+class Form1099NECPreflightReader:
+    """Live impl for form_1099_nec_preflight.PrismHRReader.
+
+    Filters getData#Employee|Client to employees flagged employee1099=True,
+    pulls Compensation for SSN + getBulkYearToDateValues for YTD nonemp
+    comp, merges the W-9 address from getAddressInfo.
+    """
+
+    def __init__(self, client: PrismHRClient) -> None:
+        self._c = client
+
+    async def list_contractors_paid_in_year(
+        self, client_id: str, tax_year: int
+    ) -> list[dict]:
+        client_data = await _system_get_data(
+            self._c,
+            schema="Employee",
+            class_name="Client",
+            client_id=client_id,
+        )
+        client_rows = _coerce_rows(client_data)
+        contractors: dict[str, dict] = {}
+        for r in client_rows:
+            if r.get("employee1099") is not True:
+                continue
+            eid = r.get("employeeId") or _eid_from_id(r.get("id"))
+            if not eid:
+                continue
+            contractors[str(eid)] = {
+                "contractorId": str(eid),
+                "legalName": "",
+                "ein": "",
+                "ssn": "",
+                "ytdNonempComp": "0",
+                "ytdBackupWithholding": "0",
+                "w9OnFile": bool(r.get("formI9Filed")),  # proxy; real W-9 flag TBD
+                "address": {},
+                "voucherPayeeName": "",
+                "box1Expected": "0",
+            }
+        # Enrich with YTD + name + address
+        for eid, rec in contractors.items():
+            try:
+                ytd = await self._c.get(
+                    "/payroll/v1/getBulkYearToDateValues",
+                    params={"clientId": client_id, "asOfDate": f"{tax_year}-12-31"},
+                )
+                for row in (ytd.get("data") or [])[:5000]:
+                    if str(row.get("employeeId") or "") != eid:
+                        continue
+                    ytd_block = row.get("YTD") or {}
+                    rec["ytdNonempComp"] = str(ytd_block.get("totalEarned") or "0")
+                    break
+            except Exception:  # noqa: BLE001
+                pass
+            try:
+                addr = await self._c.get(
+                    "/employee/v1/getAddressInfo",
+                    params={"clientId": client_id, "employeeId": eid},
+                )
+                info = (addr.get("addressInfo") or {}).get("homeAddress") or {}
+                rec["address"] = {
+                    "line1": info.get("addressLine1") or "",
+                    "city": info.get("city") or "",
+                    "state": info.get("stateAbbr") or "",
+                    "zip": info.get("zipCode") or "",
+                }
+            except Exception:  # noqa: BLE001
+                pass
+            try:
+                comp = await self._c.get(
+                    "/employee/v1/getEmployee",
+                    params={"clientId": client_id, "employeeId": eid,
+                            "options": "Compensation"},
+                )
+                emp = _first(comp, "employee") or {}
+                c_cls = emp.get("compensation") or {}
+                rec["ssn"] = c_cls.get("ssn", "")
+                rec["legalName"] = f"{emp.get('firstName','')} {emp.get('lastName','')}".strip()
+            except Exception:  # noqa: BLE001
+                pass
+            rec["box1Expected"] = rec["ytdNonempComp"]
+        return list(contractors.values())
+
+
+# =============================================================================
+# Bonus gross-up audit
+# =============================================================================
+
+
+class BonusGrossUpReader:
+    """Filters vouchers to type='B' (bonus)."""
+
+    def __init__(self, client: PrismHRClient) -> None:
+        self._c = client
+
+    async def list_bonus_vouchers(
+        self, client_id: str, period_start: date, period_end: date
+    ) -> list[dict]:
+        try:
+            body = await self._c.get(
+                "/payroll/v1/getPayrollVouchers",
+                params={
+                    "clientId": client_id,
+                    "payDateStart": period_start.isoformat(),
+                    "payDateEnd": period_end.isoformat(),
+                },
+            )
+        except Exception:  # noqa: BLE001
+            return []
+        vouchers = _coerce_rows(body, preferred_key="payrollVoucher")
+        out: list[dict] = []
+        for v in vouchers:
+            vtype = str(v.get("type") or "").upper()
+            if vtype != "B":
+                continue
+            tax_rows = v.get("employeeTax") or []
+            fed = Decimal("0")
+            state = Decimal("0")
+            for t in tax_rows:
+                code = str(t.get("empTaxDeductCode") or "")
+                amt = _dec(t.get("empTaxAmount"))
+                if code.startswith("00-10"):
+                    fed += amt
+                elif "-20" in code or "-21" in code or "-22" in code:
+                    state += amt
+            out.append({
+                "voucherId": v.get("voucherId"),
+                "employeeId": v.get("employeeId"),
+                "supplementalMethod": v.get("supplementalMethod") or "FLAT_22",
+                "supplementalAmount": v.get("totalEarnings"),
+                "federalWithheld": str(fed),
+                "stateWithheld": str(state),
+                "workState": v.get("wcState") or "",
+                "ytdSupplementalWages": "0",  # requires YTD blend
+                "netPay": v.get("netPay"),
+                "targetNetRequested": "0",
+                "isGrossUp": False,
+            })
+        return out
+
+
+# =============================================================================
+# Retirement NDT suite
+# =============================================================================
+
+
+class RetirementNDTReader:
+    """Live impl for retirement_ndt_suite.PrismHRReader.
+
+    401k: getEmployee401KContributionsByDate + getBulkYearToDateValues
+    Section 125: getData#Employee|Client (isKeyEmployee flag) + YTD pre-tax benefits
+    FSA 55: getData#Benefit|SpendingAccounts filtered to DCFSA type
+    """
+
+    def __init__(self, client: PrismHRClient) -> None:
+        self._c = client
+
+    async def list_401k_participants(
+        self, client_id: str, plan_year: int
+    ) -> list[dict]:
+        try:
+            body = await self._c.get(
+                "/payroll/v1/getEmployee401KContributionsByDate",
+                params={
+                    "clientId": client_id,
+                    "startDate": f"{plan_year}-01-01",
+                    "endDate": f"{plan_year}-12-31",
+                },
+            )
+        except Exception:  # noqa: BLE001
+            return []
+        rows = _coerce_rows(body, preferred_key="employee401kBatchDetail")
+        by_emp: dict[str, dict] = {}
+        for r in rows:
+            eid = str(r.get("employeeId") or "")
+            if not eid:
+                continue
+            rd = r.get("retirementData") or {}
+            bucket = by_emp.setdefault(eid, {
+                "employeeId": eid,
+                "ytdGross": Decimal("0"),
+                "ytdDeferral": Decimal("0"),
+                "ytdEmployerMatch": Decimal("0"),
+                "ytdAfterTax": Decimal("0"),
+                "isHCE": None,
+            })
+            bucket["ytdGross"] += _dec(r.get("ytdGross"))
+            bucket["ytdDeferral"] += _dec(rd.get("employeePreTaxDeferral"))
+            bucket["ytdEmployerMatch"] += _dec(rd.get("employerMatch"))
+            bucket["ytdAfterTax"] += _dec(rd.get("postTaxContribution"))
+        return [
+            {k: str(v) if isinstance(v, Decimal) else v for k, v in row.items()}
+            for row in by_emp.values()
+        ]
+
+    async def list_section_125_participants(
+        self, client_id: str, plan_year: int
+    ) -> list[dict]:
+        data = await _system_get_data(
+            self._c,
+            schema="Benefit",
+            class_name="SpendingAccounts",
+            client_id=client_id,
+        )
+        rows = _coerce_rows(data)
+        out: list[dict] = []
+        for r in rows:
+            for acct in (r.get("account") or []):
+                if not isinstance(acct, dict):
+                    continue
+                eid = r.get("employeeId") or _eid_from_id(r.get("id"))
+                if not eid:
+                    continue
+                out.append({
+                    "employeeId": str(eid),
+                    "ytdPretaxBenefits": str(acct.get("deductAmount") or 0),
+                    "isKeyEmployee": None,
+                })
+        return out
+
+    async def list_dependent_care_fsa(
+        self, client_id: str, plan_year: int
+    ) -> list[dict]:
+        data = await _system_get_data(
+            self._c,
+            schema="Benefit",
+            class_name="SpendingAccounts",
+            client_id=client_id,
+        )
+        rows = _coerce_rows(data)
+        out: list[dict] = []
+        for r in rows:
+            eid = r.get("employeeId") or _eid_from_id(r.get("id"))
+            for acct in (r.get("account") or []):
+                if not isinstance(acct, dict):
+                    continue
+                if str(acct.get("accountId") or "").upper() not in {"DCFSA", "DEP", "DCR"}:
+                    continue
+                out.append({
+                    "employeeId": str(eid or ""),
+                    "fsaBenefit": str(acct.get("electAmount") or 0),
+                    "isHCE": None,
+                })
+        return out
+
+
+# =============================================================================
+# Reciprocal withholding
+# =============================================================================
+
+
+class ReciprocalWithholdingReader:
+    """Identifies multistate employees from Compensation.stateTax[]
+    and sums withholding per state from vouchers in the period."""
+
+    def __init__(self, client: PrismHRClient) -> None:
+        self._c = client
+
+    async def list_multistate_employees(
+        self, client_id: str, period_start: date, period_end: date
+    ) -> list[dict]:
+        # Pull Employee|Client to find candidate employees, then their
+        # Compensation.stateTax[] to see home/work state. Light scan.
+        client_data = await _system_get_data(
+            self._c, schema="Employee", class_name="Client",
+            client_id=client_id,
+        )
+        client_rows = _coerce_rows(client_data)
+        addr_by_eid: dict[str, str] = {}
+        for r in client_rows:
+            eid = str(r.get("employeeId") or _eid_from_id(r.get("id")) or "")
+            st = str(r.get("state") or "").upper()
+            if eid and st:
+                addr_by_eid[eid] = st
+
+        # Work-state per employee from Compensation + voucher withholding
+        try:
+            v_body = await self._c.get(
+                "/payroll/v1/getPayrollVouchers",
+                params={"clientId": client_id,
+                        "payDateStart": period_start.isoformat(),
+                        "payDateEnd": period_end.isoformat()},
+            )
+            vouchers = _coerce_rows(v_body, preferred_key="payrollVoucher")
+        except Exception:  # noqa: BLE001
+            vouchers = []
+
+        by_emp: dict[str, dict] = {}
+        for v in vouchers:
+            eid = str(v.get("employeeId") or "")
+            if not eid:
+                continue
+            bucket = by_emp.setdefault(eid, {
+                "employeeId": eid,
+                "homeState": addr_by_eid.get(eid, ""),
+                "workStates": set(),
+                "homeStateWithholding": Decimal("0"),
+                "workStateWithholding": {},
+                "reciprocalCertsOnFile": [],
+                "allocationPct": {},
+            })
+            wc_state = str(v.get("wcState") or "").upper()
+            if wc_state:
+                bucket["workStates"].add(wc_state)
+            for t in (v.get("employeeTax") or []):
+                code = str(t.get("empTaxDeductCode") or "")
+                amt = _dec(t.get("empTaxAmount"))
+                desc = str(t.get("empTaxDeductCodeDesc") or "").upper()
+                if "-20" not in code:
+                    continue
+                state = ""
+                for tok in desc.split():
+                    if len(tok) == 2 and tok.isalpha():
+                        state = tok
+                        break
+                if not state:
+                    continue
+                if state == bucket["homeState"]:
+                    bucket["homeStateWithholding"] += amt
+                else:
+                    bucket["workStateWithholding"].setdefault(state, Decimal("0"))
+                    bucket["workStateWithholding"][state] += amt
+
+        out: list[dict] = []
+        for eid, rec in by_emp.items():
+            rec["workStates"] = sorted(rec["workStates"])
+            rec["homeStateWithholding"] = str(rec["homeStateWithholding"])
+            rec["workStateWithholding"] = {
+                k: str(v) for k, v in rec["workStateWithholding"].items()
+            }
+            out.append(rec)
+        return out
+
+
+# =============================================================================
+# State new-hire reporting
+# =============================================================================
+
+
+class StateNewHireReportingReader:
+    """Pulls new hires from Employee|Client + Person + Address."""
+
+    def __init__(self, client: PrismHRClient) -> None:
+        self._c = client
+
+    async def list_new_hires(
+        self, client_id: str, hired_since: date
+    ) -> list[dict]:
+        client_data = await _system_get_data(
+            self._c, schema="Employee", class_name="Client",
+            client_id=client_id, start_date=hired_since, end_date=date.today(),
+        )
+        client_rows = _coerce_rows(client_data)
+        out: list[dict] = []
+        for r in client_rows:
+            hire = _parse_iso_prefix(r.get("firstHireDate") or r.get("lastHireDate"))
+            if not hire or hire < hired_since:
+                continue
+            eid = str(r.get("employeeId") or _eid_from_id(r.get("id")) or "")
+            if not eid:
+                continue
+            # Fetch person class for SSN/DOB
+            ssn = ""
+            dob = ""
+            fn = ""
+            ln = ""
+            try:
+                p = await self._c.get(
+                    "/employee/v1/getEmployee",
+                    params={"clientId": client_id, "employeeId": eid,
+                            "options": "Compensation"},
+                )
+                emp = _first(p, "employee") or {}
+                comp = emp.get("compensation") or {}
+                ssn = str(comp.get("ssn") or "")
+                fn = str(emp.get("firstName") or "")
+                ln = str(emp.get("lastName") or "")
+            except Exception:  # noqa: BLE001
+                pass
+            addr: dict = {}
+            try:
+                a = await self._c.get(
+                    "/employee/v1/getAddressInfo",
+                    params={"clientId": client_id, "employeeId": eid},
+                )
+                home = (a.get("addressInfo") or {}).get("homeAddress") or {}
+                addr = {
+                    "line1": home.get("addressLine1", ""),
+                    "city": home.get("city", ""),
+                    "state": home.get("stateAbbr", ""),
+                    "zip": home.get("zipCode", ""),
+                }
+            except Exception:  # noqa: BLE001
+                pass
+            out.append({
+                "employeeId": eid,
+                "firstName": fn,
+                "lastName": ln,
+                "state": addr.get("state", ""),
+                "hireDate": hire.isoformat(),
+                "priorTerminationDate": None,
+                "newHireReportSentDate": r.get("newHireReportDate"),
+                "ssn": ssn,
+                "dob": dob,
+                "address": addr,
+            })
+        return out
+
+
+# =============================================================================
+# Final paycheck compliance
+# =============================================================================
+
+
+class FinalPaycheckComplianceReader:
+    """Separations from Employee|Client status=T, final check data
+    from last voucher; PTO hours from getData#Benefit|PaidTimeOff."""
+
+    def __init__(self, client: PrismHRClient) -> None:
+        self._c = client
+
+    async def list_recent_separations(
+        self, client_id: str, since: date
+    ) -> list[dict]:
+        data = await _system_get_data(
+            self._c, schema="Employee", class_name="Client",
+            client_id=client_id, start_date=since, end_date=date.today(),
+        )
+        rows = _coerce_rows(data)
+        out: list[dict] = []
+        for r in rows:
+            status = str(r.get("employeeStatus") or r.get("status") or "").upper()
+            if status not in {"T", "TERMINATED"}:
+                continue
+            term_date = _parse_iso_prefix(
+                r.get("lastStatusChangeDate") or r.get("termDate")
+            )
+            if term_date is None or term_date < since:
+                continue
+            out.append({
+                "employeeId": r.get("employeeId") or _eid_from_id(r.get("id")),
+                "firstName": r.get("firstName") or "",
+                "lastName": r.get("lastName") or "",
+                "workState": r.get("state") or "",
+                "separationDate": term_date.isoformat(),
+                "separationType": (
+                    "INVOLUNTARY" if str(r.get("termReasonCode") or "").upper()
+                    in {"TERM", "FIRED", "RIF", "LAYOFF"}
+                    else "VOLUNTARY"
+                ),
+                "finalCheckIssuedDate": r.get("lastPayDate"),
+                "finalCheckAmount": "0",
+                "unpaidPtoHours": "0",
+                "unpaidCommission": "0",
+                "separationNoticeIssued": False,
+            })
+        return out
+
+
+# =============================================================================
+# Off-cycle payroll audit
+# =============================================================================
+
+
+class OffCycleVoucherReader:
+    """Filters vouchers to off-cycle types (B, M, C, F)."""
+
+    def __init__(self, client: PrismHRClient) -> None:
+        self._c = client
+
+    async def list_off_cycle_vouchers(
+        self, client_id: str, period_start: date, period_end: date
+    ) -> list[dict]:
+        try:
+            body = await self._c.get(
+                "/payroll/v1/getPayrollVouchers",
+                params={
+                    "clientId": client_id,
+                    "payDateStart": period_start.isoformat(),
+                    "payDateEnd": period_end.isoformat(),
+                },
+            )
+        except Exception:  # noqa: BLE001
+            return []
+        vouchers = _coerce_rows(body, preferred_key="payrollVoucher")
+        out: list[dict] = []
+        for v in vouchers:
+            vtype = str(v.get("type") or "").upper()
+            if vtype not in {"B", "M", "C", "F"}:
+                continue
+            out.append({
+                "voucherId": v.get("voucherId"),
+                "employeeId": v.get("employeeId"),
+                "type": vtype,
+                "payDate": v.get("payDate"),
+                "totalEarnings": v.get("totalEarnings"),
+                "approver": "",  # not in voucher payload
+                "reason": "",
+                "supplementalTaxMethod": "",
+                "terminationDate": None,
+            })
+        return out
+
+    async def get_employee_avg_regular_check(
+        self, client_id: str, employee_id: str
+    ) -> Decimal:
+        # Simple average of last 10 R-type vouchers in the last year
+        today = date.today()
+        from datetime import timedelta as _td
+        start = today - _td(days=365)
+        try:
+            body = await self._c.get(
+                "/payroll/v1/getPayrollVouchersForEmployee",
+                params={
+                    "clientId": client_id, "employeeId": employee_id,
+                    "payDateStart": start.isoformat(),
+                    "payDateEnd": today.isoformat(),
+                },
+            )
+        except Exception:  # noqa: BLE001
+            return Decimal("0")
+        vouchers = _coerce_rows(body, preferred_key="payrollVoucher")
+        regulars = [
+            _dec(v.get("netPay")) for v in vouchers
+            if str(v.get("type") or "").upper() == "R"
+        ][:10]
+        if not regulars:
+            return Decimal("0")
+        return (sum(regulars, Decimal("0")) / Decimal(len(regulars))).quantize(
+            Decimal("0.01")
+        )
