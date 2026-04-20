@@ -82,8 +82,14 @@ PATH_ALLOWLIST_FOR_CLIENT_IDS = {
     ".planning/prismhr-methods-full.json",
     ".planning/prismhr-methods-v2.json",
     ".planning/prismhr-methods.json",
-    # This scanner itself lists real IDs as banned tokens — that's OK
+}
+
+# Paths where BANNED_TOKENS are allowed — these files define or reference
+# the banned list for their own purpose (the scanner + the filter-repo
+# callback).
+PATH_ALLOWLIST_FULL = {
     "scripts/scan_pii.py",
+    "scripts/_pii_message_callback.py",
 }
 
 
@@ -104,6 +110,8 @@ def _scan_text(text: str, *, skip_client_ids: bool = False) -> list[str]:
 
 def _scan_file(path: Path, repo_rel: str) -> list[tuple[int, str]]:
     """Line-by-line scan. Returns list of (line_no, token) hits."""
+    if repo_rel in PATH_ALLOWLIST_FULL:
+        return []
     try:
         text = path.read_text(encoding="utf-8", errors="replace")
     except Exception:  # noqa: BLE001
