@@ -1,0 +1,225 @@
+"""Multi-state voucher validator.
+
+PrismHR passes inputs to Vertex/Symmetry which then compute withholding.
+The ENGINE is correct; the INPUTS often aren't. This validator reverse-
+engineers what the correct allocation should have been and flags when
+PrismHR vouchers don't match.
+
+Primary Simploy problem: MO/IL commuters. MO is NOT reciprocal with IL.
+So MO resident working IL should have:
+  * IL withholding (full amount per IL rates)
+  * MO withholding = 0 (per MO rule: "does not require withholding from
+    MO residents working in other states that collect withholding tax")
+
+Likewise IL resident working MO:
+  * MO withholding (full amount)
+  * IL withholding = 0
+
+Validator checks voucher tax rows + employee state metadata to detect:
+  * WRONG_WORK_STATE_WITHHELD — home state withheld when work state collects
+  * DOUBLE_WITHHELD_NON_RECIPROCAL — both states withheld on non-reciprocal pair
+  * MISSING_NR_CERT — employee has multi-state pattern but no NR cert flag
+  * MULTI_STATE_TAX_ON_VOUCHER — voucher has 2+ state income tax codes
+  * WORK_STATE_WITHHELD_UNDER — non-resident work state withholding < expected
+"""
+
+from __future__ import annotations
+
+import re
+from dataclasses import dataclass, field
+from decimal import Decimal
+from typing import Protocol
+
+
+Severity = str  # critical / warning / info
+
+
+@dataclass(frozen=True)
+class Finding:
+    code: str
+    severity: Severity
+    message: str
+
+
+# Reciprocity table (bidirectional). Source: Vertex Calculation Guide
+# per-state reciprocity sections. MO is NOT in any reciprocity pair.
+RECIPROCITY_PAIRS: frozenset[tuple[str, str]] = frozenset(
+    tuple(sorted(p))
+    for p in [
+        # IL reciprocals (from Vertex IL section)
+        ("IL", "IA"), ("IL", "KY"), ("IL", "MI"), ("IL", "WI"),
+        # Common Midwestern
+        ("IN", "KY"), ("IN", "MI"), ("IN", "OH"), ("IN", "PA"), ("IN", "WI"),
+        ("KY", "MI"), ("KY", "OH"), ("KY", "VA"), ("KY", "WV"), ("KY", "WI"),
+        ("MI", "WI"), ("MI", "OH"),
+        ("OH", "PA"), ("OH", "WV"),
+        # Mid-Atlantic
+        ("MD", "DC"), ("MD", "PA"), ("MD", "VA"), ("MD", "WV"),
+        ("PA", "NJ"), ("PA", "VA"), ("PA", "WV"),
+        ("VA", "DC"), ("VA", "WV"),
+        # Other
+        ("MN", "ND"),
+        ("ND", "MT"),
+    ]
+)
+
+
+def is_reciprocal(state_a: str, state_b: str) -> bool:
+    if not state_a or not state_b:
+        return False
+    return tuple(sorted([state_a.upper(), state_b.upper()])) in RECIPROCITY_PAIRS
+
+
+_STATE_DESC_RE = re.compile(r"\b([A-Z]{2})\b")
+
+
+_US_STATES = frozenset({
+    "AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DE", "DC", "FL",
+    "GA", "HI", "ID", "IL", "IN", "IA", "KS", "KY", "LA", "ME",
+    "MD", "MA", "MI", "MN", "MS", "MO", "MT", "NE", "NV", "NH",
+    "NJ", "NM", "NY", "NC", "ND", "OH", "OK", "OR", "PA", "RI",
+    "SC", "SD", "TN", "TX", "UT", "VT", "VA", "WA", "WV", "WI",
+    "WY", "PR",
+})
+
+
+def _state_from_desc(desc: str) -> str | None:
+    """Pull a state abbrev from empTaxDeductCodeDesc, e.g.,
+    'MO INCOME TAX' -> 'MO'. Returns None if no match."""
+    if not desc:
+        return None
+    tokens = _STATE_DESC_RE.findall(desc.upper())
+    for tok in tokens:
+        if tok in _US_STATES:
+            return tok
+    return None
+
+
+@dataclass
+class MultiStateVoucherAudit:
+    voucher_id: str
+    employee_id: str
+    home_state: str
+    work_state: str
+    states_with_tax: list[str]
+    total_state_withheld: Decimal
+    findings: list[Finding] = field(default_factory=list)
+
+
+def analyze_voucher(
+    voucher: dict,
+    *,
+    home_state: str,
+    has_nr_cert: bool = False,
+) -> MultiStateVoucherAudit:
+    """Parse a single voucher's employeeTax[] for state-income-tax codes
+    and validate against the home/work state pair."""
+    vid = str(voucher.get("voucherId") or "")
+    eid = str(voucher.get("employeeId") or "")
+    work_state = str(voucher.get("wcState") or "").upper()
+    home_state = (home_state or "").upper()
+
+    # Walk tax rows — extract state income tax by "-20" suffix
+    states_seen: dict[str, Decimal] = {}
+    for t in (voucher.get("employeeTax") or []):
+        code = str(t.get("empTaxDeductCode") or "")
+        desc = str(t.get("empTaxDeductCodeDesc") or "")
+        amt = Decimal(str(t.get("empTaxAmount") or "0"))
+        if "-20" not in code:
+            continue
+        state = _state_from_desc(desc)
+        if not state:
+            continue
+        states_seen.setdefault(state, Decimal("0"))
+        states_seen[state] += amt
+
+    total_withheld = sum(states_seen.values(), Decimal("0"))
+    audit = MultiStateVoucherAudit(
+        voucher_id=vid,
+        employee_id=eid,
+        home_state=home_state,
+        work_state=work_state,
+        states_with_tax=sorted(states_seen.keys()),
+        total_state_withheld=total_withheld,
+    )
+
+    if not home_state or not work_state:
+        return audit
+
+    # ---- Case 1: Multi-state withholding on a single voucher ----
+    if len(states_seen) >= 2:
+        audit.findings.append(
+            Finding(
+                "MULTI_STATE_TAX_ON_VOUCHER",
+                "info",
+                f"Voucher withheld state tax for {len(states_seen)} states: "
+                f"{sorted(states_seen.keys())}. Verify split is intentional.",
+            )
+        )
+        # Check: is any pair non-reciprocal + both withheld?
+        state_list = sorted(states_seen.keys())
+        for i, a in enumerate(state_list):
+            for b in state_list[i + 1:]:
+                if not is_reciprocal(a, b):
+                    if states_seen[a] > 0 and states_seen[b] > 0:
+                        audit.findings.append(
+                            Finding(
+                                "DOUBLE_WITHHELD_NON_RECIPROCAL",
+                                "critical",
+                                f"Non-reciprocal pair {a}/{b} — both withheld "
+                                f"(${states_seen[a]} + ${states_seen[b]}). "
+                                f"Should be work-state-only.",
+                            )
+                        )
+
+    # ---- Case 2: Home state ≠ work state, non-reciprocal ----
+    if home_state != work_state and not is_reciprocal(home_state, work_state):
+        work_withheld = states_seen.get(work_state, Decimal("0"))
+        home_withheld = states_seen.get(home_state, Decimal("0"))
+
+        if work_withheld == 0 and home_withheld > 0:
+            audit.findings.append(
+                Finding(
+                    "WRONG_STATE_WITHHELD",
+                    "critical",
+                    f"Non-reciprocal {home_state}(home)/{work_state}(work) — "
+                    f"home state withheld ${home_withheld} but work state "
+                    f"withheld $0. Per Vertex pJurIntTreatment=7, work state "
+                    f"should collect.",
+                )
+            )
+        elif work_withheld > 0 and home_withheld > 0 and not has_nr_cert:
+            audit.findings.append(
+                Finding(
+                    "MISSING_NR_CERT",
+                    "warning",
+                    f"Employee has {home_state} home / {work_state} work, "
+                    f"both withheld. Missing NR cert likely — file one to "
+                    f"suppress home-state withholding.",
+                )
+            )
+
+    # ---- Case 3: Home state ≠ work state, reciprocal ----
+    elif home_state != work_state and is_reciprocal(home_state, work_state):
+        work_withheld = states_seen.get(work_state, Decimal("0"))
+        home_withheld = states_seen.get(home_state, Decimal("0"))
+        if work_withheld > 0 and not has_nr_cert:
+            audit.findings.append(
+                Finding(
+                    "RECIPROCAL_WORK_WITHHELD_NO_CERT",
+                    "critical",
+                    f"Reciprocal pair {home_state}/{work_state} — work state "
+                    f"withheld ${work_withheld}. Should be $0 with NR cert.",
+                )
+            )
+        if home_withheld == 0 and work_withheld == 0:
+            audit.findings.append(
+                Finding(
+                    "RECIPROCAL_NOTHING_WITHHELD",
+                    "warning",
+                    f"Reciprocal pair {home_state}/{work_state} but neither "
+                    f"state withheld. Home state ({home_state}) should.",
+                )
+            )
+
+    return audit

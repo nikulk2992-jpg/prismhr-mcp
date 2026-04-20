@@ -1,0 +1,12 @@
+Scanning 254 clients across 2025 quarters.
+
+Q1 2025: 2025-01-01 .. 2025-03-31
+  -> .planning\corpus-2025-Q1.json  (24049 vouchers, 49 flagged)
+Q2 2025: 2025-04-01 .. 2025-06-30
+  -> .planning\corpus-2025-Q2.json  (26953 vouchers, 121 flagged)
+Q3 2025: 2025-07-01 .. 2025-09-30
+  -> .planning\corpus-2025-Q3.json  (29318 vouchers, 109 flagged)
+Q4 2025: 2025-10-01 .. 2025-12-31
+  -> .planning\corpus-2025-Q4.json  (31360 vouchers, 158 flagged)
+
+Wrote .planning/corpus-summary-2025.md

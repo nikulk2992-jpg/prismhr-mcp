@@ -516,3 +516,31 @@ def register_workflow_tools(
 
     registry.register(server, "commercial_state_filings_orchestrator",
                       commercial_state_filings_orchestrator)
+
+    # -------------------- tax_engine_diff --------------------
+
+    async def commercial_tax_engine_diff(
+        client_id: Annotated[str, Field(description="PrismHR client ID.")],
+        period_start: Annotated[str, Field(description="YYYY-MM-DD.")],
+        period_end: Annotated[str, Field(description="YYYY-MM-DD.")],
+    ) -> dict:
+        """Cross-check PrismHR voucher withholding against a reference
+        tax engine (Federal Pub 15-T + FICA + FUTA + MO + IL + multi-
+        state validator). Flags deltas that suggest PrismHR fed Vertex
+        bad inputs — particularly the MO/IL commuter case where MO is
+        not reciprocal with IL.
+        """
+        from simploy.workflows.adapters import TaxEngineDiffReader
+        from simploy.workflows.tax_engine_diff import run_tax_engine_diff
+
+        permissions.check(Scope.PAYROLL_READ)
+        reader = TaxEngineDiffReader(prismhr)
+        report = await run_tax_engine_diff(
+            reader, client_id=client_id,
+            period_start=_parse_date(period_start),
+            period_end=_parse_date(period_end),
+        )
+        return _to_dict(report)
+
+    registry.register(server, "commercial_tax_engine_diff",
+                      commercial_tax_engine_diff)

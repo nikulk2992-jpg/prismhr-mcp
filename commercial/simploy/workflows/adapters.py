@@ -2482,3 +2482,83 @@ class StateFilingsOrchestratorReader:
         # open criticals for that state. Returning 0 keeps the
         # orchestrator optimistic; caller can chain manually.
         return 0
+
+
+# =============================================================================
+# Tax engine diff reader
+# =============================================================================
+
+
+class TaxEngineDiffReader:
+    """Live impl for tax_engine_diff.PrismHRReader. Reuses the payroll
+    vouchers endpoint + getEmployee?options=Compensation for home state
+    + filing status + YTD data."""
+
+    def __init__(self, client: PrismHRClient) -> None:
+        self._c = client
+
+    async def list_vouchers_for_period(
+        self, client_id: str, start: date, end: date
+    ) -> list[dict]:
+        try:
+            body = await self._c.get(
+                "/payroll/v1/getPayrollVouchers",
+                params={"clientId": client_id,
+                        "payDateStart": start.isoformat(),
+                        "payDateEnd": end.isoformat()},
+            )
+        except Exception:  # noqa: BLE001
+            return []
+        return _coerce_rows(body, preferred_key="payrollVoucher")
+
+    async def get_employee_profile(
+        self, client_id: str, employee_id: str
+    ) -> dict:
+        try:
+            comp_body = await self._c.get(
+                "/employee/v1/getEmployee",
+                params={"clientId": client_id,
+                        "employeeId": employee_id,
+                        "options": "Compensation"},
+            )
+        except Exception:  # noqa: BLE001
+            return {}
+        emp = _first(comp_body, "employee") or {}
+        comp = emp.get("compensation") or {}
+        # Work state = first state with filingStatus populated
+        work_state = ""
+        state_tax = comp.get("stateTax") or []
+        if isinstance(state_tax, list):
+            for s in state_tax:
+                if isinstance(s, dict) and s.get("filingStatus"):
+                    work_state = str(s.get("stateCode") or "").upper()
+                    break
+        # Home state = derived from getAddressInfo
+        home_state = ""
+        try:
+            addr_body = await self._c.get(
+                "/employee/v1/getAddressInfo",
+                params={"clientId": client_id, "employeeId": employee_id},
+            )
+            home = (addr_body.get("addressInfo") or {}).get("homeAddress") or {}
+            home_state = str(home.get("stateAbbr") or "").upper()
+        except Exception:  # noqa: BLE001
+            pass
+        # Filing status mapping
+        fed_status = str(comp.get("fedFilingStatus") or "S").upper()
+        status_map = {
+            "SS": "S", "S": "S", "MFS": "MFS", "SM": "S",
+            "MJ": "MFJ", "MFJ": "MFJ", "HH": "HoH", "HOH": "HoH",
+        }
+        filing_status = status_map.get(fed_status, "S")
+        return {
+            "homeState": home_state,
+            "filingStatus": filing_status,
+            "payPeriodsPerYear": {
+                "W": 52, "B": 26, "S": 24, "M": 12,
+            }.get(str(comp.get("payPeriod") or "W").upper()[:1], 52),
+            "hasNRCert": False,  # PrismHR field not directly exposed
+            "ytdSSWages": Decimal("0"),       # would need YTD probe
+            "ytdMedicareWages": Decimal("0"),
+            "ytdFutaWages": Decimal("0"),
+        }
