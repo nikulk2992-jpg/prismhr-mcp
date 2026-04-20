@@ -1138,9 +1138,10 @@ class VoucherClassificationReader:
                 "/payroll/v1/getPayrollVouchers",
                 params={
                     "clientId": client_id,
-                    "startDate": period_start.isoformat(),
-                    "endDate": period_end.isoformat(),
-                    "dateType": "PAY",
+                    # PrismHR getPayrollVouchers uses payDateStart /
+                    # payDateEnd, not startDate / endDate + dateType.
+                    "payDateStart": period_start.isoformat(),
+                    "payDateEnd": period_end.isoformat(),
                 },
             )
         except Exception:  # noqa: BLE001

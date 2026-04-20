@@ -76,7 +76,13 @@ async def _fetch_data_object(c: httpx.AsyncClient, h: dict, url: str) -> dict | 
     try:
         r = await c.get(url, headers={"sessionId": h.get("sessionId", ""),
                                        "Accept": "application/json"})
-        return r.json()
+        # Some dataObjects are latin-1 / windows-1252 not utf-8
+        try:
+            return r.json()
+        except Exception:  # noqa: BLE001
+            text = r.content.decode("latin-1", errors="replace")
+            import json as _j
+            return _j.loads(text)
     except Exception as exc:  # noqa: BLE001
         return {"error": f"{type(exc).__name__}: {str(exc)[:100]}"}
 
@@ -142,16 +148,42 @@ async def main() -> int:
 
         # ---- 2. SystemService.getData probes ----
         probes = [
+            # Employee classes
             ("Employee", "Compensation"),
             ("Employee", "Client"),
             ("Employee", "Person"),
-            ("Client", "Master"),
-            ("Client", "Deduction"),
-            ("Deduction", "Garnishment"),
-            ("Deduction", "ScheduledDeductions"),
-            ("Benefit", "Enrollment"),
+            ("Employee", "Events"),
+            ("Employee", "LeaveRequests"),
+            ("Employee", "FutureEEChanges"),
+            ("Employee", "History"),
+            ("Employee", "DirectDeposit"),
+            # Benefit classes
+            ("Benefit", "BenefitPlan"),
+            ("Benefit", "BenefitPlanDetail"),
             ("Benefit", "RetirementPlan"),
             ("Benefit", "Dependent"),
+            ("Benefit", "Enrollment"),
+            ("Benefit", "AbsenceJournal"),
+            ("Benefit", "RetirementLoan"),
+            ("Benefit", "SpendingAccounts"),
+            ("Benefit", "PaidTimeOff"),
+            # Client classes
+            ("Client", "Master"),
+            ("Client", "Deduction"),
+            ("Client", "Pay"),
+            ("Client", "Location"),
+            ("Client", "Department"),
+            ("Client", "Division"),
+            ("Client", "Job"),
+            # Deduction classes
+            ("Deduction", "Garnishment"),
+            ("Deduction", "EmployeeArrears"),
+            ("Deduction", "EmployeeLoan"),
+            ("Deduction", "EmployeeDeductions"),
+            ("Deduction", "EmployeeDeductionDetails"),
+            ("Deduction", "ScheduledDeductions"),
+            # Payroll
+            ("Payroll", "BatchControl"),
         ]
         for schema, cls in probes:
             print("=" * 72)
