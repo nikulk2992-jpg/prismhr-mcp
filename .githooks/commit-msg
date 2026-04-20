@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+# Block commits whose messages contain tenant PII tokens.
+# $1 is the path to the commit message file.
+
+set -e
+
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+cd "$REPO_ROOT"
+
+MSG_FILE="$1"
+if [ ! -f "$MSG_FILE" ]; then
+    exit 0
+fi
+
+if [ -x ".venv/Scripts/python.exe" ]; then
+    PYTHON=".venv/Scripts/python.exe"
+elif [ -x ".venv/bin/python" ]; then
+    PYTHON=".venv/bin/python"
+else
+    PYTHON="python"
+fi
+
+"$PYTHON" - <<PYEOF "$MSG_FILE"
+import sys
+sys.path.insert(0, "scripts")
+from scan_pii import _scan_text
+
+msg = open(sys.argv[1], encoding="utf-8").read()
+hits = _scan_text(msg, skip_client_ids=False)
+if hits:
+    print("COMMIT MESSAGE BLOCKED: tenant PII tokens present.")
+    print("Matches:", sorted(set(hits)))
+    print("Edit the commit message to remove real tenant identifiers.")
+    sys.exit(1)
+PYEOF

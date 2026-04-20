@@ -5,7 +5,7 @@ aggregates unique empTaxDeductCode values, and maps to
 federal/state/local/county/SD buckets. Output feeds the state-tax-
 filing-orchestrator scope doc.
 
-PrismHR tax code convention (verified from 001202 probe):
+PrismHR tax code convention (verified empirically from voucher probes):
   00-10  FIT
   00-11  FICA Medicare
   00-12  FICA OASDI

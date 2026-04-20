@@ -267,14 +267,12 @@ async def run_voucher_classification_audit(
             )
 
         # ---- voucher-level: FICA exempt misflag ----
-        # Caught the real 941-balancing bug at Simploy client 001315 (EE
-        # M12853 HARDIN BRYAN D, Laborer, Active, 1099=No, FICA Exempt=Yes).
         # PrismHR stores FICA Exempt as a plain checkbox on employee > tax
         # tab — no reason code, no justification field — so an operator
         # check-click has no audit trail. Any active W-2 with wages flagged
         # exempt is a critical review item unless pre-allowlisted. Legit
-        # exemptions (clergy, students, F-1/J-1, railroad) are rare enough
-        # to manage via explicit allowlist.
+        # statutory exemptions (clergy, students, F-1/J-1, railroad) are
+        # rare enough to manage via explicit allowlist.
         allowlisted = (
             eid.upper() in allow_ids
             or (position and position.upper() in allow_positions)

@@ -291,7 +291,7 @@ async def test_correction_voucher_does_not_flag_negative_tax() -> None:
     assert "NEGATIVE_TAX_POSITIVE_WAGES" not in codes
 
 
-# ---------- SS wage-base cap (real UAT false positive: Phantom Neuro R11296) ----------
+# ---------- SS wage-base cap ----------
 
 
 @pytest.mark.asyncio
@@ -327,22 +327,22 @@ async def test_over_ss_cap_not_flagged_as_fica_missing() -> None:
     assert "FICA_EXEMPT_MISFLAG" not in codes
 
 
-# ---------- FICA_EXEMPT_MISFLAG (real bug: client 001315 HARDIN BRYAN D) ----------
+# ---------- FICA_EXEMPT_MISFLAG ----------
 
 
 @pytest.mark.asyncio
 async def test_fica_exempt_misflag_active_w2_with_wages_is_critical() -> None:
-    """Reproduces the 941 balancing issue from Simploy employer 400 /
-    client 001315. Active W-2 Laborer flagged FICA Exempt=Yes = data
-    error. Voucher withheld $0, 941 doesn't balance."""
+    """Active W-2 Laborer flagged FICA Exempt=Yes with no statutory
+    justification = data error. Voucher withheld $0, 941 doesn't
+    balance."""
     reader = FakeReader(
         vouchers=[{
-            "voucherId": "V-HARDIN", "employeeId": "M12853", "totalEarnings": "2000",
+            "voucherId": "V1", "employeeId": "E001", "totalEarnings": "2000",
             "type": "R",
             "employeeTax": [{"empTaxDeductCode": "00-10", "empTaxAmount": "150"}],
             "earning": [{"payCode": "REG", "payAmount": "2000"}],
         }],
-        employees={"M12853": {
+        employees={"E001": {
             "employeeType": "W2", "ficaExempt": True,
             "status": "ACTIVE", "position": "Laborer",
         }},
@@ -352,7 +352,7 @@ async def test_fica_exempt_misflag_active_w2_with_wages_is_critical() -> None:
     codes = {f.code for f in r.vouchers[0].findings}
     assert "FICA_EXEMPT_MISFLAG" in codes
     msg = next(f.message for f in r.vouchers[0].findings if f.code == "FICA_EXEMPT_MISFLAG")
-    assert "M12853" in msg
+    assert "E001" in msg
     assert "Laborer" in msg
 
 

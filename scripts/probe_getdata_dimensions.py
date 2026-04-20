@@ -7,7 +7,7 @@ script tries candidate params and reports which combinations PrismHR
 actually honors. Output feeds adapter design.
 
 Usage:
-  DOGFOOD_CLIENT_ID=001202 .venv/Scripts/python scripts/probe_getdata_dimensions.py
+  DOGFOOD_CLIENT_ID=YOUR_CLIENT_ID .venv/Scripts/python scripts/probe_getdata_dimensions.py
 """
 
 from __future__ import annotations
@@ -61,7 +61,10 @@ async def _get(c: httpx.AsyncClient, url: str, h: dict, params: dict) -> tuple[i
 
 async def main() -> int:
     load_into_environ(Path(".env.local.enc"))
-    client_id = os.environ.get("DOGFOOD_CLIENT_ID", "001202")
+    client_id = os.environ.get("DOGFOOD_CLIENT_ID", "").strip()
+    if not client_id:
+        print("ERROR: set DOGFOOD_CLIENT_ID in env.")
+        return 2
     base = "https://uatapi.prismhr.com/demo/prismhr-api/services/rest"
     async with httpx.AsyncClient(timeout=60) as c:
         r = await c.post(f"{base}/login/v1/createPeoSession", data={

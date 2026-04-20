@@ -8,7 +8,7 @@ getData uses the async download pattern:
   3. fetch dataObject URL for the compiled JSON payload
 
 Usage:
-    set DOGFOOD_CLIENT_ID=001202
+    set DOGFOOD_CLIENT_ID=YOUR_CLIENT_ID
     .venv/Scripts/python scripts/probe_get_data.py
 """
 
@@ -89,7 +89,10 @@ async def _fetch_data_object(c: httpx.AsyncClient, h: dict, url: str) -> dict | 
 
 async def main() -> int:
     load_into_environ(Path(".env.local.enc"))
-    client_id = os.environ.get("DOGFOOD_CLIENT_ID", "001202").strip()
+    client_id = os.environ.get("DOGFOOD_CLIENT_ID", "").strip()
+    if not client_id:
+        print("ERROR: set DOGFOOD_CLIENT_ID in env.")
+        return 2
 
     base = "https://uatapi.prismhr.com/demo/prismhr-api/services/rest"
     async with httpx.AsyncClient(timeout=120) as c:

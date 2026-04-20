@@ -25,7 +25,7 @@ def _write(tmp_path: Path, body: str) -> Path:
 def test_missing_file_returns_empty_map(tmp_path: Path) -> None:
     pdm = load_plan_deduction_map(tmp_path / "does-not-exist.yaml")
     assert not pdm
-    assert pdm.expected_deduction_codes("001010", "MED") == []
+    assert pdm.expected_deduction_codes("999999", "MED") == []
 
 
 def test_default_block_applies_when_no_client_override(tmp_path: Path) -> None:

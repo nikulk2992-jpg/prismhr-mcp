@@ -2,7 +2,7 @@
 
 Each pack is a single entry point that runs a curated sequence of
 workflow checks and rolls their findings up into one report. Designed
-so an agent can say "run month-end close for client 001315" and get
+so an agent can say "run month-end close for client <client_id>" and get
 back a single structured answer — not orchestrate 10 calls by hand.
 
 Packs:

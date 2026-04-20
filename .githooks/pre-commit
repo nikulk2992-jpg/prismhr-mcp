@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+# Block commits that include tenant PII.
+# Install via: git config core.hooksPath .githooks
+# Or: bash scripts/install_hooks.sh
+
+set -e
+
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+cd "$REPO_ROOT"
+
+# Prefer the repo's .venv Python; fall back to system Python.
+if [ -x ".venv/Scripts/python.exe" ]; then
+    PYTHON=".venv/Scripts/python.exe"
+elif [ -x ".venv/bin/python" ]; then
+    PYTHON=".venv/bin/python"
+else
+    PYTHON="python"
+fi
+
+"$PYTHON" scripts/scan_pii.py --staged
+rc=$?
+if [ "$rc" -ne 0 ]; then
+    echo ""
+    echo "COMMIT BLOCKED: tenant PII detected in staged files."
+    echo "Fix the files then re-stage, or amend .githooks/pre-commit if"
+    echo "the pattern was a false positive."
+    exit 1
+fi
+
+# Also scan the commit message template the user has prepared, if any.
+# $1 is the file containing the commit message when invoked as
+# prepare-commit-msg; pre-commit alone doesn't get the message. Skip
+# message scanning here — it's covered by the prepare-commit-msg hook.
+
+exit 0

@@ -2,11 +2,11 @@
 new VoucherClassificationReader adapter.
 
 Picks a client, runs the workflow against a recent pay period, and
-prints any findings. Surfaces HARDIN-class misflags end-to-end through
+prints any findings. Surfaces FICA-exempt-misflag class issues end-to-end through
 the actual MCP-facing reader (not the ad-hoc sweep script).
 
 Usage:
-  set DOGFOOD_CLIENT_ID=001315
+  set DOGFOOD_CLIENT_ID=YOUR_CLIENT_ID
   .venv/Scripts/python scripts/dogfood_voucher_classification.py
 """
 
@@ -38,7 +38,10 @@ from simploy.workflows.voucher_classification_audit import (  # noqa: E402
 async def main() -> int:
     load_into_environ(Path(".env.local.enc"))
 
-    client_id = os.environ.get("DOGFOOD_CLIENT_ID", "001315").strip()
+    client_id = os.environ.get("DOGFOOD_CLIENT_ID", "").strip()
+    if not client_id:
+        print("ERROR: set DOGFOOD_CLIENT_ID in env.")
+        return 2
     lookback = int(os.environ.get("DOGFOOD_LOOKBACK_DAYS", "90"))
     today = date.today()
     start = today - timedelta(days=lookback)

@@ -32,7 +32,7 @@
 #   DEN-PPO:
 #     deduction_codes: [DENEE]
 #
-# 001010:                                         # override per client
+# 999999:                                         # override per client (placeholder ID)
 #   DEN-PPO:
 #     deduction_codes: [DENEE-HIGH]
 #
