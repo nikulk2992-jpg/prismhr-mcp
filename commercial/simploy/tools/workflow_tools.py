@@ -36,6 +36,8 @@ from simploy.workflows.adapters import (
     DependentAgeOutReader,
     FinalPaycheckComplianceReader,
     Form1099NECPreflightReader,
+    Form940ReconReader,
+    Form941ReconReader,
     GarnishmentHistoryReader,
     OffCycleVoucherReader,
     PayrollBatchHealthReader,
@@ -43,7 +45,10 @@ from simploy.workflows.adapters import (
     ReciprocalWithholdingReader,
     RetirementLoanStatusReader,
     RetirementNDTReader,
+    StateFilingsOrchestratorReader,
     StateNewHireReportingReader,
+    StateWithholdingReconReader,
+    TaxRemittanceReader,
     VoucherClassificationReader,
 )
 from simploy.workflows.absence_journal_audit import run_absence_journal_audit
@@ -62,6 +67,11 @@ from simploy.workflows.reciprocal_withholding import run_reciprocal_withholding_
 from simploy.workflows.retirement_loan_status import run_retirement_loan_status
 from simploy.workflows.retirement_ndt_suite import run_retirement_ndt
 from simploy.workflows.state_new_hire_reporting import run_state_new_hire_audit
+from simploy.workflows.form_940_reconciliation import run_form_940_reconciliation
+from simploy.workflows.form_941_reconciliation import run_form_941_reconciliation
+from simploy.workflows.state_filings_orchestrator import run_state_filings_orchestrator
+from simploy.workflows.state_withholding_recon import run_state_withholding_recon
+from simploy.workflows.tax_remittance_tracking import run_tax_remittance_tracking
 from simploy.workflows.voucher_classification_audit import (
     run_voucher_classification_audit,
 )
@@ -407,3 +417,102 @@ def register_workflow_tools(
 
     registry.register(server, "commercial_off_cycle_payroll_audit",
                       commercial_off_cycle_payroll_audit)
+
+    # -------------------- form_941_reconciliation --------------------
+
+    async def commercial_form_941_reconciliation(
+        client_id: Annotated[str, Field(description="PrismHR client ID.")],
+        year: Annotated[int, Field(description="Tax year.", ge=2020, le=2030)],
+        quarter: Annotated[int, Field(description="Quarter 1-4.", ge=1, le=4)],
+    ) -> dict:
+        """Federal 941 reconciliation: voucher wages + FIT + SS + Medicare
+        tied to filed 941. Catches voucher-vs-form drift from voids, late
+        corrections, additional-Medicare misses."""
+        permissions.check(Scope.PAYROLL_READ)
+        reader = Form941ReconReader(prismhr)
+        report = await run_form_941_reconciliation(
+            reader, client_id=client_id, year=year, quarter=quarter,
+        )
+        return _to_dict(report)
+
+    registry.register(server, "commercial_form_941_reconciliation",
+                      commercial_form_941_reconciliation)
+
+    # -------------------- form_940_reconciliation --------------------
+
+    async def commercial_form_940_reconciliation(
+        client_id: Annotated[str, Field(description="PrismHR client ID.")],
+        year: Annotated[int, Field(description="Tax year.", ge=2020, le=2030)],
+    ) -> dict:
+        """Annual FUTA 940 reconciliation. $7K per-employee cap handling,
+        credit-reduction state detection, tax calc tie-out."""
+        permissions.check(Scope.PAYROLL_READ)
+        reader = Form940ReconReader(prismhr)
+        report = await run_form_940_reconciliation(
+            reader, client_id=client_id, year=year,
+        )
+        return _to_dict(report)
+
+    registry.register(server, "commercial_form_940_reconciliation",
+                      commercial_form_940_reconciliation)
+
+    # -------------------- state_withholding_recon --------------------
+
+    async def commercial_state_withholding_recon(
+        client_id: Annotated[str, Field(description="PrismHR client ID.")],
+        year: Annotated[int, Field(description="Tax year.", ge=2020, le=2030)],
+        quarter: Annotated[int, Field(description="Quarter 1-4.", ge=1, le=4)],
+    ) -> dict:
+        """Per-state quarterly withholding + SUTA tie-out. NO_FILING,
+        WITHHOLDING_MISMATCH, SUTA_WAGES_MISMATCH, EMPLOYEE_COUNT_MISMATCH."""
+        permissions.check(Scope.PAYROLL_READ)
+        reader = StateWithholdingReconReader(prismhr)
+        report = await run_state_withholding_recon(
+            reader, client_id=client_id, year=year, quarter=quarter,
+        )
+        return _to_dict(report)
+
+    registry.register(server, "commercial_state_withholding_recon",
+                      commercial_state_withholding_recon)
+
+    # -------------------- tax_remittance_tracking --------------------
+
+    async def commercial_tax_remittance_tracking(
+        client_id: Annotated[str, Field(description="PrismHR client ID.")],
+        jurisdiction: Annotated[str, Field(description="federal | state:XX | local:NYC | etc.")],
+        tax_code: Annotated[str, Field(description="FIT | SS | MED | SUTA | SWH")],
+        year: Annotated[int, Field(description="Tax year.", ge=2020, le=2030)],
+    ) -> dict:
+        """Liability vs ACH deposit tie-out. DEPOSIT_MISSING, DEPOSIT_LATE,
+        DEPOSIT_UNDER, DEPOSIT_OVER. Catches FTD penalty exposure."""
+        permissions.check(Scope.PAYROLL_READ)
+        reader = TaxRemittanceReader(prismhr)
+        report = await run_tax_remittance_tracking(
+            reader, client_id=client_id,
+            jurisdiction=jurisdiction, tax_code=tax_code, year=year,
+        )
+        return _to_dict(report)
+
+    registry.register(server, "commercial_tax_remittance_tracking",
+                      commercial_tax_remittance_tracking)
+
+    # -------------------- state_filings_orchestrator --------------------
+
+    async def commercial_state_filings_orchestrator(
+        client_id: Annotated[str, Field(description="PrismHR client ID.")],
+        year: Annotated[int, Field(description="Tax year.", ge=2020, le=2030)],
+        quarter: Annotated[int, Field(description="Quarter 1-4.", ge=1, le=4)],
+    ) -> dict:
+        """Unified filing-status board across every state the client
+        operates in. Shows form name per state, due date, filed status,
+        reconciliation-open-issue count. Blocks filing when recon has
+        open criticals."""
+        permissions.check(Scope.PAYROLL_READ)
+        reader = StateFilingsOrchestratorReader(prismhr)
+        report = await run_state_filings_orchestrator(
+            reader, client_id=client_id, year=year, quarter=quarter,
+        )
+        return _to_dict(report)
+
+    registry.register(server, "commercial_state_filings_orchestrator",
+                      commercial_state_filings_orchestrator)

@@ -77,7 +77,16 @@ def test_register_workflow_tools_registers_all() -> None:
     server = FastMCP("test")
     reg = _FakeRegistry()
     register_workflow_tools(server, reg, _FakeClient(), _FakePerms())
-    assert len(reg.names) >= 14
+    assert len(reg.names) >= 20  # 15 ops + 5 tax recon
     expected_prefix = "commercial_"
     for name in reg.names:
         assert name.startswith(expected_prefix), name
+    # Spot-check the tax-recon family is actually wired
+    tax_tools = {
+        "commercial_form_941_reconciliation",
+        "commercial_form_940_reconciliation",
+        "commercial_state_withholding_recon",
+        "commercial_tax_remittance_tracking",
+        "commercial_state_filings_orchestrator",
+    }
+    assert tax_tools.issubset(set(reg.names))
