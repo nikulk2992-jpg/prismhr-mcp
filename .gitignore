@@ -46,6 +46,9 @@ cached-credentials.enc
 .planning/sweep-*/
 .planning/dogfood-*.txt
 .planning/dogfood-*.json
+.planning/workflow-audit.md
+.planning/field-index.json
+.planning/field-index-summary.md
 .gitignore.local
 # Audit files reference authorized-services list (tenant-specific).
 .planning/uat-coverage-audit.md

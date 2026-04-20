@@ -212,19 +212,22 @@ def _sum_voucher_tax(raw) -> Decimal:  # type: ignore[no-untyped-def]
 
 
 def _dec_tax(raw) -> Decimal:  # type: ignore[no-untyped-def]
-    """taxWithholding may be a flat number or a nested breakdown."""
+    """taxWithholding may be a flat number or a nested breakdown. Must
+    sum ALL numeric children, not a hand-picked subset — otherwise
+    city/local/PFML/SDIF/county taxes appear in voucher-side sum but
+    not in YTD sum, causing false YTD_MISMATCH_TAX flags for every
+    employee in CA / NY / Philadelphia / NYC / STL / KC / Detroit etc."""
     if raw is None:
         return Decimal("0")
     if isinstance(raw, dict):
         total = Decimal("0")
-        for k in (
-            "federalIncomeTax",
-            "stateIncomeTax",
-            "socialSecurity",
-            "medicare",
-            "sdi",
-            "otherTax",
-        ):
-            total += _dec(raw.get(k))
+        for k, v in raw.items():
+            # Skip nested structures (e.g. taxCodes list) — they carry
+            # identification, not amounts the voucher side sums.
+            if isinstance(v, (int, float, str)):
+                total += _dec(v)
+            elif isinstance(v, dict):
+                # Recurse for edge cases where a sub-dict holds amounts.
+                total += _dec_tax(v)
         return total
     return _dec(raw)

@@ -126,11 +126,18 @@ async def run_retirement_match_compliance(
         if dob:
             audit.age = (today - dob).days // 365
 
-        # Expected match = min(match_up_to_pct * gross, match_pct * ee)
+        # Expected match = match_pct × min(deferrals, match_up_to_pct × wages)
+        # Same formula as retirement_true_up.py (this previously had the
+        # order-of-operations bug `min(cap_on_wages, ee × pct)` which
+        # under-flagged MATCH_SHORT when match_pct < 100% and deferrals
+        # exceeded the cap).
         match_pct = primary_rule["match_pct"] / Decimal("100")
         match_up = primary_rule["match_up_to_pct"] / Decimal("100")
-        cap_on_wages = ytd_gross * match_up
-        audit.expected_match = min(cap_on_wages, ee * match_pct) if match_up > 0 else ee * match_pct
+        if match_up > 0:
+            eligible_deferrals = min(ee, ytd_gross * match_up)
+        else:
+            eligible_deferrals = ee
+        audit.expected_match = eligible_deferrals * match_pct
 
         if audit.expected_match - er > tol:
             audit.findings.append(

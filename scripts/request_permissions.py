@@ -183,6 +183,43 @@ DESIRED_SERVICES: list[str] = [
     # DocumentService
     "DocumentService.getDocumentTypes",
     "DocumentService.getRuleset",
+    # Round 9 — SystemService.getData unlocks (master dataset endpoint).
+    # Format is SystemService.getData#Schema|Class[|Option1|...], where
+    # each Schema|Class combo is a SEPARATE service grant. Async
+    # download pattern (INIT/BUILD/DONE). Covers the classification
+    # fields (ficaExempt, W-4, pay rate, work state) that getEmployee
+    # alone cannot expose.
+    "SystemService.getData#Employee|Compensation|NOMASKSSN|NOMASKDOC",
+    "SystemService.getData#Employee|Person|NOMASKSSN|NOMASKDOB|NOMASKDOC",
+    "SystemService.getData#Employee|Client",
+    "SystemService.getData#Employee|Events",
+    "SystemService.getData#Employee|LeaveRequests",
+    "SystemService.getData#Employee|FutureEEChanges",
+    "SystemService.getData#Employee|History",
+    "SystemService.getData#Employee|DirectDeposit|NOMASKACH",
+    "SystemService.getData#Benefit|BenefitPlan",
+    "SystemService.getData#Benefit|BenefitPlanDetail",
+    "SystemService.getData#Benefit|RetirementPlan",
+    "SystemService.getData#Benefit|Dependent|NOMASKSSN|NOMASKDOB",
+    "SystemService.getData#Benefit|Enrollment",
+    "SystemService.getData#Benefit|AbsenceJournal",
+    "SystemService.getData#Benefit|RetirementLoan",
+    "SystemService.getData#Benefit|SpendingAccounts",
+    "SystemService.getData#Benefit|PaidTimeOff",
+    "SystemService.getData#Client|Master",
+    "SystemService.getData#Client|Deduction",
+    "SystemService.getData#Client|Pay",
+    "SystemService.getData#Client|Location|NOMASKACH",
+    "SystemService.getData#Client|Department",
+    "SystemService.getData#Client|Division",
+    "SystemService.getData#Client|Job",
+    "SystemService.getData#Deduction|Garnishment",
+    "SystemService.getData#Deduction|EmployeeArrears",
+    "SystemService.getData#Deduction|EmployeeLoan",
+    "SystemService.getData#Deduction|EmployeeDeductions",
+    "SystemService.getData#Deduction|EmployeeDeductionDetails",
+    "SystemService.getData#Deduction|ScheduledDeductions",
+    "SystemService.getData#Payroll|BatchControl",
     # Round 4: additional payroll/benefits/client/employee coverage
     "PayrollService.getBillingVouchers",
     "PayrollService.getBillingCodeTotalsByPayGroup",
@@ -258,9 +295,30 @@ DESIRED_UNMASK: dict[str, list[str]] = {
     # Used by New Hire Audit for real SSN presence (masked still works,
     # but unmasked enables SSN-format validity checks) and by the 401(k)
     # catch-up eligibility check which needs birthDate.
-    "EmployeeService.getEmployee": ["NOMASKSSN", "NOMASKDOB"],
+    #
+    # Compensation / Client / ContactInformation / DirectDeposit are
+    # getEmployee DATA CLASS options (separate from NOMASK PII tokens).
+    # Default grant returns only the Person class. Must list each class
+    # explicitly in the options array to get its subtree back populated.
+    # Compensation holds the tax-setup fields (FICA exempt, state tax
+    # setup, W-4, pay rate) the Voucher Classification Audit + 941 recon
+    # workflows need.
+    "EmployeeService.getEmployee": [
+        "NOMASKSSN",
+        "NOMASKDOB",
+        "Compensation",
+        "Client",
+        "ContactInformation",
+        "DirectDeposit",
+        "Health",
+    ],
     "EmployeeService.getEmployeeSSNList": ["NOMASKSSN"],
-    "EmployeeService.getEmployeeBySSN": ["NOMASKSSN"],
+    "EmployeeService.getEmployeeBySSN": [
+        "NOMASKSSN",
+        "Compensation",
+        "Client",
+        "ContactInformation",
+    ],
 }
 
 
