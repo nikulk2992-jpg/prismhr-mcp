@@ -1,5 +1,5 @@
 {
-  "source": "Curated OH municipal income tax seed — top cities hardcoded from 2026 effective rates. Full refresh via scripts/refresh_oh_muni.py loads Ohio DoT Finder CSV into .planning/locals-data/oh_muni_full.json for override.",
+  "source": "Curated OH municipal income tax seed; hardcoded top cities plus CCA member scrape 2026-04-21. Full refresh via scripts/refresh_oh_muni.py loads Ohio DoT Finder CSV into .planning/locals-data/oh_muni_full.json for override.",
   "notes": [
     "All rates decimal. Credit rate is % of work-city tax creditable against resident-city tax, capped at credit_limit fraction of resident rate.",
     "HB 5 20-day rule applies: work-city withholding only required after 20 work-days in a non-principal-place-of-work city.",
@@ -82,13 +82,503 @@
       "credit_rate": 1.0,
       "credit_limit": 0.0225,
       "collector": "RITA"
+    },
+    "BURTON": {
+      "work_rate": 0.01,
+      "resident_rate": 0.01,
+      "credit_rate": 0.5,
+      "credit_limit": 0.005,
+      "collector": "CCA"
+    },
+    "BURTON VIL / TWP JEDD": {
+      "work_rate": 0.01,
+      "resident_rate": 0.01,
+      "credit_rate": 1.0,
+      "credit_limit": 0.01,
+      "collector": "CCA"
+    },
+    "CLAYTON": {
+      "work_rate": 0.025,
+      "resident_rate": 0.025,
+      "credit_rate": 1.0,
+      "credit_limit": 0.025,
+      "collector": "CCA"
+    },
+    "CLAYTON / CLAY TWP JEDD": {
+      "work_rate": 0.015,
+      "resident_rate": 0.015,
+      "credit_rate": 1.0,
+      "credit_limit": 0.015,
+      "collector": "CCA"
+    },
+    "CLE/WARR HTS TREMCO": {
+      "work_rate": 0.025,
+      "resident_rate": 0.025,
+      "credit_rate": 1.0,
+      "credit_limit": 0.025,
+      "collector": "CCA"
+    },
+    "DALTON": {
+      "work_rate": 0.015,
+      "resident_rate": 0.015,
+      "credit_rate": 1.0,
+      "credit_limit": 0.015,
+      "collector": "CCA"
+    },
+    "EDON": {
+      "work_rate": 0.0175,
+      "resident_rate": 0.0175,
+      "credit_rate": 1.0,
+      "credit_limit": 0.0175,
+      "collector": "CCA"
+    },
+    "ELIDA": {
+      "work_rate": 0.0075,
+      "resident_rate": 0.0075,
+      "credit_rate": 0.0,
+      "credit_limit": 0.0,
+      "collector": "CCA"
+    },
+    "EMERALD PARK": {
+      "work_rate": 0.025,
+      "resident_rate": 0.025,
+      "credit_rate": 1.0,
+      "credit_limit": 0.025,
+      "collector": "CCA"
+    },
+    "GATEWAY OR OTHER SPECIFIC COMPANY": {
+      "work_rate": 0.025,
+      "resident_rate": 0.025,
+      "credit_rate": 1.0,
+      "credit_limit": 0.025,
+      "collector": "CCA"
+    },
+    "GENEVA-ON-THE-LAKE": {
+      "work_rate": 0.015,
+      "resident_rate": 0.015,
+      "credit_rate": 1.0,
+      "credit_limit": 0.01,
+      "collector": "CCA"
+    },
+    "GRAND RAPIDS": {
+      "work_rate": 0.01,
+      "resident_rate": 0.01,
+      "credit_rate": 0.5,
+      "credit_limit": 0.005,
+      "collector": "CCA"
+    },
+    "GRAND RIVER": {
+      "work_rate": 0.02,
+      "resident_rate": 0.02,
+      "credit_rate": 1.0,
+      "credit_limit": 0.02,
+      "collector": "CCA"
+    },
+    "HIGHLAND HILLS": {
+      "work_rate": 0.025,
+      "resident_rate": 0.025,
+      "credit_rate": 1.0,
+      "credit_limit": 0.025,
+      "collector": "CCA"
+    },
+    "HIGHLAND HILLS JEDZ  , *": {
+      "work_rate": 0.025,
+      "resident_rate": 0.025,
+      "credit_rate": 1.0,
+      "credit_limit": 0.025,
+      "collector": "CCA"
+    },
+    "IX CENTER": {
+      "work_rate": 0.025,
+      "resident_rate": 0.025,
+      "credit_rate": 1.0,
+      "credit_limit": 0.025,
+      "collector": "CCA"
+    },
+    "LINNDALE": {
+      "work_rate": 0.02,
+      "resident_rate": 0.02,
+      "credit_rate": 1.0,
+      "credit_limit": 0.02,
+      "collector": "CCA"
+    },
+    "MARBLE CLIFF": {
+      "work_rate": 0.02,
+      "resident_rate": 0.02,
+      "credit_rate": 1.0,
+      "credit_limit": 0.02,
+      "collector": "CCA"
+    },
+    "MENTOR-ON-THE-LAKE": {
+      "work_rate": 0.02,
+      "resident_rate": 0.02,
+      "credit_rate": 1.0,
+      "credit_limit": 0.02,
+      "collector": "CCA"
+    },
+    "MONTPELIER": {
+      "work_rate": 0.018000000000000002,
+      "resident_rate": 0.018000000000000002,
+      "credit_rate": 1.0,
+      "credit_limit": 0.018000000000000002,
+      "collector": "CCA"
+    },
+    "MUNROE FALLS": {
+      "work_rate": 0.0225,
+      "resident_rate": 0.0225,
+      "credit_rate": 1.0,
+      "credit_limit": 0.0225,
+      "collector": "CCA"
+    },
+    "NEW CARLISLE": {
+      "work_rate": 0.015,
+      "resident_rate": 0.015,
+      "credit_rate": 0.0,
+      "credit_limit": 0.0,
+      "collector": "CCA"
+    },
+    "NEW MADISON": {
+      "work_rate": 0.01,
+      "resident_rate": 0.01,
+      "credit_rate": 1.0,
+      "credit_limit": 0.01,
+      "collector": "CCA"
+    },
+    "NEW MIAMI": {
+      "work_rate": 0.0175,
+      "resident_rate": 0.0175,
+      "credit_rate": 1.0,
+      "credit_limit": 0.0175,
+      "collector": "CCA"
+    },
+    "NEW PARIS": {
+      "work_rate": 0.01,
+      "resident_rate": 0.01,
+      "credit_rate": 1.0,
+      "credit_limit": 0.005,
+      "collector": "CCA"
+    },
+    "NORTH BALTIMORE": {
+      "work_rate": 0.01,
+      "resident_rate": 0.01,
+      "credit_rate": 0.0,
+      "credit_limit": 0.0,
+      "collector": "CCA"
+    },
+    "NORTH BALTIMORE / HENRY TOWNSHIP JEDD": {
+      "work_rate": 0.01,
+      "resident_rate": 0.01,
+      "credit_rate": 1.0,
+      "credit_limit": 0.01,
+      "collector": "CCA"
+    },
+    "NORTH RANDALL": {
+      "work_rate": 0.0275,
+      "resident_rate": 0.0275,
+      "credit_rate": 1.0,
+      "credit_limit": 0.0275,
+      "collector": "CCA"
+    },
+    "OAKWOOD (PAULDING COUNTY)": {
+      "work_rate": 0.01,
+      "resident_rate": 0.01,
+      "credit_rate": 1.0,
+      "credit_limit": 0.01,
+      "collector": "CCA"
+    },
+    "OBETZ": {
+      "work_rate": 0.025,
+      "resident_rate": 0.025,
+      "credit_rate": 1.0,
+      "credit_limit": 0.025,
+      "collector": "CCA"
+    },
+    "ORWELL": {
+      "work_rate": 0.015,
+      "resident_rate": 0.015,
+      "credit_rate": 1.0,
+      "credit_limit": 0.015,
+      "collector": "CCA"
+    },
+    "PAULDING": {
+      "work_rate": 0.01,
+      "resident_rate": 0.01,
+      "credit_rate": 0.0,
+      "credit_limit": 0.0,
+      "collector": "CCA"
+    },
+    "PHILLIPSBURG": {
+      "work_rate": 0.015,
+      "resident_rate": 0.015,
+      "credit_rate": 1.0,
+      "credit_limit": 0.01,
+      "collector": "CCA"
+    },
+    "PITSBURG": {
+      "work_rate": 0.01,
+      "resident_rate": 0.01,
+      "credit_rate": 0.0,
+      "credit_limit": 0.0,
+      "collector": "CCA"
+    },
+    "PRAIRIE OBETZ JEDZ": {
+      "work_rate": 0.025,
+      "resident_rate": 0.025,
+      "credit_rate": 1.0,
+      "credit_limit": 0.025,
+      "collector": "CCA"
+    },
+    "RIVERSIDE": {
+      "work_rate": 0.025,
+      "resident_rate": 0.025,
+      "credit_rate": 1.0,
+      "credit_limit": 0.025,
+      "collector": "CCA"
+    },
+    "ROCK CREEK": {
+      "work_rate": 0.01,
+      "resident_rate": 0.01,
+      "credit_rate": 1.0,
+      "credit_limit": 0.01,
+      "collector": "CCA"
+    },
+    "RUSSELLS POINT": {
+      "work_rate": 0.01,
+      "resident_rate": 0.01,
+      "credit_rate": 0.0,
+      "credit_limit": 0.0,
+      "collector": "CCA"
+    },
+    "SEVILLE": {
+      "work_rate": 0.01,
+      "resident_rate": 0.01,
+      "credit_rate": 0.0,
+      "credit_limit": 0.0,
+      "collector": "CCA"
+    },
+    "SHAKER SQUARE": {
+      "work_rate": 0.025,
+      "resident_rate": 0.025,
+      "credit_rate": 1.0,
+      "credit_limit": 0.025,
+      "collector": "CCA"
+    },
+    "SHREVE": {
+      "work_rate": 0.01,
+      "resident_rate": 0.01,
+      "credit_rate": 1.0,
+      "credit_limit": 0.005,
+      "collector": "CCA"
+    },
+    "SOMERSET": {
+      "work_rate": 0.01,
+      "resident_rate": 0.01,
+      "credit_rate": 0.0,
+      "credit_limit": 0.0,
+      "collector": "CCA"
+    },
+    "SOUTH RUSSELL": {
+      "work_rate": 0.0125,
+      "resident_rate": 0.0125,
+      "credit_rate": 0.75,
+      "credit_limit": 0.009399999999999999,
+      "collector": "CCA"
+    },
+    "UNION": {
+      "work_rate": 0.015,
+      "resident_rate": 0.015,
+      "credit_rate": 1.0,
+      "credit_limit": 0.015,
+      "collector": "CCA"
+    },
+    "WEST MILTON": {
+      "work_rate": 0.015,
+      "resident_rate": 0.015,
+      "credit_rate": 0.0,
+      "credit_limit": 0.0,
+      "collector": "CCA"
+    },
+    "GERMANTOWN": {
+      "work_rate": 0.015,
+      "resident_rate": 0.015,
+      "credit_rate": 0.6,
+      "credit_limit": 0.009000000000000001,
+      "collector": "CCA"
+    },
+    "PAULDING (1/1/25 - 6/30/25)": {
+      "work_rate": 0.011000000000000001,
+      "resident_rate": 0.011000000000000001,
+      "credit_rate": 0.0,
+      "credit_limit": 0.0,
+      "collector": "CCA"
+    },
+    "PAULDING (7/1/25 - 12/31/25)": {
+      "work_rate": 0.01,
+      "resident_rate": 0.01,
+      "credit_rate": 0.0,
+      "credit_limit": 0.0,
+      "collector": "CCA"
+    },
+    "WAYNESFIELD": {
+      "work_rate": 0.01,
+      "resident_rate": 0.01,
+      "credit_rate": 1.0,
+      "credit_limit": 0.01,
+      "collector": "CCA"
+    },
+    "RUSHSYLVANIA": {
+      "work_rate": 0.01,
+      "resident_rate": 0.01,
+      "credit_rate": 0.0,
+      "credit_limit": 0.0,
+      "collector": "CCA"
+    },
+    "BUTLER CO ANNEX": {
+      "work_rate": 0.02,
+      "resident_rate": 0.02,
+      "credit_rate": 1.0,
+      "credit_limit": 0.02,
+      "collector": "CCA"
+    },
+    "DRESDEN": {
+      "work_rate": 0.01,
+      "resident_rate": 0.01,
+      "credit_rate": 0.5,
+      "credit_limit": 0.005,
+      "collector": "CCA"
+    },
+    "HAMILTON": {
+      "work_rate": 0.02,
+      "resident_rate": 0.02,
+      "credit_rate": 1.0,
+      "credit_limit": 0.02,
+      "collector": "CCA"
+    },
+    "HAMILTON-FAIRFIELD JEDD I": {
+      "work_rate": 0.02,
+      "resident_rate": 0.02,
+      "credit_rate": 1.0,
+      "credit_limit": 0.02,
+      "collector": "CCA"
+    },
+    "HAMILTON-FAIRFIELD JEDD II": {
+      "work_rate": 0.02,
+      "resident_rate": 0.02,
+      "credit_rate": 1.0,
+      "credit_limit": 0.02,
+      "collector": "CCA"
+    },
+    "HAMILTON-FAIRFIELD JEDD III": {
+      "work_rate": 0.02,
+      "resident_rate": 0.02,
+      "credit_rate": 1.0,
+      "credit_limit": 0.02,
+      "collector": "CCA"
+    },
+    "WEST ALEXANDRIA": {
+      "work_rate": 0.01,
+      "resident_rate": 0.01,
+      "credit_rate": 1.0,
+      "credit_limit": 0.005,
+      "collector": "CCA"
+    },
+    "ADA": {
+      "work_rate": 0.0165,
+      "resident_rate": 0.0165,
+      "credit_rate": 1.0,
+      "credit_limit": 0.0165,
+      "collector": "CCA"
+    },
+    "ALGER": {
+      "work_rate": 0.01,
+      "resident_rate": 0.01,
+      "credit_rate": 1.0,
+      "credit_limit": 0.01,
+      "collector": "CCA"
+    },
+    "BARBERTON": {
+      "work_rate": 0.0225,
+      "resident_rate": 0.0225,
+      "credit_rate": 1.0,
+      "credit_limit": 0.0225,
+      "collector": "CCA"
+    },
+    "BRATENAHL": {
+      "work_rate": 0.02,
+      "resident_rate": 0.02,
+      "credit_rate": 0.5,
+      "credit_limit": 0.01,
+      "collector": "CCA"
+    },
+    "FRAZEYSBURG": {
+      "work_rate": 0.01,
+      "resident_rate": 0.01,
+      "credit_rate": 1.0,
+      "credit_limit": 0.01,
+      "collector": "CCA"
+    },
+    "GATES MILLS": {
+      "work_rate": 0.01,
+      "resident_rate": 0.01,
+      "credit_rate": 0.5,
+      "credit_limit": 0.005,
+      "collector": "CCA"
+    },
+    "NORTH PERRY VILLAGE": {
+      "work_rate": 0.01,
+      "resident_rate": 0.01,
+      "credit_rate": 1.0,
+      "credit_limit": 0.01,
+      "collector": "CCA"
+    },
+    "NORTON": {
+      "work_rate": 0.02,
+      "resident_rate": 0.02,
+      "credit_rate": 1.0,
+      "credit_limit": 0.015,
+      "collector": "CCA"
+    },
+    "PARMA HEIGHTS": {
+      "work_rate": 0.03,
+      "resident_rate": 0.03,
+      "credit_rate": 1.0,
+      "credit_limit": 0.02,
+      "collector": "CCA"
+    },
+    "PAULDING (EFFECTIVE 7/1/20)": {
+      "work_rate": 0.011000000000000001,
+      "resident_rate": 0.011000000000000001,
+      "credit_rate": 0.0,
+      "credit_limit": 0.0,
+      "collector": "CCA"
+    },
+    "TIMBERLAKE": {
+      "work_rate": 0.01,
+      "resident_rate": 0.01,
+      "credit_rate": 0.5,
+      "credit_limit": 0.005,
+      "collector": "CCA"
+    },
+    "WARRENSVILLE HEIGHTS": {
+      "work_rate": 0.026000000000000002,
+      "resident_rate": 0.026000000000000002,
+      "credit_rate": 0.5,
+      "credit_limit": 0.013000000000000001,
+      "collector": "CCA"
+    },
+    "WARRENSVILLE HTS JEDZ": {
+      "work_rate": 0.026000000000000002,
+      "resident_rate": 0.026000000000000002,
+      "credit_rate": 1.0,
+      "credit_limit": 0.026000000000000002,
+      "collector": "CCA"
     }
   },
   "fallback": {
-    "work_rate": 0.0200,
-    "resident_rate": 0.0200,
+    "work_rate": 0.02,
+    "resident_rate": 0.02,
     "credit_rate": 1.0,
-    "credit_limit": 0.0200,
+    "credit_limit": 0.02,
     "collector": "UNKNOWN",
     "note": "For munis not in this seed, use median OH rate 2%."
   },
