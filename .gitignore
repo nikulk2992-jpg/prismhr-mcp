@@ -91,3 +91,6 @@ mcp-publisher.tar.gz
 tmp/
 *.pdf
 .planning/drafts/
+
+# Vertex PDF extraction artifacts (local copy)
+.planning/vertex/
