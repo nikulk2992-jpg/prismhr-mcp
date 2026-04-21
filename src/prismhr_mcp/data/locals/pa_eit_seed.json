@@ -1,0 +1,87 @@
+{
+  "source": "Curated PA EIT seed table — top PSD codes hardcoded from publicly known rates (2026 effective). Full refresh via scripts/refresh_pa_eit.py loads DCED Tax Register XLS into .planning/locals-data/pa_eit_full.json for override.",
+  "notes": [
+    "Philadelphia is outside Act 32; rates are Philly wage tax (separate). Resident: 3.75%, Nonresident: 3.44% (2026).",
+    "Rates here are decimal (0.01 = 1%). LST in whole dollars/year.",
+    "`nonresident` = rate withheld if employee works in this municipality but lives elsewhere. `resident` = rate for residents regardless of work location. Act 32: withhold max(resident-rate-of-home, nonresident-rate-of-work)."
+  ],
+  "psd_rates": {
+    "510101": {
+      "name": "Philadelphia",
+      "county": "PHILADELPHIA",
+      "resident": 0.0375,
+      "nonresident": 0.0344,
+      "lst_annual": 0,
+      "outside_act_32": true
+    },
+    "730402": {
+      "name": "Pittsburgh",
+      "county": "ALLEGHENY",
+      "resident": 0.0300,
+      "nonresident": 0.0100,
+      "lst_annual": 52,
+      "outside_act_32": false
+    },
+    "090102": {
+      "name": "Harrisburg",
+      "county": "DAUPHIN",
+      "resident": 0.0200,
+      "nonresident": 0.0200,
+      "lst_annual": 156,
+      "outside_act_32": false
+    },
+    "210103": {
+      "name": "Lancaster",
+      "county": "LANCASTER",
+      "resident": 0.0110,
+      "nonresident": 0.0110,
+      "lst_annual": 52,
+      "outside_act_32": false
+    },
+    "090301": {
+      "name": "Allentown",
+      "county": "LEHIGH",
+      "resident": 0.0150,
+      "nonresident": 0.0135,
+      "lst_annual": 52,
+      "outside_act_32": false
+    },
+    "480101": {
+      "name": "Erie",
+      "county": "ERIE",
+      "resident": 0.0165,
+      "nonresident": 0.0165,
+      "lst_annual": 52,
+      "outside_act_32": false
+    },
+    "480103": {
+      "name": "Bethlehem",
+      "county": "NORTHAMPTON",
+      "resident": 0.0100,
+      "nonresident": 0.0100,
+      "lst_annual": 52,
+      "outside_act_32": false
+    },
+    "220901": {
+      "name": "Scranton",
+      "county": "LACKAWANNA",
+      "resident": 0.0340,
+      "nonresident": 0.0100,
+      "lst_annual": 156,
+      "outside_act_32": false
+    },
+    "120404": {
+      "name": "Reading",
+      "county": "BERKS",
+      "resident": 0.0360,
+      "nonresident": 0.0130,
+      "lst_annual": 52,
+      "outside_act_32": false
+    }
+  },
+  "fallback": {
+    "resident": 0.0100,
+    "nonresident": 0.0100,
+    "note": "For PSDs not in this seed, assume 1% resident / 1% nonresident. This is PA's minimum rate for most municipalities. Override with refresh script for accuracy."
+  }
+}

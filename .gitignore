@@ -94,3 +94,6 @@ tmp/
 
 # Vertex PDF extraction artifacts (local copy)
 .planning/vertex/
+
+# Local tax rate downloads (third-party data; refresh via refresh_*.py)
+.planning/locals-data/

@@ -1,0 +1,99 @@
+{
+  "source": "Curated OH municipal income tax seed — top cities hardcoded from 2026 effective rates. Full refresh via scripts/refresh_oh_muni.py loads Ohio DoT Finder CSV into .planning/locals-data/oh_muni_full.json for override.",
+  "notes": [
+    "All rates decimal. Credit rate is % of work-city tax creditable against resident-city tax, capped at credit_limit fraction of resident rate.",
+    "HB 5 20-day rule applies: work-city withholding only required after 20 work-days in a non-principal-place-of-work city.",
+    "Collector is RITA, CCA, or SELF."
+  ],
+  "muni_rates": {
+    "CLEVELAND": {
+      "work_rate": 0.025,
+      "resident_rate": 0.025,
+      "credit_rate": 1.0,
+      "credit_limit": 0.02,
+      "collector": "CCA"
+    },
+    "COLUMBUS": {
+      "work_rate": 0.025,
+      "resident_rate": 0.025,
+      "credit_rate": 1.0,
+      "credit_limit": 0.025,
+      "collector": "SELF"
+    },
+    "CINCINNATI": {
+      "work_rate": 0.018,
+      "resident_rate": 0.018,
+      "credit_rate": 1.0,
+      "credit_limit": 0.018,
+      "collector": "SELF"
+    },
+    "TOLEDO": {
+      "work_rate": 0.025,
+      "resident_rate": 0.025,
+      "credit_rate": 1.0,
+      "credit_limit": 0.025,
+      "collector": "SELF"
+    },
+    "AKRON": {
+      "work_rate": 0.025,
+      "resident_rate": 0.025,
+      "credit_rate": 1.0,
+      "credit_limit": 0.0125,
+      "collector": "SELF"
+    },
+    "DAYTON": {
+      "work_rate": 0.025,
+      "resident_rate": 0.025,
+      "credit_rate": 1.0,
+      "credit_limit": 0.025,
+      "collector": "SELF"
+    },
+    "PARMA": {
+      "work_rate": 0.025,
+      "resident_rate": 0.025,
+      "credit_rate": 1.0,
+      "credit_limit": 0.02,
+      "collector": "CCA"
+    },
+    "YOUNGSTOWN": {
+      "work_rate": 0.0275,
+      "resident_rate": 0.0275,
+      "credit_rate": 1.0,
+      "credit_limit": 0.02,
+      "collector": "SELF"
+    },
+    "CANTON": {
+      "work_rate": 0.025,
+      "resident_rate": 0.025,
+      "credit_rate": 0.9,
+      "credit_limit": 0.02,
+      "collector": "SELF"
+    },
+    "LORAIN": {
+      "work_rate": 0.025,
+      "resident_rate": 0.025,
+      "credit_rate": 1.0,
+      "credit_limit": 0.02,
+      "collector": "RITA"
+    },
+    "ELYRIA": {
+      "work_rate": 0.0225,
+      "resident_rate": 0.0225,
+      "credit_rate": 1.0,
+      "credit_limit": 0.0225,
+      "collector": "RITA"
+    }
+  },
+  "fallback": {
+    "work_rate": 0.0200,
+    "resident_rate": 0.0200,
+    "credit_rate": 1.0,
+    "credit_limit": 0.0200,
+    "collector": "UNKNOWN",
+    "note": "For munis not in this seed, use median OH rate 2%."
+  },
+  "twenty_day_rule": {
+    "threshold_days": 20,
+    "note": "Employers not required to withhold work-city tax until employee works 20+ days in that city. Principal place of work always withholds from day 1."
+  }
+}
