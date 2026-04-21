@@ -198,13 +198,14 @@ def test_dispatcher_routes_pa() -> None:
 
 
 def test_dispatcher_unsupported_state_returns_zero() -> None:
+    # TX has no state income tax — catalog fallback classifies as HIGH $0.
     out = compute_state(StateCalcInput(
         work_state="TX", home_state="TX",
         gross_wages_period=Decimal("1000"),
     ))
-    assert out.confidence == "NONE"
     assert out.expected_withholding_period == Decimal("0")
-    # TX has no state income tax so 0 is accurate anyway
+    assert out.confidence == "HIGH"
+    assert "no_income_tax" in out.applied_rule
 
 
 def test_dispatcher_ca_marked_low_confidence() -> None:

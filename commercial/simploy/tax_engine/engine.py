@@ -14,6 +14,10 @@ from __future__ import annotations
 from dataclasses import dataclass
 from decimal import Decimal
 
+from simploy.tax_engine.catalog_calc import (
+    CatalogCalcInput,
+    compute_from_catalog,
+)
 from simploy.tax_engine.states import ca as ca_mod
 from simploy.tax_engine.states import il as il_mod
 from simploy.tax_engine.states import ma as ma_mod
@@ -151,11 +155,19 @@ def compute_state(inp: StateCalcInput) -> StateCalcOutput:
         return StateCalcOutput(state, r.ny_withholding_period, r.applied_rule,
                                CONFIDENCE["NY"], r.notes)
 
-    # Unknown state — no engine. Return zero + LOW confidence + note.
-    return StateCalcOutput(
+    # Fallback: Vertex catalog-backed generic calculator. Covers the
+    # ~40 states without custom modules using bracket / flat / no-tax
+    # classification from the 2026Q1 Vertex extraction.
+    c = compute_from_catalog(CatalogCalcInput(
         state=state,
-        expected_withholding_period=Decimal("0"),
-        applied_rule="unsupported",
-        confidence="NONE",
-        notes=[f"No reference engine for {state}. Compare against Vertex output only."],
+        gross_wages_period=inp.gross_wages_period,
+        pay_periods_per_year=inp.pay_periods_per_year,
+        filing_status=inp.filing_status,
+    ))
+    return StateCalcOutput(
+        state=c.state,
+        expected_withholding_period=c.expected_withholding_period,
+        applied_rule=f"catalog:{c.applied_rule}",
+        confidence=c.confidence,
+        notes=c.notes,
     )
