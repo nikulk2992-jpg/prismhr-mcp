@@ -69,6 +69,10 @@ _CATALOG_PATH = (
     Path(__file__).resolve().parents[3]
     / "src" / "prismhr_mcp" / "data" / "vertex_catalog_2026Q1.json"
 )
+_OVERRIDE_PATH = (
+    Path(__file__).resolve().parents[3]
+    / "src" / "prismhr_mcp" / "data" / "state_manual_overrides.json"
+)
 
 _catalog_cache: dict | None = None
 
@@ -76,7 +80,20 @@ _catalog_cache: dict | None = None
 def _load_catalog() -> dict:
     global _catalog_cache
     if _catalog_cache is None:
-        _catalog_cache = json.loads(_CATALOG_PATH.read_text())
+        cat = json.loads(_CATALOG_PATH.read_text())
+        if _OVERRIDE_PATH.exists():
+            try:
+                override = json.loads(_OVERRIDE_PATH.read_text())
+                for name, data in (override.get("states") or {}).items():
+                    if name in cat["states"]:
+                        cat["states"][name]["brackets"] = data.get("brackets", {})
+                        cat["states"][name]["no_income_tax"] = False
+                        cat["states"][name]["flat_rate"] = None
+                        cat["states"][name]["_manual_override"] = True
+                        cat["states"][name]["_forced_confidence"] = data.get("confidence")
+            except Exception:  # noqa: BLE001
+                pass
+        _catalog_cache = cat
     return _catalog_cache
 
 
@@ -263,7 +280,8 @@ def compute_from_catalog(inp: CatalogCalcInput) -> CatalogCalcOutput:
             per_period = ann_tax / Decimal(inp.pay_periods_per_year)
             if per_period < 0:
                 per_period = Decimal("0")
-            conf = "HIGH" if len(brackets_dict) >= 2 else "MEDIUM"
+            forced = info.get("_forced_confidence")
+            conf = forced if forced else ("HIGH" if len(brackets_dict) >= 2 else "MEDIUM")
             return CatalogCalcOutput(
                 state=state,
                 expected_withholding_period=_quantize(per_period),

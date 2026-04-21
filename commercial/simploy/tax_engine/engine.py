@@ -18,12 +18,10 @@ from simploy.tax_engine.catalog_calc import (
     CatalogCalcInput,
     compute_from_catalog,
 )
-from simploy.tax_engine.states import ca as ca_mod
 from simploy.tax_engine.states import il as il_mod
 from simploy.tax_engine.states import ma as ma_mod
 from simploy.tax_engine.states import mo as mo_mod
 from simploy.tax_engine.states import nj as nj_mod
-from simploy.tax_engine.states import ny as ny_mod
 from simploy.tax_engine.states import oh as oh_mod
 from simploy.tax_engine.states import pa as pa_mod
 
@@ -56,8 +54,9 @@ CONFIDENCE = {
     "MA": "HIGH",
     "OH": "MEDIUM",
     "NJ": "MEDIUM",
-    "CA": "LOW",
-    "NY": "LOW",
+    # CA / NY route through catalog (Vertex March 2026 brackets) — HIGH.
+    "CA": "HIGH",
+    "NY": "HIGH",
 }
 
 
@@ -133,27 +132,9 @@ def compute_state(inp: StateCalcInput) -> StateCalcOutput:
         ))
         return StateCalcOutput(state, r.nj_withholding_period, r.applied_rule,
                                CONFIDENCE["NJ"], r.notes)
-    if state == "CA":
-        r = ca_mod.compute_ca(ca_mod.CACalcInput(
-            gross_wages_period=inp.gross_wages_period,
-            pay_periods_per_year=inp.pay_periods_per_year,
-            regular_allowances=inp.allowances,
-            is_ca_resident=(home == "CA"),
-            work_state=state,
-            work_state_withholding_period=inp.work_state_withholding_period,
-        ))
-        return StateCalcOutput(state, r.ca_withholding_period, r.applied_rule,
-                               CONFIDENCE["CA"], r.notes)
-    if state == "NY":
-        r = ny_mod.compute_ny(ny_mod.NYCalcInput(
-            gross_wages_period=inp.gross_wages_period,
-            pay_periods_per_year=inp.pay_periods_per_year,
-            allowances=inp.allowances,
-            is_ny_resident=(home == "NY"),
-            work_state=state,
-        ))
-        return StateCalcOutput(state, r.ny_withholding_period, r.applied_rule,
-                               CONFIDENCE["NY"], r.notes)
+    # CA / NY — route through Vertex catalog for HIGH confidence.
+    # Custom modules (ca_mod, ny_mod) remain importable for reference
+    # but the dispatcher uses catalog brackets from the March 2026 guide.
 
     # Fallback: Vertex catalog-backed generic calculator. Covers the
     # ~40 states without custom modules using bracket / flat / no-tax

@@ -208,9 +208,20 @@ def test_dispatcher_unsupported_state_returns_zero() -> None:
     assert "no_income_tax" in out.applied_rule
 
 
-def test_dispatcher_ca_marked_low_confidence() -> None:
+def test_dispatcher_ca_routes_through_catalog_high_confidence() -> None:
+    # CA now routes through the Vertex 2026Q1 catalog (real brackets).
     out = compute_state(StateCalcInput(
         work_state="CA", home_state="CA",
         gross_wages_period=Decimal("1000"),
     ))
-    assert out.confidence == "LOW"
+    assert out.confidence == "HIGH"
+    assert "catalog" in out.applied_rule
+
+
+def test_dispatcher_ny_routes_through_catalog_high_confidence() -> None:
+    out = compute_state(StateCalcInput(
+        work_state="NY", home_state="NY",
+        gross_wages_period=Decimal("1000"),
+    ))
+    assert out.confidence == "HIGH"
+    assert "catalog" in out.applied_rule

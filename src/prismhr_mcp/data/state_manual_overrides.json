@@ -1,0 +1,51 @@
+{
+  "source": "Manually-curated bracket overrides for states whose Vertex PDF format the auto-extractor couldn't parse. 2026 effective rates.",
+  "states": {
+    "Arkansas": {
+      "brackets": {
+        "All filers": [
+          {"min": 0, "max": 5300, "base_tax": 0, "rate": 0.0},
+          {"min": 5300, "max": 10600, "base_tax": 0, "rate": 0.02},
+          {"min": 10600, "max": 15100, "base_tax": 106, "rate": 0.03},
+          {"min": 15100, "max": 25000, "base_tax": 241, "rate": 0.034},
+          {"min": 25000, "max": null, "base_tax": 578, "rate": 0.039}
+        ]
+      },
+      "confidence": "HIGH",
+      "note": "AR bracket table adjusted from Vertex p154 (had unusual column order with per-bracket deduction amounts)."
+    },
+    "Iowa": {
+      "brackets": {
+        "Single": [
+          {"min": 0, "max": null, "base_tax": 0, "rate": 0.038}
+        ]
+      },
+      "confidence": "HIGH",
+      "note": "IA moved to flat 3.8% effective 2025 (HF 2317). Single/Married both 3.8%."
+    },
+    "Louisiana": {
+      "brackets": {
+        "All filers": [
+          {"min": 0, "max": null, "base_tax": 0, "rate": 0.03}
+        ]
+      },
+      "confidence": "HIGH",
+      "note": "LA moved to flat 3% effective 2025 (HB 10/2024). Applied after std deduction which we approximate by direct flat-on-gross here; produces ~0.3pp high on low wages, neutral above ~$50K."
+    },
+    "District of Columbia": {
+      "brackets": {
+        "Single": [
+          {"min": 0, "max": 10000, "base_tax": 0, "rate": 0.04},
+          {"min": 10000, "max": 40000, "base_tax": 400, "rate": 0.06},
+          {"min": 40000, "max": 60000, "base_tax": 2200, "rate": 0.065},
+          {"min": 60000, "max": 250000, "base_tax": 3500, "rate": 0.085},
+          {"min": 250000, "max": 500000, "base_tax": 19650, "rate": 0.0925},
+          {"min": 500000, "max": 1000000, "base_tax": 42775, "rate": 0.0975},
+          {"min": 1000000, "max": null, "base_tax": 91525, "rate": 0.1075}
+        ]
+      },
+      "confidence": "HIGH",
+      "note": "DC 2026 brackets per DC Code 47-1806.03."
+    }
+  }
+}
